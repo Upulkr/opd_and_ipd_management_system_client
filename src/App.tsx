@@ -4,7 +4,7 @@ import DashBoard from "./pages/DashBoard";
 import SearchPatient from "./pages/SearchPatient";
 import OutpatientDepartment from "./pages/OutpatientDepartment";
 import InpatientDepartment from "./pages/InpatientDepartment";
-import EmergencyDepartment from "./pages/EmergencyDepartment";
+import EmergencyDepartment from "./pages/IntensiceCareUnit";
 import DiseasePrediction from "./pages/DiseasePrediction";
 import Employee from "./pages/Employee";
 import DrugQuantity from "./pages/DrugQuantity";
@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { SidebarProvider } from "./components/ui/sidebar";
 import ClinicNotifier from "./pages/ClinicNotifier";
+import IntensiveCareUnit from "./pages/IntensiceCareUnit";
 
 function App() {
   const Departments = [
@@ -53,8 +54,8 @@ function App() {
     },
     {
       id: 5,
-      name: "Emergency Department",
-      url: "/emergency-department",
+      name: "Intensive Care Unit",
+      url: "/icu",
       icon: <SquareActivity />,
     },
     {
@@ -107,16 +108,14 @@ function App() {
             path="/inpatient-department"
             element={<InpatientDepartment />}
           />
-          <Route
-            path="/emergency-department"
-            element={<EmergencyDepartment />}
-          />
+          <Route path="/icu" element={<IntensiveCareUnit />} />
           <Route path="/clinic-notifier" element={<ClinicNotifier />} />
-          <Route path="/emergency-department" element={<ClinicNotifier />} />
+
           <Route path="/drugs-quantity" element={<DrugQuantity />} />
           <Route path="/employee" element={<Employee />} />
           <Route path="/ward-details" element={<Wards />} />
           <Route path="/disease-prediction" element={<DiseasePrediction />} />
+          <Route path="/current-ward-details" element={<Wards />} />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>
