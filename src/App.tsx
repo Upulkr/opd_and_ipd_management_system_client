@@ -1,31 +1,29 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import DashBoard from "./pages/DashBoard";
 
-import SearchPatient from "./pages/SearchPatient";
-import OutpatientDepartment from "./pages/OutpatientDepartment";
-import InpatientDepartment from "./pages/InpatientDepartment";
-import EmergencyDepartment from "./pages/IntensiceCareUnit";
 import DiseasePrediction from "./pages/DiseasePrediction";
 import Employee from "./pages/Employee";
-import DrugQuantity from "./pages/DrugQuantity";
+import InpatientDepartment from "./pages/InpatientDepartment";
+import OutpatientDepartment from "./pages/OutpatientDepartment";
 import Wards from "./pages/Wards";
 
-import SidebarComponent from "./components/SideBar/SidebarComponent";
 import {
+  Ambulance,
   ArrowLeftToLine,
   ArrowRightFromLine,
-  BellRing,
   BrainCircuit,
   HeartPulseIcon,
   LayoutDashboard,
   Pill,
-  Search,
   SquareActivity,
   Users,
 } from "lucide-react";
+import SidebarComponent from "./components/SideBar/SidebarComponent";
 import { SidebarProvider } from "./components/ui/sidebar";
 import ClinicNotifier from "./pages/ClinicNotifier";
 import IntensiveCareUnit from "./pages/IntensiceCareUnit";
+import MobileClinic from "./pages/MobileClinic";
+import Pharamacy from "./pages/Pharamacy";
 
 function App() {
   const Departments = [
@@ -35,12 +33,7 @@ function App() {
       url: "/",
       icon: <LayoutDashboard />,
     },
-    {
-      id: 2,
-      name: "Search Patient",
-      url: "/search-patient",
-      icon: <Search />,
-    },
+
     {
       id: 3,
       name: "Out-patient Department",
@@ -74,8 +67,8 @@ function App() {
 
     {
       id: 7,
-      name: "Current Drugs Quantity",
-      url: "/drugs-quantity",
+      name: "Pharmacy Unit",
+      url: "/pharmacy",
       icon: <Pill />,
     },
 
@@ -91,6 +84,12 @@ function App() {
       url: "/disease-prediction",
       icon: <BrainCircuit />,
     },
+    {
+      id: 2,
+      name: "Mobile Clinic",
+      url: "/mobile-clinic",
+      icon: <Ambulance />,
+    },
   ];
 
   return (
@@ -100,7 +99,7 @@ function App() {
 
         <Routes>
           <Route path="/" element={<DashBoard />} />
-          <Route path="/search-patient" element={<SearchPatient />} />
+          <Route path="/mobile-clinic" element={<MobileClinic />} />
           <Route
             path="/outpatient-department"
             element={<OutpatientDepartment />}
@@ -112,7 +111,7 @@ function App() {
           <Route path="/icu" element={<IntensiveCareUnit />} />
           <Route path="/clinic" element={<ClinicNotifier />} />
 
-          <Route path="/drugs-quantity" element={<DrugQuantity />} />
+          <Route path="/pharmacy" element={<Pharamacy />} />
           <Route path="/employee" element={<Employee />} />
           <Route path="/ward-details" element={<Wards />} />
           <Route path="/disease-prediction" element={<DiseasePrediction />} />

@@ -67,10 +67,11 @@ export default function InpatientDepartment() {
           <CardContent>
             <div className="flex flex-col space-y-2">
               <Button>
-                <PlusIcon className="mr-2 h-4 w-4" /> Admit Patient
+                <PlusIcon className="mr-2 h-4 w-4" /> View Drugs Detials
               </Button>
               <Button variant="outline">
-                <ClipboardIcon className="mr-2 h-4 w-4" /> View Reports
+                <ClipboardIcon className="mr-2 h-4 w-4" />
+                Order Drugs From Pharmacy Unit
               </Button>
             </div>
           </CardContent>
