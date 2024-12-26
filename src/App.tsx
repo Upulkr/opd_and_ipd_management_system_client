@@ -16,6 +16,7 @@ import {
   ArrowRightFromLine,
   BellRing,
   BrainCircuit,
+  HeartPulseIcon,
   LayoutDashboard,
   Pill,
   Search,
@@ -66,9 +67,9 @@ function App() {
     },
     {
       id: 10,
-      name: "Clinic Notifier",
-      url: "/clinic-notifier",
-      icon: <BellRing />,
+      name: "Clinic",
+      url: "/clinic",
+      icon: <HeartPulseIcon />,
     },
 
     {
@@ -109,7 +110,7 @@ function App() {
             element={<InpatientDepartment />}
           />
           <Route path="/icu" element={<IntensiveCareUnit />} />
-          <Route path="/clinic-notifier" element={<ClinicNotifier />} />
+          <Route path="/clinic" element={<ClinicNotifier />} />
 
           <Route path="/drugs-quantity" element={<DrugQuantity />} />
           <Route path="/employee" element={<Employee />} />

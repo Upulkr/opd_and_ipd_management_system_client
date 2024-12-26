@@ -1,10 +1,10 @@
 import { AddOutpatientForm } from "@/components/outpatient/addOutPatientDashBoard";
 import { InventoryTracker } from "@/components/outpatient/inventory-tracker";
+import { IPDAdmissions } from "@/components/outpatient/ipd-Admissions";
 import { PersonSearchCard } from "@/components/outpatient/person-search-chart";
 import { PrescriptionManager } from "@/components/outpatient/PrescriptionManager";
 import { StaffDutyCard } from "@/components/outpatient/staff-duty-card";
 import Statistics from "@/components/outpatient/statisticsForOutPAtientDashboard";
-import { TodaysClinics } from "@/components/outpatient/todays-clinics";
 import { TodaysPatients } from "@/components/outpatient/todays-patients";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { statistics } from "@/lib/mock-data";
@@ -27,7 +27,7 @@ function OutpatientDepartment() {
           <Statistics data={statistics} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TodaysPatients />
-            <TodaysClinics />
+            <IPDAdmissions />
           </div>
         </TabsContent>
         <TabsContent value="add-outpatient">
