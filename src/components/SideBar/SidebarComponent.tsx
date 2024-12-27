@@ -10,6 +10,7 @@ import {
   SidebarMenuItem,
 } from "../ui/sidebar";
 import { useEffect, useState } from "react";
+import { url } from "inspector";
 type Department = {
   id: number;
   name: string;
@@ -23,6 +24,19 @@ function SidebarComponent({ Departments }: { Departments: Department[] }) {
   useEffect(() => {
     setCurrentTab(pathname);
   }, [pathname]);
+
+  const urls: { [key: string]: string } = {
+    "/": "Dashboard",
+    "/outpatient-department": "Out-patient Department",
+    "/inpatient-department": "In-patient Department",
+    "/icu": "Intensive Care Unit",
+    "/surgeries": "Surgeries List",
+    "/clinic": "Clinic",
+    "/mobile-clinic": "Mobile Clinic",
+    "/disease-prediction": "Disease Prediction",
+    "/pharmacy-unit": "Pharmacy Unit",
+    "/inpatient-department/admission-sheet": "In-patient Department",
+  };
 
   return (
     <Sidebar>
@@ -38,7 +52,7 @@ function SidebarComponent({ Departments }: { Departments: Department[] }) {
                   <SidebarMenuButton
                     asChild
                     className={
-                      currentTab === department.url ? "bg-blue-100" : ""
+                      department.name === urls[currentTab] ? "bg-blue-100" : ""
                     }
                   >
                     <Link to={department.url}>

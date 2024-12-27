@@ -83,7 +83,7 @@ export default function InpatientDepartment() {
             <CardDescription>Patient admission details</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/admission-sheet">
+            <Link to="/inpatient-department/admission-sheet">
               <Button className="w-full">
                 <FileTextIcon className="mr-2 h-4 w-4" /> Go to Admission Sheet
               </Button>

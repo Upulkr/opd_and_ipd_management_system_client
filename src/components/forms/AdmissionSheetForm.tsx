@@ -83,7 +83,7 @@ export const AdmissionSheetForm = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 max-w-4xl mx-auto"
+        className="space-y-8 w-full mx-auto px-32 py-10"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
@@ -91,11 +91,10 @@ export const AdmissionSheetForm = () => {
             name="bht"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">
-                  BHT Number
-                </FormLabel>
+                <FormLabel className=" font-bold">BHT Number</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500"
                     type="number"
                     placeholder="BHT Number"
                     {...field}
@@ -111,9 +110,10 @@ export const AdmissionSheetForm = () => {
             name="nic"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">NIC</FormLabel>
+                <FormLabel className=" font-bold">NIC</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500"
                     type="number"
                     placeholder="NIC"
                     {...field}
@@ -129,9 +129,13 @@ export const AdmissionSheetForm = () => {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">Name</FormLabel>
+                <FormLabel className=" font-bold">Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Full Name" {...field} />
+                  <Input
+                    className="border border-gray-500"
+                    placeholder="Full Name"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -142,9 +146,10 @@ export const AdmissionSheetForm = () => {
             name="age"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">Age</FormLabel>
+                <FormLabel className=" font-bold">Age</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500"
                     type="number"
                     placeholder="Age"
                     {...field}
@@ -160,9 +165,7 @@ export const AdmissionSheetForm = () => {
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">
-                  Gender
-                </FormLabel>
+                <FormLabel className=" font-bold">Gender</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -187,9 +190,10 @@ export const AdmissionSheetForm = () => {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">Phone</FormLabel>
+                <FormLabel className=" font-bold">Phone</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500"
                     type="tel"
                     placeholder="Phone number"
                     {...field}
@@ -209,11 +213,13 @@ export const AdmissionSheetForm = () => {
               name="streetAddress"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-700 font-bold">
-                    Street Address
-                  </FormLabel>
+                  <FormLabel className=" font-bold">Street Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Street Address" {...field} />
+                    <Input
+                      className="border border-gray-500"
+                      placeholder="Street Address"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -224,11 +230,13 @@ export const AdmissionSheetForm = () => {
               name="city"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-700 font-bold">
-                    City
-                  </FormLabel>
+                  <FormLabel className=" font-bold">City</FormLabel>
                   <FormControl>
-                    <Input placeholder="City" {...field} />
+                    <Input
+                      className="border border-gray-500"
+                      placeholder="City"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,11 +247,13 @@ export const AdmissionSheetForm = () => {
               name="stateProvince"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-700 font-bold">
-                    State/Province
-                  </FormLabel>
+                  <FormLabel className=" font-bold">State/Province</FormLabel>
                   <FormControl>
-                    <Input placeholder="State/Province" {...field} />
+                    <Input
+                      className="border border-gray-500"
+                      placeholder="State/Province"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -254,11 +264,13 @@ export const AdmissionSheetForm = () => {
               name="postalCode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-700 font-bold">
-                    Postal Code
-                  </FormLabel>
+                  <FormLabel className=" font-bold">Postal Code</FormLabel>
                   <FormControl>
-                    <Input placeholder="Postal Code" {...field} />
+                    <Input
+                      className="border border-gray-500"
+                      placeholder="Postal Code"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -269,11 +281,13 @@ export const AdmissionSheetForm = () => {
               name="country"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-blue-700 font-bold">
-                    Country
-                  </FormLabel>
+                  <FormLabel className=" font-bold">Country</FormLabel>
                   <FormControl>
-                    <Input placeholder="Country" {...field} />
+                    <Input
+                      className="border border-gray-500"
+                      placeholder="Country"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -287,11 +301,10 @@ export const AdmissionSheetForm = () => {
             name="wardNo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">
-                  Ward Number
-                </FormLabel>
+                <FormLabel className=" font-bold">Ward Number</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500"
                     type="number"
                     placeholder="Ward Number"
                     {...field}
@@ -307,11 +320,10 @@ export const AdmissionSheetForm = () => {
             name="pressure"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">
-                  Blood Pressure
-                </FormLabel>
+                <FormLabel className=" font-bold">Blood Pressure</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500"
                     type="number"
                     placeholder="Blood Pressure"
                     {...field}
@@ -327,11 +339,10 @@ export const AdmissionSheetForm = () => {
             name="weight"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-bold">
-                  Weight (kg)
-                </FormLabel>
+                <FormLabel className=" font-bold">Weight (kg)</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500"
                     type="number"
                     placeholder="Weight in kg"
                     {...field}
@@ -348,9 +359,7 @@ export const AdmissionSheetForm = () => {
           name="reason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-blue-700 font-bold">
-                Reason for Admission
-              </FormLabel>
+              <FormLabel className=" font-bold">Reason for Admission</FormLabel>
               <FormControl>
                 <Textarea placeholder="Reason for admission" {...field} />
               </FormControl>

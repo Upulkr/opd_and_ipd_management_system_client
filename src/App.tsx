@@ -5,7 +5,7 @@ import DiseasePrediction from "./pages/DiseasePrediction";
 import Employee from "./pages/Employee";
 import InpatientDepartment from "./pages/InpatientDepartment";
 import OutpatientDepartment from "./pages/OutpatientDepartment";
-import Wards from "./pages/Wards";
+import Wards, { SurgeriesList } from "./pages/SurgeriesList";
 
 import {
   Ambulance,
@@ -24,6 +24,7 @@ import ClinicNotifier from "./pages/ClinicNotifier";
 import IntensiveCareUnit from "./pages/IntensiceCareUnit";
 import MobileClinic from "./pages/MobileClinic";
 import Pharamacy from "./pages/Pharamacy";
+import AdmissionSheet from "./pages/AdmissionSheet";
 
 function App() {
   const Departments = [
@@ -54,8 +55,8 @@ function App() {
     },
     {
       id: 6,
-      name: "Current Wards Details",
-      url: "/current-ward-details",
+      name: "Surgeries List",
+      url: "/surgeries",
       icon: <LayoutDashboard />,
     },
     {
@@ -115,7 +116,11 @@ function App() {
           <Route path="/employee" element={<Employee />} />
           <Route path="/ward-details" element={<Wards />} />
           <Route path="/disease-prediction" element={<DiseasePrediction />} />
-          <Route path="/current-ward-details" element={<Wards />} />
+          <Route path="/surgeries" element={<SurgeriesList />} />
+          <Route
+            path="/inpatient-department/admission-sheet"
+            element={<AdmissionSheet />}
+          />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>
