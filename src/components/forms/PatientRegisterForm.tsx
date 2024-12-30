@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useState } from "react";
@@ -48,7 +47,6 @@ export const AdmissionSheetForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht: 0,
       nic: " ",
       name: "",
       age: "",
@@ -59,36 +57,46 @@ export const AdmissionSheetForm = () => {
       postalCode: "",
       country: "",
       phone: "",
-      wardNo: 0,
-      reason: "",
-      pressure: "",
-      weight: "",
+
       address: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("clicking");
     setIsLoading(true);
 
     try {
-      const response = await axios(`http://localhost:8000/admissionSheet`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      values.address = `${values.streetAddress}, ${values.city}, ${values.stateProvince}, ${values.postalCode}, ${values.country}`;
+      const createPatient = await axios.post(
+        "http://localhost:8000/patient",
+        {
+          nic: values.nic,
+          name: values.name,
+          age: values.age,
+          gender: values.gender,
+          phone: values.phone,
+          address: values.address,
+          pressure: values.pressure,
+          weight: values.weight,
         },
-        data: JSON.stringify(values),
-      });
-      if (response.status === 201) {
-        setIsLoading(false);
-        toast.success("Admission Sheet Created");
-        // form.reset();
-        setIsLoading(false);
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (createPatient.status === 201) {
+        toast.success("Patient created successfully");
+      } else if (createPatient.status === 400) {
+        toast.error("User already exists");
       }
+
+      setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
       if (error) {
-        toast.error("Error creating admission sheet");
+        toast.error("Error creating patient");
         console.log(error);
       }
     }
@@ -103,25 +111,6 @@ export const AdmissionSheetForm = () => {
           className="space-y-8 w-full mx-auto px-32 py-10"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="bht"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className=" font-bold">BHT Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-gray-500"
-                      type="number"
-                      placeholder="BHT Number"
-                      {...field}
-                      onChange={(e) => field.onChange(+e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="nic"
@@ -307,76 +296,8 @@ export const AdmissionSheetForm = () => {
               />
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField
-              control={form.control}
-              name="wardNo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className=" font-bold">Ward Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-gray-500"
-                      type="number"
-                      placeholder="Ward Number"
-                      {...field}
-                      onChange={(e) => field.onChange(+e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="pressure"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className=" font-bold">Blood Pressure</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-gray-500"
-                      placeholder="Blood Pressure"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="weight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className=" font-bold">Weight (kg)</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-gray-500"
-                      placeholder="Weight in kg"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormField
-            control={form.control}
-            name="reason"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className=" font-bold">
-                  Reason for Admission
-                </FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Reason for admission" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
           <div className="flex justify-end">
             <Button
               type="submit"
