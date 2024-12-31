@@ -41,7 +41,7 @@ const formSchema = z.object({
   address: z.string(),
 });
 
-export const AdmissionSheetForm = () => {
+export const PatientRegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -313,4 +313,4 @@ export const AdmissionSheetForm = () => {
   );
 };
 
-export default AdmissionSheetForm;
+export default PatientRegisterForm;

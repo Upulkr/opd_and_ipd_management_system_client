@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { usePatientStore } from "@/stores/usePatientStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useState } from "react";
@@ -24,7 +25,7 @@ import {
 } from "../ui/form";
 
 const formSchema = z.object({
-  bht: z.number(),
+  bht: z.string(),
   nic: z.string(),
   name: z.string(),
   age: z.string(),
@@ -32,10 +33,10 @@ const formSchema = z.object({
   streetAddress: z.string(),
   city: z.string(),
   stateProvince: z.string(),
-  postalCode: z.string().min(2).max(20),
+  postalCode: z.string(),
   country: z.string(),
   phone: z.string(),
-  wardNo: z.number(),
+  wardNo: z.string(),
   reason: z.string(),
   pressure: z.string(),
   weight: z.string(),
@@ -44,31 +45,33 @@ const formSchema = z.object({
 
 export const AdmissionSheetForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { patient } = usePatientStore((state) => state);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht: 0,
-      nic: " ",
-      name: "",
+      bht: "",
+      nic: patient.nic || " ",
+      name: patient.name || " ",
       age: "",
-      gender: "Male",
+      gender: (["Male", "Female", "Other"].includes(patient.gender)
+        ? patient.gender
+        : "Male") as "Male" | "Female" | "Other",
       streetAddress: "",
       city: "",
       stateProvince: "",
       postalCode: "",
       country: "",
-      phone: "",
-      wardNo: 0,
+      phone: patient.phone || " ",
+      wardNo: "",
       reason: "",
       pressure: "",
       weight: "",
-      address: "",
+      address: patient.address || " ",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("clicking");
     setIsLoading(true);
 
     try {
@@ -112,10 +115,8 @@ export const AdmissionSheetForm = () => {
                   <FormControl>
                     <Input
                       className="border border-gray-500"
-                      type="number"
                       placeholder="BHT Number"
                       {...field}
-                      onChange={(e) => field.onChange(+e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -317,10 +318,8 @@ export const AdmissionSheetForm = () => {
                   <FormControl>
                     <Input
                       className="border border-gray-500"
-                      type="number"
                       placeholder="Ward Number"
                       {...field}
-                      onChange={(e) => field.onChange(+e.target.value)}
                     />
                   </FormControl>
                   <FormMessage />
