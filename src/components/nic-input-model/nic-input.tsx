@@ -5,11 +5,13 @@ import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useNavigate } from "react-router-dom";
 import { usePatientStore } from "@/stores/usePatientStore";
+import axios from "axios";
 
 export function InputNicForm({ onClose }: { onClose: () => void }) {
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");
-  const { setPatient } = usePatientStore();
+  const { setPatient, setPatientNic } = usePatientStore((state) => state);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
@@ -19,36 +21,41 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
   //     }
   //   };
 
-  const { data, error, isLoading, refetch } = useQuery({
-    queryKey: ["patient"],
-    queryFn: () =>
-      fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
-    enabled: false,
-  });
+  // const { data, error, isLoading, refetch } = useQuery({
+  //   queryKey: ["patient"],
+  //   queryFn: () =>
+  //     fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
+  //   enabled: false,
+  // });
 
   const handleSubmit = async () => {
+    setIsLoading(true);
     console.log("clicking");
     console.log("NIC:", nic);
     if (!nic) {
+      setPatientNic(nic);
       toast.error("NIC is required");
+      setIsLoading(false);
       return;
+    } else {
+      setPatientNic(nic);
     }
 
     try {
-      await refetch(); // Trigger the query
-      if (error) {
-        throw new Error("Error fetching patient");
-      }
-      setPatient(data.Patient);
-      console.log("patient", data.Patient);
-      if (data.status === 404) {
-        navigate("/patient-register-page");
-      }
-
-      // toast.success("Patient data fetched successfully!");
+      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      console.log("response", response);
+      setPatient(response.data.Patient);
       navigate("/admission-sheet-register-page");
+      setIsLoading(false);
     } catch (err: any) {
-      toast.error(err.message || "Error fetching patient");
+      if (err.response?.status === 404) {
+        toast.error("Patient not found, please register the patient");
+        navigate("/patient-register-form");
+      } else {
+        console.error("Error fetching patient", err);
+        toast.error(err.message || "Error fetching patient");
+      }
+      setIsLoading(false);
     }
   };
   return (

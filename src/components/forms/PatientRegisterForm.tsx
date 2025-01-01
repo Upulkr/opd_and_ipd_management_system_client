@@ -21,9 +21,10 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { usePatientStore } from "@/stores/usePatientStore";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
-  bht: z.number(),
   nic: z.string(),
   name: z.string(),
   age: z.string(),
@@ -34,71 +35,58 @@ const formSchema = z.object({
   postalCode: z.string().min(2).max(20),
   country: z.string(),
   phone: z.string(),
-  wardNo: z.number(),
-  reason: z.string(),
-  pressure: z.string(),
-  weight: z.string(),
-  address: z.string(),
 });
 
 export const PatientRegisterForm = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-
+  const { patientNic, setPatient } = usePatientStore((state) => state);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nic: " ",
+      nic: patientNic || " ",
       name: "",
       age: "",
       gender: "Male",
-      streetAddress: "",
+
       city: "",
       stateProvince: "",
       postalCode: "",
       country: "",
       phone: "",
 
-      address: "",
+      streetAddress: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-
     try {
-      values.address = `${values.streetAddress}, ${values.city}, ${values.stateProvince}, ${values.postalCode}, ${values.country}`;
-      const createPatient = await axios.post(
-        "http://localhost:8000/patient",
-        {
-          nic: values.nic,
-          name: values.name,
-          age: values.age,
-          gender: values.gender,
-          phone: values.phone,
-          address: values.address,
-          pressure: values.pressure,
-          weight: values.weight,
+      setIsLoading(true);
+      const createPatient = await axios("http://localhost:8000/patient", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+        data: JSON.stringify(values),
+      });
 
-      if (createPatient.status === 201) {
+      if (createPatient.status === 200) {
+        setPatient(createPatient.data.newPatient);
         toast.success("Patient created successfully");
+        navigate("/admission-sheet-register-page");
       } else if (createPatient.status === 400) {
         toast.error("User already exists");
       }
 
       setIsLoading(false);
-    } catch (error) {
-      setIsLoading(false);
-      if (error) {
+    } catch (error: any) {
+      if (error.response?.status === 400) {
+        toast.error("Patient already exists");
+      } else {
         toast.error("Error creating patient");
         console.log(error);
       }
+      setIsLoading(false);
     }
   }
 
@@ -108,7 +96,7 @@ export const PatientRegisterForm = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full mx-auto px-32 py-10"
+          className="space-y-8 w-full mx-auto  py-1"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
@@ -207,93 +195,99 @@ export const PatientRegisterForm = () => {
             />
           </div>
           <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Address</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="streetAddress"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className=" font-bold">Street Address</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border border-gray-500"
-                        placeholder="Street Address"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className=" font-bold">City</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border border-gray-500"
-                        placeholder="City"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="stateProvince"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className=" font-bold">State/Province</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border border-gray-500"
-                        placeholder="State/Province"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="postalCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className=" font-bold">Postal Code</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border border-gray-500"
-                        placeholder="Postal Code"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className=" font-bold">Country</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="border border-gray-500"
-                        placeholder="Country"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Address</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="streetAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className=" font-bold">
+                        Street Address
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="border border-gray-500"
+                          placeholder="Street Address"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className=" font-bold">City</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="border border-gray-500"
+                          placeholder="City"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stateProvince"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className=" font-bold">
+                        State/Province
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          className="border border-gray-500"
+                          placeholder="State/Province"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="postalCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className=" font-bold">Postal Code</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="border border-gray-500"
+                          placeholder="Postal Code"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className=" font-bold">Country</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="border border-gray-500"
+                          placeholder="Country"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6"></div>

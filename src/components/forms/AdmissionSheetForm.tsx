@@ -53,28 +53,26 @@ export const AdmissionSheetForm = () => {
       bht: "",
       nic: patient.nic || " ",
       name: patient.name || " ",
-      age: "",
+      age: patient.age || " ",
       gender: (["Male", "Female", "Other"].includes(patient.gender)
         ? patient.gender
         : "Male") as "Male" | "Female" | "Other",
-      streetAddress: "",
-      city: "",
-      stateProvince: "",
-      postalCode: "",
-      country: "",
+      streetAddress: patient.streetAddress || " ",
+      city: patient.city || " ",
+      stateProvince: patient.stateProvince || " ",
+      postalCode: patient.postalCode,
+      country: patient.country || " ",
       phone: patient.phone || " ",
       wardNo: "",
       reason: "",
       pressure: "",
       weight: "",
-      address: patient.address || " ",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
       const response = await axios(`http://localhost:8000/admissionSheet`, {
         method: "POST",
         headers: {
@@ -103,7 +101,7 @@ export const AdmissionSheetForm = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-8 w-full mx-auto px-32 py-10"
+          className="space-y-8 w-full mx-auto  py-1"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField

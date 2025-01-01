@@ -18,7 +18,6 @@ import {
   SquareActivity,
   Users,
 } from "lucide-react";
-import { PatientRegisterForm } from "./components/forms/PatientRegisterForm";
 import SidebarComponent from "./components/SideBar/SidebarComponent";
 import { SidebarProvider } from "./components/ui/sidebar";
 import AdmissionSheet from "./pages/AdmissionSheet";
@@ -26,6 +25,7 @@ import AdmissionSheetRegisterPage from "./pages/AdmissionSheetRegisterPage";
 import ClinicNotifier from "./pages/ClinicNotifier";
 import IntensiveCareUnit from "./pages/IntensiceCareUnit";
 import MobileClinic from "./pages/MobileClinic";
+import PatientRegister from "./pages/PatientRegister";
 import Pharamacy from "./pages/Pharamacy";
 
 function App() {
@@ -123,10 +123,7 @@ function App() {
             path="/inpatient-department/admission-sheet"
             element={<AdmissionSheet />}
           />
-          <Route
-            path="/patient-register-form"
-            element={<PatientRegisterForm />}
-          />
+          <Route path="/patient-register-form" element={<PatientRegister />} />
           <Route
             path="/admission-sheet-register-page"
             element={<AdmissionSheetRegisterPage />}
