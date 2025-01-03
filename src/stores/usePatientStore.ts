@@ -12,10 +12,12 @@ interface Patient {
 export type State = {
   patient: Patient[];
   patientNic: string;
+  pattientBHT: string;
 };
 
 export type Actions = {
   setPatient: (patient: []) => void;
+  setPatientBHT: (bht: string) => void;
   setPatientNic: (nic: string) => void;
 };
 
@@ -24,8 +26,10 @@ export const usePatientStore = create<State & Actions>()(
     (set) => ({
       patient: [],
       patientNic: "",
+      pattientBHT: "",
       setPatientNic: (nic) => set({ patientNic: nic }),
       setPatient: (patient) => set({ patient: patient }),
+      setPatientBHT: (bht) => set({ pattientBHT: bht }),
     }),
     { name: "patient-store" }
   )

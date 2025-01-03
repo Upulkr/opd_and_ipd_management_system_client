@@ -23,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { useNavigate } from "react-router-dom";
 
 const formSchema = z.object({
   bht: z.string(),
@@ -40,13 +41,12 @@ const formSchema = z.object({
   reason: z.string(),
   pressure: z.string(),
   weight: z.string(),
-  address: z.string(),
 });
 
 export const AdmissionSheetForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { patient } = usePatientStore((state) => state);
-
+  const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,9 +54,7 @@ export const AdmissionSheetForm = () => {
       nic: patient.nic || " ",
       name: patient.name || " ",
       age: patient.age || " ",
-      gender: (["Male", "Female", "Other"].includes(patient.gender)
-        ? patient.gender
-        : "Male") as "Male" | "Female" | "Other",
+      gender: (patient.gender as "Male" | "Female" | "Other") || "Male",
       streetAddress: patient.streetAddress || " ",
       city: patient.city || " ",
       stateProvince: patient.stateProvince || " ",
@@ -85,10 +83,16 @@ export const AdmissionSheetForm = () => {
         toast.success("Admission Sheet Created");
         // form.reset();
         setIsLoading(false);
+        navigate("/inpatient-department");
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsLoading(false);
       if (error) {
+        if (error.response?.status === 400) {
+          toast.error("Patient already exists");
+          navigate("/admission-sheet-register-page");
+        }
+
         toast.error("Error creating admission sheet");
         console.log(error);
       }

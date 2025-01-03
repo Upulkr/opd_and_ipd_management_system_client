@@ -27,6 +27,7 @@ import IntensiveCareUnit from "./pages/IntensiceCareUnit";
 import MobileClinic from "./pages/MobileClinic";
 import PatientRegister from "./pages/PatientRegister";
 import Pharamacy from "./pages/Pharamacy";
+import AdmissionBookPage from "./pages/AdmiisionBookPage";
 
 function App() {
   const Departments = [
@@ -128,6 +129,7 @@ function App() {
             path="/admission-sheet-register-page"
             element={<AdmissionSheetRegisterPage />}
           />
+          <Route path="/admission-book-page" element={<AdmissionBookPage />} />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>

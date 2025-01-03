@@ -1,17 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
+import { usePatientStore } from "@/stores/usePatientStore";
+import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import { useNavigate } from "react-router-dom";
-import { usePatientStore } from "@/stores/usePatientStore";
-import axios from "axios";
+import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 
-export function InputNicForm({ onClose }: { onClose: () => void }) {
+export function InputBHTForm({ onClose }: { onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const [nic, setNic] = useState<string>("");
-  const { setPatient, setPatientNic } = usePatientStore((state) => state);
+  const [bht, setBht] = useState<string>("");
+  const { setPatientBHT } = usePatientStore((state) => state);
+
+  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
@@ -30,22 +32,22 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
 
   const handleSubmit = async () => {
     setIsLoading(true);
-    console.log("clicking");
-    console.log("NIC:", nic);
-    if (!nic) {
-      setPatientNic(nic);
-      toast.error("NIC is required");
+
+    if (!bht) {
+      toast.error("BHT is required");
       setIsLoading(false);
       return;
     } else {
-      setPatientNic(nic);
+      setPatientBHT(bht);
     }
 
     try {
-      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      const response = await axios.get(
+        `http://localhost:8000/admissionSheet/bht?bht=${bht}`
+      );
       console.log("response", response);
-      setPatient(response.data.Patient);
-      navigate("/admission-sheet-register-page");
+      setAdmissionSheetByBHT(response.data.admissionSheet);
+      navigate("/admission-book-page");
       setIsLoading(false);
     } catch (err: any) {
       if (err.response?.status === 404) {
@@ -67,20 +69,11 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
         Input Patient NIC
       </h2>
 
-      <InputOTP maxLength={14} value={nic} onChange={(value) => setNic(value)}>
+      <InputOTP maxLength={3} value={bht} onChange={(value) => setBht(value)}>
         <InputOTPGroup className="border border-gray-300">
           <InputOTPSlot index={0} />
           <InputOTPSlot index={1} />
           <InputOTPSlot index={2} />
-          <InputOTPSlot index={3} />
-          <InputOTPSlot index={4} />
-          <InputOTPSlot index={6} />
-          <InputOTPSlot index={7} />
-          <InputOTPSlot index={8} />
-          <InputOTPSlot index={9} />
-          <InputOTPSlot index={10} />
-          <InputOTPSlot index={11} />
-          <InputOTPSlot index={12} />
         </InputOTPGroup>
       </InputOTP>
       <div className="flex justify-center p-3">
@@ -100,4 +93,4 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default InputNicForm;
+export default InputBHTForm;

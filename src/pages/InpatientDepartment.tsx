@@ -1,4 +1,5 @@
-import InputNicForm from "@/components/nic-input-model/nic-input";
+import InputBHTForm from "@/components/input-id-models/bht-input";
+import InputNicForm from "@/components/input-id-models/nic-input";
 import { InpatienDashboardTable } from "@/components/tables/InpatienDashboardTable";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,20 +21,29 @@ import {
   UserIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 export default function InpatientDepartment() {
   const [isShowNicForm, setIsShowNicForm] = useState(false);
+  const [isShoBhtForm, setIsShoBhtForm] = useState(false);
 
   return (
     <div className="relative">
-      {isShowNicForm && (
+      {isShowNicForm ? (
         <div
           className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
           onClick={() => setIsShowNicForm(false)} // Close when clicking outside
         >
           <InputNicForm onClose={() => setIsShowNicForm(false)} />
         </div>
+      ) : (
+        isShoBhtForm && (
+          <div
+            className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
+            onClick={() => setIsShoBhtForm(false)} // Close when clicking outside
+          >
+            <InputBHTForm onClose={() => setIsShowNicForm(false)} />
+          </div>
+        )
       )}
       <div
         className={`container mx-auto p-4  ${isShowNicForm ? "hidden" : ""}`}
@@ -115,11 +125,9 @@ export default function InpatientDepartment() {
               <CardDescription>Comprehensive admission records</CardDescription>
             </CardHeader>
             <CardContent>
-              <Link to="/admission-book">
-                <Button className="w-full">
-                  <BookIcon className="mr-2 h-4 w-4" /> Open Admission Book
-                </Button>
-              </Link>
+              <Button className="w-full" onClick={() => setIsShoBhtForm(true)}>
+                <BookIcon className="mr-2 h-4 w-4" /> Open Admission Book
+              </Button>
             </CardContent>
           </Card>
         </div>
