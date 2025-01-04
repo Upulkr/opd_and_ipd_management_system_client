@@ -19,10 +19,15 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import * as z from "zod";
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 const formSchema = z.object({
   bht: z.string().min(1, "BHT is required"),
   nic: z.string().min(1, "NIC is required"),
@@ -40,35 +45,106 @@ const formSchema = z.object({
   allergies: z.array(z.string()),
   transferCategory: z.enum(["ward", "hospital-to-hospital", "direct-admit"]),
   dischargeDate: z.string().optional(),
+  phone: z.string().min(1, "Phone number is required"),
 });
 
 export const AdmissionBookForm = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  const [noOfAdmissionSheetsperDay, setNoOfAdmissionSheetsperDay] = useState(0);
+  const [noOfAdmissionSheetsperYear, setNoOfAdmissionSheetsperYear] =
+    useState(0);
+  // Fetching the number of admission sheets per day
+  const fetchingNoOfAdmissionSheetsperDay = async () => {
+    try {
+      const fetchAdmissionSheetperDay = await axios.get(
+        `http://localhost:8000/admissionSheet/noOfAdmissionSheetsperday`
+      );
+      setNoOfAdmissionSheetsperDay(
+        Number(fetchAdmissionSheetperDay.data.NoOfAdmissionSheetsPerDay)
+      );
+    } catch (err: any) {
+      console.error("Error fetching admission sheet", err);
+    }
+  };
+  // Fetching the number of admission sheets per year
+  const fetchingNoOfAdmissionSheetsperYear = async () => {
+    try {
+      const fetchAdmissionSheetperYear = await axios.get(
+        `http://localhost:8000/admissionSheet/noOfAdmissionSheetsperyear`
+      );
+      setNoOfAdmissionSheetsperYear(
+        Number(fetchAdmissionSheetperYear.data.NoOfAdmissionSheetsPerYear)
+      );
+    } catch (error: any) {
+      console.log("Error fetching admission sheet", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchingNoOfAdmissionSheetsperDay();
+    fetchingNoOfAdmissionSheetsperYear();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht: "",
-      nic: "",
-      name: "",
-      dailyno: 0,
-      yearlyno: 0,
-      city: "",
-      stateProvince: "",
-      postalCode: "",
-      country: "",
-      streetAddress: "",
-      age: "",
-      admittedDate: "",
-      reason: "",
-      allergies: [],
-      transferCategory: "ward",
-      dischargeDate: "",
+      bht: String(admissionSheetByBHT?.bht) || "",
+      nic: admissionSheetByBHT?.nic || "",
+      name: admissionSheetByBHT?.name || "",
+      dailyno:
+        (noOfAdmissionSheetsperDay > 0 && noOfAdmissionSheetsperDay) || 0,
+      yearlyno:
+        (noOfAdmissionSheetsperYear > 0 && noOfAdmissionSheetsperYear) || 0,
+      city: admissionSheetByBHT?.city || "",
+      stateProvince: admissionSheetByBHT?.stateProvince || "",
+      postalCode: admissionSheetByBHT?.postalCode || "",
+      country: admissionSheetByBHT?.country || "",
+      streetAddress: admissionSheetByBHT?.streetAddress || "",
+      phone: admissionSheetByBHT?.phone || "",
+      age: admissionSheetByBHT?.age || "",
+      admittedDate: admissionSheetByBHT?.createdAt
+        ? format(new Date(admissionSheetByBHT.createdAt), "yyyy-MM-dd'T'HH:mm")
+        : "",
+      reason: admissionSheetByBHT?.reason || "",
+      allergies: admissionSheetByBHT?.allergies || [],
+      transferCategory: admissionSheetByBHT.transferCategory || "ward",
+      dischargeDate: admissionSheetByBHT.dischargeDate || "",
     },
   });
+  const { setValue } = form; // Access setValue function
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  useEffect(() => {
+    // After state change, update the form values
+    if (noOfAdmissionSheetsperDay > 0) {
+      setValue("dailyno", noOfAdmissionSheetsperDay);
+    }
+    if (noOfAdmissionSheetsperYear > 0) {
+      setValue("yearlyno", noOfAdmissionSheetsperYear);
+    }
+  }, [noOfAdmissionSheetsperDay, noOfAdmissionSheetsperYear, setValue]);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsLoading(true);
+      const response = await axios(`http://localhost:8000/admissionbook`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: values,
+      });
+      if (response.status === 201) {
+        toast.success("Admission book submitted successfully");
+      }
+      setIsLoading(false);
+      navigate("/inpatient-department");
+    } catch (error: any) {
+      if (error.response?.status === 500) {
+        toast.error("Error submitting admission book");
+      }
+    }
   }
 
   return (
@@ -206,6 +282,24 @@ export const AdmissionBookForm = () => {
                 <FormLabel>Country</FormLabel>
                 <FormControl>
                   <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className=" font-bold">Phone</FormLabel>
+                <FormControl>
+                  <Input
+                    className="border border-gray-500"
+                    type="tel"
+                    placeholder="Phone number"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -366,7 +460,11 @@ export const AdmissionBookForm = () => {
           />
         </div>
         <div className="col-span-full flex justify-center">
-          <Button type="submit" className="px-12 bg-blue-600 hover:bg-blue-700">
+          <Button
+            type="submit"
+            className="px-12 bg-blue-600 hover:bg-blue-700"
+            disabled={isLoading}
+          >
             {isLoading ? "Submitting..." : "Submit"}
           </Button>
         </div>

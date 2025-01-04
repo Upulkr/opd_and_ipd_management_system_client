@@ -55,14 +55,14 @@ export default function InpatientDepartment() {
         <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-3`}>
           <Card>
             <CardHeader>
-              <CardTitle>Patient Search</CardTitle>
+              <CardTitle>Patient Profile Search</CardTitle>
               <CardDescription>
                 Find patient information quickly
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex space-x-2">
-                <Input placeholder="Search patients..." />
+                <Input placeholder="Enter patients' NIC" />
                 <Button size="icon">
                   <SearchIcon className="h-4 w-4" />
                 </Button>
@@ -94,12 +94,17 @@ export default function InpatientDepartment() {
             <CardContent>
               <div className="flex flex-col space-y-2">
                 <Button>
-                  <PlusIcon className="mr-2 h-4 w-4" /> View Drugs Detials
+                  <SearchIcon className="mr-2 h-4 w-4" /> View Existing
+                  Admission Sheets by BHT Number
                 </Button>
-                <Button variant="outline">
+                <Button>
+                  <SearchIcon className="mr-2 h-4 w-4" /> View Exisiting
+                  Admission Books by BHT Number
+                </Button>
+                {/* <Button variant="outline">
                   <ClipboardIcon className="mr-2 h-4 w-4" />
                   Order Drugs From Pharmacy Unit
-                </Button>
+                </Button> */}
               </div>
             </CardContent>
           </Card>
@@ -111,7 +116,8 @@ export default function InpatientDepartment() {
             </CardHeader>
             <CardContent>
               <Button className="w-full" onClick={() => setIsShowNicForm(true)}>
-                <FileTextIcon className="mr-2 h-4 w-4" /> Go to Admission Sheet
+                <FileTextIcon className="mr-2 h-4 w-4" /> Create New Admission
+                Sheet
               </Button>
               {/* <Link to="/inpatient-department/admission-sheet">
           
@@ -126,7 +132,7 @@ export default function InpatientDepartment() {
             </CardHeader>
             <CardContent>
               <Button className="w-full" onClick={() => setIsShoBhtForm(true)}>
-                <BookIcon className="mr-2 h-4 w-4" /> Open Admission Book
+                <BookIcon className="mr-2 h-4 w-4" /> Create New Admission Book
               </Button>
             </CardContent>
           </Card>

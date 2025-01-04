@@ -6,13 +6,18 @@ import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
-export function InputBHTForm({ onClose }: { onClose: () => void }) {
+export function InputBHTFormFrAdmissionSheet({
+  onClose,
+}: {
+  onClose: () => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
   const { setPatientBHT } = usePatientStore((state) => state);
-
+  const { setEnableUpdating } = useFrontendComponentsStore((state) => state);
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -45,14 +50,14 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
       const response = await axios.get(
         `http://localhost:8000/admissionSheet/bht?bht=${bht}`
       );
-      console.log("response", response);
+
       setAdmissionSheetByBHT(response.data.admissionSheet);
+      setEnableUpdating();
       navigate("/admission-book-page");
       setIsLoading(false);
     } catch (err: any) {
       if (err.response?.status === 404) {
-        toast.error("Patient not found, please register the patient");
-        navigate("/patient-register-form");
+        toast.error("Patient not found");
       } else {
         console.error("Error fetching patient", err);
         toast.error(err.message || "Error fetching patient");
@@ -93,4 +98,4 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default InputBHTForm;
+export default InputBHTFormFrAdmissionSheet;

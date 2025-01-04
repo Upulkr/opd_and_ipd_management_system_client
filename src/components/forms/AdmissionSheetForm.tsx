@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { useNavigate } from "react-router-dom";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
 const formSchema = z.object({
   bht: z.string(),
@@ -46,6 +47,7 @@ const formSchema = z.object({
 export const AdmissionSheetForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { patient } = usePatientStore((state) => state);
+  const { enableUpdate } = useFrontendComponentsStore((state) => state);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,10 +63,10 @@ export const AdmissionSheetForm = () => {
       postalCode: patient.postalCode,
       country: patient.country || " ",
       phone: patient.phone || " ",
-      wardNo: "",
-      reason: "",
-      pressure: "",
-      weight: "",
+      wardNo: patient.wardNo || "",
+      reason: patient.reason || "",
+      pressure: patient.pressure || "",
+      weight: patient.weight || "",
     },
   });
 
@@ -384,7 +386,13 @@ export const AdmissionSheetForm = () => {
               disabled={isLoading}
               className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
             >
-              {isLoading ? "Submitting..." : "Submit"}
+              {isLoading
+                ? enableUpdate
+                  ? "Updating..."
+                  : "Submitting..."
+                : enableUpdate
+                ? "Update"
+                : "Submit"}
             </Button>
           </div>
         </form>
