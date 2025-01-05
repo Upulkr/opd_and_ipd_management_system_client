@@ -55,7 +55,7 @@ export function InputBHTFormFrAdmissionSheet({
 
       setAdmissionSheetByBHT(response.data.admissionSheet);
 
-      navigate("/admission-book-page");
+      navigate("/inpatient-department/admission-sheet");
       setIsLoading(false);
     } catch (err: any) {
       if (err.response?.status === 404) {

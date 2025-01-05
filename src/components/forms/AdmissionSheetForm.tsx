@@ -25,6 +25,7 @@ import {
 } from "../ui/form";
 import { useNavigate } from "react-router-dom";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
+import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 
 const formSchema = z.object({
   bht: z.string(),
@@ -48,25 +49,31 @@ export const AdmissionSheetForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { patient } = usePatientStore((state) => state);
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
+  const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht: "",
-      nic: patient.nic || " ",
-      name: patient.name || " ",
-      age: patient.age || " ",
-      gender: (patient.gender as "Male" | "Female" | "Other") || "Male",
-      streetAddress: patient.streetAddress || " ",
-      city: patient.city || " ",
-      stateProvince: patient.stateProvince || " ",
+      bht: String(admissionSheetByBHT?.bht) || "",
+      nic: patient.nic || admissionSheetByBHT?.nic || " ",
+      name: patient.name || admissionSheetByBHT?.name || " ",
+      age: patient.age || admissionSheetByBHT?.age || " ",
+      gender:
+        (patient.gender as "Male" | "Female" | "Other") ||
+        admissionSheetByBHT?.gender ||
+        "Male",
+      streetAddress:
+        patient.streetAddress || admissionSheetByBHT?.streetAddress || " ",
+      city: patient.city || admissionSheetByBHT?.city || " ",
+      stateProvince:
+        patient.stateProvince || admissionSheetByBHT?.stateProvince || " ",
       postalCode: patient.postalCode,
-      country: patient.country || " ",
-      phone: patient.phone || " ",
-      wardNo: patient.wardNo || "",
-      reason: patient.reason || "",
-      pressure: patient.pressure || "",
-      weight: patient.weight || "",
+      country: patient.country || admissionSheetByBHT?.country || " ",
+      phone: patient.phone || admissionSheetByBHT?.phone || " ",
+      wardNo: patient.wardNo || admissionSheetByBHT?.wardNo || "",
+      reason: patient.reason || admissionSheetByBHT?.reason || "",
+      pressure: patient.pressure || admissionSheetByBHT?.pressure || "",
+      weight: patient.weight || admissionSheetByBHT?.weight || "",
     },
   });
 
@@ -383,7 +390,9 @@ export const AdmissionSheetForm = () => {
           <div className="flex justify-end">
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={
+                isLoading || Object.keys(admissionSheetByBHT).length > 0
+              }
               className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
             >
               {isLoading
