@@ -41,10 +41,11 @@ export const PatientRegisterForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { patientNic, setPatient } = usePatientStore((state) => state);
+  console.log("NIC", patientNic);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nic: patientNic || " ",
+      nic: (patientNic !== "" && patientNic) || " ",
       name: "",
       age: "",
       gender: "Male",

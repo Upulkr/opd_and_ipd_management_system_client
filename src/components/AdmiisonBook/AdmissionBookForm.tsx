@@ -17,17 +17,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { set, useForm } from "react-hook-form";
-import * as z from "zod";
-import { Plus, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
+
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
+import { usePatientStore } from "@/stores/usePatientStore";
+import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { Plus, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import * as z from "zod";
+import { Textarea } from "../ui/textarea";
 const formSchema = z.object({
   bht: z.string().min(1, "BHT is required"),
   nic: z.string().min(1, "NIC is required"),
@@ -55,9 +59,27 @@ export const AdmissionBookForm = () => {
   const [noOfAdmissionSheetsperDay, setNoOfAdmissionSheetsperDay] = useState(0);
   const [noOfAdmissionSheetsperYear, setNoOfAdmissionSheetsperYear] =
     useState(0);
+
+  const { enableUpdate } = useFrontendComponentsStore((state) => state);
+  const { admissionBook } = useAdmissionBookByBHT((state) => state);
   // Fetching the number of admission sheets per day
+
+  // const fetchAdmissionBookbyBHT = useCallback(async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:8000/admissionBook/${pattientBHT}`
+  //     );
+  //     setAdmissionBook(response.data.admissionBook);
+  //   } catch (error) {
+  //     console.error("Error fetching admission book", error);
+  //   }
+  // }, [pattientBHT, setAdmissionBook]);
+
   const fetchingNoOfAdmissionSheetsperDay = async () => {
     try {
+      if (enableUpdate === true) {
+        return;
+      }
       const fetchAdmissionSheetperDay = await axios.get(
         `http://localhost:8000/admissionSheet/noOfAdmissionSheetsperday`
       );
@@ -71,6 +93,9 @@ export const AdmissionBookForm = () => {
   // Fetching the number of admission sheets per year
   const fetchingNoOfAdmissionSheetsperYear = async () => {
     try {
+      if (enableUpdate === true) {
+        return;
+      }
       const fetchAdmissionSheetperYear = await axios.get(
         `http://localhost:8000/admissionSheet/noOfAdmissionSheetsperyear`
       );
@@ -83,34 +108,66 @@ export const AdmissionBookForm = () => {
   };
 
   useEffect(() => {
-    fetchingNoOfAdmissionSheetsperDay();
-    fetchingNoOfAdmissionSheetsperYear();
+    if (enableUpdate === false) {
+      fetchingNoOfAdmissionSheetsperDay();
+      fetchingNoOfAdmissionSheetsperYear();
+    }
   }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht: String(admissionSheetByBHT?.bht) || "",
-      nic: admissionSheetByBHT?.nic || "",
-      name: admissionSheetByBHT?.name || "",
+      bht:
+        String(admissionSheetByBHT?.bht) || admissionBook?.bht !== undefined
+          ? String(admissionBook?.bht)
+          : "no" || "",
+      nic: admissionSheetByBHT?.nic || admissionBook?.nic || "",
+      name: admissionSheetByBHT?.name || admissionBook?.name || "",
       dailyno:
-        (noOfAdmissionSheetsperDay > 0 && noOfAdmissionSheetsperDay) || 0,
+        (noOfAdmissionSheetsperDay > 0 && noOfAdmissionSheetsperDay) ||
+        admissionBook?.dailyno ||
+        0,
       yearlyno:
-        (noOfAdmissionSheetsperYear > 0 && noOfAdmissionSheetsperYear) || 0,
-      city: admissionSheetByBHT?.city || "",
-      stateProvince: admissionSheetByBHT?.stateProvince || "",
-      postalCode: admissionSheetByBHT?.postalCode || "",
-      country: admissionSheetByBHT?.country || "",
-      streetAddress: admissionSheetByBHT?.streetAddress || "",
-      phone: admissionSheetByBHT?.phone || "",
-      age: admissionSheetByBHT?.age || "",
-      admittedDate: admissionSheetByBHT?.createdAt
-        ? format(new Date(admissionSheetByBHT.createdAt), "yyyy-MM-dd'T'HH:mm")
-        : "",
-      reason: admissionSheetByBHT?.reason || "",
-      allergies: admissionSheetByBHT?.allergies || [],
-      transferCategory: admissionSheetByBHT.transferCategory || "ward",
-      dischargeDate: admissionSheetByBHT.dischargeDate || "",
+        (noOfAdmissionSheetsperYear > 0 && noOfAdmissionSheetsperYear) ||
+        admissionBook?.yearlyno ||
+        0,
+      city: admissionSheetByBHT?.city || admissionBook?.city || "",
+      stateProvince:
+        admissionSheetByBHT?.stateProvince ||
+        admissionBook?.stateProvince ||
+        "",
+      postalCode:
+        admissionSheetByBHT?.postalCode || admissionBook?.postalCode || "",
+      country: admissionSheetByBHT?.country || admissionBook?.country || "",
+      streetAddress:
+        admissionSheetByBHT?.streetAddress ||
+        admissionBook?.streetAddress ||
+        "",
+      phone: admissionSheetByBHT?.phone || admissionBook?.phone || "",
+      age: admissionSheetByBHT?.age || admissionBook?.age || "",
+      admittedDate:
+        admissionSheetByBHT?.createdAt ||
+        (admissionBook?.admittedDate &&
+          format(
+            new Date(admissionBook?.admittedDate),
+            "yyyy-MM-dd'T'HH:mm"
+          )) ||
+        "",
+      reason: admissionSheetByBHT?.reason || admissionBook?.reason || "",
+      allergies:
+        admissionSheetByBHT?.allergies || admissionBook?.allergies || [],
+      transferCategory:
+        admissionSheetByBHT.transferCategory ||
+        admissionBook?.transferCategory ||
+        "ward",
+      dischargeDate:
+        admissionSheetByBHT.dischargeDate ||
+        (admissionBook?.dischargeDate &&
+          format(
+            new Date(admissionBook?.dischargeDate),
+            "yyyy-MM-dd'T'HH:mm"
+          )) ||
+        "",
     },
   });
   const { setValue } = form; // Access setValue function
@@ -128,6 +185,7 @@ export const AdmissionBookForm = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
+
       const response = await axios(`http://localhost:8000/admissionbook`, {
         method: "POST",
         headers: {
@@ -161,7 +219,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>BHT</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.bht} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -174,7 +232,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>NIC</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.nic} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -189,7 +247,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.name} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -206,6 +264,7 @@ export const AdmissionBookForm = () => {
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    disabled={admissionBook?.dailyno}
                   />
                 </FormControl>
                 <FormMessage />
@@ -225,6 +284,7 @@ export const AdmissionBookForm = () => {
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    disabled={admissionBook?.yearlyno}
                   />
                 </FormControl>
                 <FormMessage />
@@ -238,7 +298,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>City</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.city} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -253,7 +313,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>State/Province</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.stateProvince} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -266,7 +326,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Postal Code</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.postalCode} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -281,7 +341,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Country</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.country} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -299,6 +359,7 @@ export const AdmissionBookForm = () => {
                     type="tel"
                     placeholder="Phone number"
                     {...field}
+                    disabled={admissionBook?.phone}
                   />
                 </FormControl>
                 <FormMessage />
@@ -312,7 +373,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Street Address</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.streetAddress} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -327,7 +388,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Age</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={admissionBook?.age} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -340,7 +401,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Admitted Date</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    disabled={admissionBook?.admittedDate}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -355,7 +420,7 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Reason</FormLabel>
                 <FormControl>
-                  <Textarea {...field} />
+                  <Textarea {...field} disabled={admissionBook?.reason} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -377,6 +442,7 @@ export const AdmissionBookForm = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => field.onChange([...field.value, ""])}
+                        disabled={admissionBook?.allergies}
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Allergy
@@ -392,8 +458,10 @@ export const AdmissionBookForm = () => {
                             field.onChange(newAllergies);
                           }}
                           className="w-40"
+                          disabled={admissionBook?.allergies}
                         />
                         <Button
+                          disabled={admissionBook?.allergies}
                           type="button"
                           variant="destructive"
                           size="icon"
@@ -425,6 +493,7 @@ export const AdmissionBookForm = () => {
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  disabled={admissionBook?.transferCategory}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -452,7 +521,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Discharge Date</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    disabled={admissionBook?.dischargeDate}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -463,9 +536,15 @@ export const AdmissionBookForm = () => {
           <Button
             type="submit"
             className="px-12 bg-blue-600 hover:bg-blue-700"
-            disabled={isLoading}
+            disabled={isLoading || Object.keys(admissionBook).length > 0}
           >
-            {isLoading ? "Submitting..." : "Submit"}
+            {isLoading
+              ? enableUpdate
+                ? "Updating..."
+                : "Submitting..."
+              : enableUpdate
+              ? "Update"
+              : "Submit"}
           </Button>
         </div>
       </form>

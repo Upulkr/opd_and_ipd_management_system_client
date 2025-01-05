@@ -1,3 +1,4 @@
+import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import { useState } from "react";
@@ -5,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
 export function InputBHTFormFrAdmissionSheet({
@@ -17,7 +17,9 @@ export function InputBHTFormFrAdmissionSheet({
   const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
   const { setPatientBHT } = usePatientStore((state) => state);
-  const { setEnableUpdating } = useFrontendComponentsStore((state) => state);
+  const { setEnableUpdating, enableUpdate } = useFrontendComponentsStore(
+    (state) => state
+  );
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -52,7 +54,7 @@ export function InputBHTFormFrAdmissionSheet({
       );
 
       setAdmissionSheetByBHT(response.data.admissionSheet);
-      setEnableUpdating();
+
       navigate("/admission-book-page");
       setIsLoading(false);
     } catch (err: any) {

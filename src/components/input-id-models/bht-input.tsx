@@ -11,7 +11,7 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
-  const { setPatientBHT } = usePatientStore((state) => state);
+  const { setPatientBHT, setPatient } = usePatientStore((state) => state);
 
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
@@ -52,6 +52,7 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
     } catch (err: any) {
       if (err.response?.status === 404) {
         toast.error("Patient not found, please register the patient");
+
         navigate("/patient-register-form");
       } else {
         console.error("Error fetching patient", err);

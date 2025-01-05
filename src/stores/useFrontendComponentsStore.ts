@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 
 export type State = {
   showBhtInput: boolean;
-  enableUpdate: boolean;
+  enableUpdate: null | boolean;
 };
 
 export type Actions = {
@@ -15,7 +15,7 @@ export const useFrontendComponentsStore = create<State & Actions>()(
   persist(
     (set) => ({
       showBhtInput: false,
-      enableUpdate: false,
+      enableUpdate: null,
       setShowBhtInput: () =>
         set((state) => ({ showBhtInput: !state.showBhtInput })),
       setEnableUpdating: () =>

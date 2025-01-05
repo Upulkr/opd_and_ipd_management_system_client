@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
 export function InputBHTFormForAdmissionBookSearch({
   onClose,
@@ -16,7 +18,12 @@ export function InputBHTFormForAdmissionBookSearch({
   const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
   const { setPatientBHT } = usePatientStore((state) => state);
-
+  const { setEnableUpdating, enableUpdate } = useFrontendComponentsStore(
+    (state) => state
+  );
+  const { setAdmissionBook, admissionBook } = useAdmissionBookByBHT(
+    (state) => state
+  );
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -44,13 +51,19 @@ export function InputBHTFormForAdmissionBookSearch({
     } else {
       setPatientBHT(bht);
     }
-
+    console.log("+++++++,", enableUpdate);
     try {
       const response = await axios.get(
-        `http://localhost:8000/admissionSheet/bht?bht=${bht}`
+        enableUpdate === true
+          ? `http://localhost:8000/admissionbook/bht?bht=${bht}`
+          : `http://localhost:8000/admissionSheet/bht?bht=${bht}`
       );
+      if (enableUpdate === true) {
+        setAdmissionBook(response.data.admissionBook);
+      } else {
+        setAdmissionSheetByBHT(response.data.admissionSheet);
+      }
 
-      setAdmissionSheetByBHT(response.data.admissionSheet);
       navigate("/admission-book-page");
       setIsLoading(false);
     } catch (err: any) {

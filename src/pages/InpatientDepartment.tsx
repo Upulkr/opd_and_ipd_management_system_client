@@ -1,4 +1,6 @@
 import InputBHTForm from "@/components/input-id-models/bht-input";
+import InputBHTFormFrAdmissionSheet from "@/components/input-id-models/bht-input-for--individualadmissionSheetSearch";
+import InputBHTFormForAdmissionBookSearch from "@/components/input-id-models/bht-input-for-individual-AdmissionBook";
 import InputNicForm from "@/components/input-id-models/nic-input";
 import { InpatienDashboardTable } from "@/components/tables/InpatienDashboardTable";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
+import { usePatientStore } from "@/stores/usePatientStore";
 import {
   BedIcon,
   BookIcon,
@@ -23,9 +28,15 @@ import {
 import { useState } from "react";
 
 export default function InpatientDepartment() {
+  const { setEnableUpdating } = useFrontendComponentsStore((state) => state);
   const [isShowNicForm, setIsShowNicForm] = useState(false);
   const [isShoBhtForm, setIsShoBhtForm] = useState(false);
-
+  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  const [isShowBHTForAdmissionSheet, setIsShowBHTForAdmissionSheet] =
+    useState(false);
+  const [isShowBHTForAdmissionBook, setIsShowBHTForAdmissionBook] =
+    useState(false);
+  const { setPatientNic } = usePatientStore((state) => state);
   return (
     <div className="relative">
       {isShowNicForm ? (
@@ -42,6 +53,27 @@ export default function InpatientDepartment() {
             onClick={() => setIsShoBhtForm(false)} // Close when clicking outside
           >
             <InputBHTForm onClose={() => setIsShowNicForm(false)} />
+          </div>
+        )
+      )}
+      {isShowBHTForAdmissionBook ? (
+        <div
+          className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
+          onClick={() => setIsShowBHTForAdmissionBook(false)} // Close when clicking outside
+        >
+          <InputBHTFormForAdmissionBookSearch
+            onClose={() => setIsShowBHTForAdmissionBook(false)}
+          />
+        </div>
+      ) : (
+        isShowBHTForAdmissionSheet && (
+          <div
+            className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
+            onClick={() => setIsShowBHTForAdmissionSheet(false)} // Close when clicking outside
+          >
+            <InputBHTFormFrAdmissionSheet
+              onClose={() => setIsShowBHTForAdmissionSheet(false)}
+            />
           </div>
         )
       )}
@@ -93,11 +125,23 @@ export default function InpatientDepartment() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col space-y-2">
-                <Button>
+                <Button
+                  onClick={() => {
+                    setEnableUpdating();
+                    setIsShowBHTForAdmissionSheet(true);
+                    setAdmissionSheetByBHT([]);
+                  }}
+                >
                   <SearchIcon className="mr-2 h-4 w-4" /> View Existing
                   Admission Sheets by BHT Number
                 </Button>
-                <Button>
+                <Button
+                  onClick={() => {
+                    setEnableUpdating();
+                    setIsShowBHTForAdmissionBook(true);
+                    setAdmissionSheetByBHT([]);
+                  }}
+                >
                   <SearchIcon className="mr-2 h-4 w-4" /> View Exisiting
                   Admission Books by BHT Number
                 </Button>
@@ -115,7 +159,14 @@ export default function InpatientDepartment() {
               <CardDescription>Patient admission details</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" onClick={() => setIsShowNicForm(true)}>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  setIsShowNicForm(true);
+                  setPatientNic("");
+                  setAdmissionSheetByBHT([]);
+                }}
+              >
                 <FileTextIcon className="mr-2 h-4 w-4" /> Create New Admission
                 Sheet
               </Button>
@@ -131,7 +182,14 @@ export default function InpatientDepartment() {
               <CardDescription>Comprehensive admission records</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" onClick={() => setIsShoBhtForm(true)}>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  setIsShoBhtForm(true);
+                  setPatientNic("");
+                  setAdmissionSheetByBHT([]);
+                }}
+              >
                 <BookIcon className="mr-2 h-4 w-4" /> Create New Admission Book
               </Button>
             </CardContent>
