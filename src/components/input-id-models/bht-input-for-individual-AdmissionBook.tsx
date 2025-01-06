@@ -2,7 +2,7 @@ import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
@@ -53,6 +53,16 @@ export function InputBHTFormForAdmissionBookSearch({
     }
     console.log("+++++++,", enableUpdate);
     try {
+      const isAdmissionBookExisting = await axios.get(
+        `http://localhost:8000/admissionBook/bht?bht=${bht}`
+      );
+
+      if (!isAdmissionBookExisting.data.admissionBook) {
+        toast.error("BHT does not exist");
+        setIsLoading(false);
+        navigate("/inpatient-department");
+        return;
+      }
       const response = await axios.get(
         enableUpdate === true
           ? `http://localhost:8000/admissionbook/bht?bht=${bht}`
@@ -81,6 +91,7 @@ export function InputBHTFormForAdmissionBookSearch({
       className="bg-white p-6 rounded-lg shadow-lg"
       onClick={(e) => e.stopPropagation()}
     >
+      <ToastContainer />
       <h2 className="text-2xl font-semibold mb-4 text-center">
         Input Patient BHT
       </h2>

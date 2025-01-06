@@ -54,7 +54,12 @@ export const AdmissionSheetForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht: String(admissionSheetByBHT?.bht) || "",
+      bht:
+        String(
+          admissionSheetByBHT?.bht !== undefined ? admissionSheetByBHT?.bht : ""
+        ) ||
+        patient.bht ||
+        "",
       nic: patient.nic || admissionSheetByBHT?.nic || " ",
       name: patient.name || admissionSheetByBHT?.name || " ",
       age: patient.age || admissionSheetByBHT?.age || " ",
@@ -125,8 +130,9 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">BHT Number</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="BHT Number"
+                      disabled={admissionSheetByBHT?.bht}
                       {...field}
                     />
                   </FormControl>
@@ -142,8 +148,9 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">NIC</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="NIC"
+                      disabled={admissionSheetByBHT?.nic}
                       {...field}
                     />
                   </FormControl>
@@ -159,8 +166,9 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">Name</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Full Name"
+                      disabled={admissionSheetByBHT?.name}
                       {...field}
                     />
                   </FormControl>
@@ -176,8 +184,9 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">Age</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Age"
+                      disabled={admissionSheetByBHT?.age}
                       {...field}
                     />
                   </FormControl>
@@ -194,9 +203,10 @@ export const AdmissionSheetForm = () => {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={admissionSheetByBHT?.gender}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="border border-gray-500 disabled:text-black disabled:font-bold ">
                         <SelectValue placeholder="Select gender" />
                       </SelectTrigger>
                     </FormControl>
@@ -218,9 +228,10 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">Phone</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       type="tel"
                       placeholder="Phone number"
+                      disabled={admissionSheetByBHT?.phone}
                       {...field}
                     />
                   </FormControl>
@@ -240,8 +251,9 @@ export const AdmissionSheetForm = () => {
                     <FormLabel className=" font-bold">Street Address</FormLabel>
                     <FormControl>
                       <Input
-                        className="border border-gray-500"
+                        className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="Street Address"
+                        disabled={admissionSheetByBHT?.streetAddress}
                         {...field}
                       />
                     </FormControl>
@@ -257,8 +269,9 @@ export const AdmissionSheetForm = () => {
                     <FormLabel className=" font-bold">City</FormLabel>
                     <FormControl>
                       <Input
-                        className="border border-gray-500"
+                        className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="City"
+                        disabled={admissionSheetByBHT?.city}
                         {...field}
                       />
                     </FormControl>
@@ -274,8 +287,9 @@ export const AdmissionSheetForm = () => {
                     <FormLabel className=" font-bold">State/Province</FormLabel>
                     <FormControl>
                       <Input
-                        className="border border-gray-500"
+                        className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="State/Province"
+                        disabled={admissionSheetByBHT?.stateProvince}
                         {...field}
                       />
                     </FormControl>
@@ -291,8 +305,9 @@ export const AdmissionSheetForm = () => {
                     <FormLabel className=" font-bold">Postal Code</FormLabel>
                     <FormControl>
                       <Input
-                        className="border border-gray-500"
+                        className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="Postal Code"
+                        disabled={admissionSheetByBHT?.postalCode}
                         {...field}
                       />
                     </FormControl>
@@ -308,8 +323,9 @@ export const AdmissionSheetForm = () => {
                     <FormLabel className=" font-bold">Country</FormLabel>
                     <FormControl>
                       <Input
-                        className="border border-gray-500"
+                        className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="Country"
+                        disabled={admissionSheetByBHT?.country}
                         {...field}
                       />
                     </FormControl>
@@ -328,8 +344,9 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">Ward Number</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Ward Number"
+                      disabled={admissionSheetByBHT?.wardNo}
                       {...field}
                     />
                   </FormControl>
@@ -345,8 +362,9 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">Blood Pressure</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Blood Pressure"
+                      disabled={admissionSheetByBHT?.pressure}
                       {...field}
                     />
                   </FormControl>
@@ -362,8 +380,9 @@ export const AdmissionSheetForm = () => {
                   <FormLabel className=" font-bold">Weight (kg)</FormLabel>
                   <FormControl>
                     <Input
-                      className="border border-gray-500"
+                      className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Weight in kg"
+                      disabled={admissionSheetByBHT?.weight}
                       {...field}
                     />
                   </FormControl>
@@ -381,7 +400,12 @@ export const AdmissionSheetForm = () => {
                   Reason for Admission
                 </FormLabel>
                 <FormControl>
-                  <Textarea placeholder="Reason for admission" {...field} />
+                  <Textarea
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                    placeholder="Reason for admission"
+                    disabled={admissionSheetByBHT?.reason}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -395,13 +419,14 @@ export const AdmissionSheetForm = () => {
               }
               className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
             >
-              {isLoading
+              Submit
+              {/* {isLoading
                 ? enableUpdate
                   ? "Updating..."
                   : "Submitting..."
                 : enableUpdate
                 ? "Update"
-                : "Submit"}
+                : "Submit"} */}
             </Button>
           </div>
         </form>

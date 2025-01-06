@@ -118,9 +118,11 @@ export const AdmissionBookForm = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       bht:
-        String(admissionSheetByBHT?.bht) || admissionBook?.bht !== undefined
-          ? String(admissionBook?.bht)
-          : "no" || "",
+        String(
+          admissionSheetByBHT?.bht !== undefined ? admissionSheetByBHT?.bht : ""
+        ) ||
+        String(admissionBook?.bht !== undefined ? admissionBook?.bht : "") ||
+        "",
       nic: admissionSheetByBHT?.nic || admissionBook?.nic || "",
       name: admissionSheetByBHT?.name || admissionBook?.name || "",
       dailyno:
@@ -146,10 +148,15 @@ export const AdmissionBookForm = () => {
       phone: admissionSheetByBHT?.phone || admissionBook?.phone || "",
       age: admissionSheetByBHT?.age || admissionBook?.age || "",
       admittedDate:
-        admissionSheetByBHT?.createdAt ||
+        admissionSheetByBHT.admittedDate ||
         (admissionBook?.admittedDate &&
           format(
             new Date(admissionBook?.admittedDate),
+            "yyyy-MM-dd'T'HH:mm"
+          )) ||
+        (admissionSheetByBHT?.createdAt &&
+          format(
+            new Date(admissionSheetByBHT?.createdAt),
             "yyyy-MM-dd'T'HH:mm"
           )) ||
         "",
@@ -219,7 +226,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>BHT</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.bht} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.bht}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -232,7 +243,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>NIC</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.nic} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.nic}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -247,7 +262,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.name} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.name}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -261,6 +280,7 @@ export const AdmissionBookForm = () => {
                 <FormLabel>Daily No</FormLabel>
                 <FormControl>
                   <Input
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
@@ -285,6 +305,7 @@ export const AdmissionBookForm = () => {
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
                     disabled={admissionBook?.yearlyno}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
                 <FormMessage />
@@ -298,7 +319,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>City</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.city} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.city}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -313,7 +338,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>State/Province</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.stateProvince} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.stateProvince}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -326,7 +355,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Postal Code</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.postalCode} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.postalCode}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -341,7 +374,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Country</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.country} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.country}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -360,6 +397,7 @@ export const AdmissionBookForm = () => {
                     placeholder="Phone number"
                     {...field}
                     disabled={admissionBook?.phone}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
                 <FormMessage />
@@ -373,7 +411,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Street Address</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.streetAddress} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.streetAddress}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -388,7 +430,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Age</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled={admissionBook?.age} />
+                  <Input
+                    {...field}
+                    disabled={admissionBook?.age}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -405,6 +451,7 @@ export const AdmissionBookForm = () => {
                     type="datetime-local"
                     {...field}
                     disabled={admissionBook?.admittedDate}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
                 <FormMessage />
@@ -420,7 +467,11 @@ export const AdmissionBookForm = () => {
               <FormItem>
                 <FormLabel>Reason</FormLabel>
                 <FormControl>
-                  <Textarea {...field} disabled={admissionBook?.reason} />
+                  <Textarea
+                    {...field}
+                    disabled={admissionBook?.reason}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -525,6 +576,7 @@ export const AdmissionBookForm = () => {
                     type="datetime-local"
                     {...field}
                     disabled={admissionBook?.dischargeDate}
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
                 <FormMessage />
@@ -536,15 +588,9 @@ export const AdmissionBookForm = () => {
           <Button
             type="submit"
             className="px-12 bg-blue-600 hover:bg-blue-700"
-            disabled={isLoading || Object.keys(admissionBook).length > 0}
+            disabled={isLoading || admissionBook?.dischargeDate}
           >
-            {isLoading
-              ? enableUpdate
-                ? "Updating..."
-                : "Submitting..."
-              : enableUpdate
-              ? "Update"
-              : "Submit"}
+            {isLoading ? "Submitting..." : "Submit"}
           </Button>
         </div>
       </form>

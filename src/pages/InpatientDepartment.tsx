@@ -13,22 +13,26 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { usePatientStore } from "@/stores/usePatientStore";
+import axios from "axios";
 import {
   BedIcon,
   BookIcon,
-  ClipboardIcon,
   FileTextIcon,
-  PlusIcon,
   SearchIcon,
   UserIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function InpatientDepartment() {
   const { setEnableUpdating } = useFrontendComponentsStore((state) => state);
+  const [nic, setNic] = useState<string>("");
+  const [isSearcing, setIsSearching] = useState(false);
   const [isShowNicForm, setIsShowNicForm] = useState(false);
   const [isShoBhtForm, setIsShoBhtForm] = useState(false);
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
@@ -36,7 +40,31 @@ export default function InpatientDepartment() {
     useState(false);
   const [isShowBHTForAdmissionBook, setIsShowBHTForAdmissionBook] =
     useState(false);
-  const { setPatientNic } = usePatientStore((state) => state);
+  const { setPatientNic, setPatient } = usePatientStore((state) => state);
+  const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
+  const navigate = useNavigate();
+  const patientProfileHandler = async () => {
+    try {
+      setIsSearching(true);
+      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      if (response.status === 200) {
+        console.log("response", response.data.Patient);
+        setPatient(response.data.Patient);
+        setIsSearching(false);
+        toast.success("Patient found successfully");
+        navigate(`/patient-profile-page`);
+      }
+    } catch (error: any) {
+      if (error.status === 500) {
+        setIsSearching(false);
+        toast.error("Patient not found");
+        return;
+      } else {
+        setIsSearching(false);
+        console.log("Error fetching patient", error);
+      }
+    }
+  };
   return (
     <div className="relative">
       {isShowNicForm ? (
@@ -94,8 +122,11 @@ export default function InpatientDepartment() {
             </CardHeader>
             <CardContent>
               <div className="flex space-x-2">
-                <Input placeholder="Enter patients' NIC" />
-                <Button size="icon">
+                <Input
+                  placeholder="Enter patients' NIC"
+                  onChange={(e) => setNic(e.target.value)}
+                />
+                <Button size="icon" onClick={patientProfileHandler}>
                   <SearchIcon className="h-4 w-4" />
                 </Button>
               </div>
@@ -127,7 +158,7 @@ export default function InpatientDepartment() {
               <div className="flex flex-col space-y-2">
                 <Button
                   onClick={() => {
-                    setEnableUpdating();
+                    setEnableUpdating(true);
                     setIsShowBHTForAdmissionSheet(true);
                     setAdmissionSheetByBHT([]);
                   }}
@@ -137,7 +168,7 @@ export default function InpatientDepartment() {
                 </Button>
                 <Button
                   onClick={() => {
-                    setEnableUpdating();
+                    setEnableUpdating(true);
                     setIsShowBHTForAdmissionBook(true);
                     setAdmissionSheetByBHT([]);
                   }}
@@ -165,6 +196,7 @@ export default function InpatientDepartment() {
                   setIsShowNicForm(true);
                   setPatientNic("");
                   setAdmissionSheetByBHT([]);
+                  setEnableUpdating(false);
                 }}
               >
                 <FileTextIcon className="mr-2 h-4 w-4" /> Create New Admission
@@ -188,6 +220,8 @@ export default function InpatientDepartment() {
                   setIsShoBhtForm(true);
                   setPatientNic("");
                   setAdmissionSheetByBHT([]);
+                  setEnableUpdating(false);
+                  setAdmissionBook([]);
                 }}
               >
                 <BookIcon className="mr-2 h-4 w-4" /> Create New Admission Book

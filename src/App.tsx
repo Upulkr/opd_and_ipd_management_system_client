@@ -28,6 +28,7 @@ import MobileClinic from "./pages/MobileClinic";
 import PatientRegister from "./pages/PatientRegister";
 import Pharamacy from "./pages/Pharamacy";
 import AdmissionBookPage from "./pages/AdmiisionBookPage";
+import PatientProfilePage from "./pages/PatientProfilePAge";
 
 function App() {
   const Departments = [
@@ -130,6 +131,10 @@ function App() {
             element={<AdmissionSheetRegisterPage />}
           />
           <Route path="/admission-book-page" element={<AdmissionBookPage />} />
+          <Route
+            path="/patient-profile-page"
+            element={<PatientProfilePage />}
+          />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>
