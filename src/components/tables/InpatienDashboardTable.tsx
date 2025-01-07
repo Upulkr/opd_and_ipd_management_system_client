@@ -56,6 +56,7 @@ const invoices = [
 
 const tableHeaders = [
   "Ward Number",
+  "Ward Name",
   "No.of Patients Undergoing Treatment",
   "No.of Today Admitted",
   "No.of Today Discharged",

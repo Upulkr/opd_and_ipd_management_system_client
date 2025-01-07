@@ -35,6 +35,7 @@ const formSchema = z.object({
   postalCode: z.string().min(2).max(20),
   country: z.string(),
   phone: z.string(),
+  livingStatus: z.string(),
 });
 
 export const PatientRegisterForm = () => {
@@ -57,6 +58,7 @@ export const PatientRegisterForm = () => {
       phone: "",
 
       streetAddress: "",
+      livingStatus: "live",
     },
   });
 
@@ -190,6 +192,31 @@ export const PatientRegisterForm = () => {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="livingStatus"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Life status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="ward">Live</SelectItem>
+
+                      <SelectItem value="direct-admit">Death</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

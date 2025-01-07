@@ -43,6 +43,7 @@ const formSchema = z.object({
   reason: z.string(),
   pressure: z.string(),
   weight: z.string(),
+  livingStatus: z.string(),
 });
 
 export const AdmissionSheetForm = () => {
@@ -79,6 +80,8 @@ export const AdmissionSheetForm = () => {
       reason: patient.reason || admissionSheetByBHT?.reason || "",
       pressure: patient.pressure || admissionSheetByBHT?.pressure || "",
       weight: patient.weight || admissionSheetByBHT?.weight || "",
+      livingStatus:
+        patient.livingStatus || admissionSheetByBHT?.livingStatus || "",
     },
   });
 
@@ -172,6 +175,31 @@ export const AdmissionSheetForm = () => {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="livingStatus"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Life status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="ward">Live</SelectItem>
+
+                      <SelectItem value="direct-admit">Death</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

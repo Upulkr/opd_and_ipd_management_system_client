@@ -50,6 +50,8 @@ const formSchema = z.object({
   transferCategory: z.enum(["ward", "hospital-to-hospital", "direct-admit"]),
   dischargeDate: z.string().optional(),
   phone: z.string().min(1, "Phone number is required"),
+  wardNo: z.string(),
+  livingStatus: z.string(),
 });
 
 export const AdmissionBookForm = () => {
@@ -163,6 +165,7 @@ export const AdmissionBookForm = () => {
       reason: admissionSheetByBHT?.reason || admissionBook?.reason || "",
       allergies:
         admissionSheetByBHT?.allergies || admissionBook?.allergies || [],
+      wardNo: admissionSheetByBHT?.wardNo || admissionBook?.wardNo || "",
       transferCategory:
         admissionSheetByBHT.transferCategory ||
         admissionBook?.transferCategory ||
@@ -175,6 +178,10 @@ export const AdmissionBookForm = () => {
             "yyyy-MM-dd'T'HH:mm"
           )) ||
         "",
+      livingStatus:
+        admissionSheetByBHT?.livingStatus ||
+        admissionBook?.livingStatus ||
+        "live",
     },
   });
   const { setValue } = form; // Access setValue function
@@ -253,6 +260,31 @@ export const AdmissionBookForm = () => {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="livingStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Life status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="ward">Live</SelectItem>
+
+                    <SelectItem value="direct-admit">Death</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
         <div className="space-y-4">
           <FormField
@@ -306,6 +338,24 @@ export const AdmissionBookForm = () => {
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
                     disabled={admissionBook?.yearlyno}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />{" "}
+          <FormField
+            control={form.control}
+            name="wardNo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className=" font-bold">Ward Number</FormLabel>
+                <FormControl>
+                  <Input
+                    className="border border-gray-500 disabled:text-black disabled:font-bold "
+                    placeholder="Ward Number"
+                    disabled={admissionSheetByBHT?.wardNo}
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />
