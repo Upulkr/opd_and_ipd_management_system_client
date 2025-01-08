@@ -2,7 +2,11 @@ import InputBHTForm from "@/components/input-id-models/bht-input";
 import InputBHTFormFrAdmissionSheet from "@/components/input-id-models/bht-input-for--individualadmissionSheetSearch";
 import InputBHTFormForAdmissionBookSearch from "@/components/input-id-models/bht-input-for-individual-AdmissionBook";
 import InputNicForm from "@/components/input-id-models/nic-input";
-import { InpatienDashboardTable } from "@/components/tables/InpatienDashboardTable";
+import {
+  InpatienDashboardTable,
+  WardDetails,
+  WardData,
+} from "@/components/tables/InpatienDashboardTable";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +21,7 @@ import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { usePatientStore } from "@/stores/usePatientStore";
+import { useWardTableInpatient } from "@/stores/useWardTableInpatient";
 import axios from "axios";
 import {
   BedIcon,
@@ -25,7 +30,7 @@ import {
   SearchIcon,
   UserIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -35,6 +40,7 @@ export default function InpatientDepartment() {
   const [isSearcing, setIsSearching] = useState(false);
   const [isShowNicForm, setIsShowNicForm] = useState(false);
   const [isShoBhtForm, setIsShoBhtForm] = useState(false);
+  const [wardData, setWardData] = useState<WardData[]>([]);
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const [isShowBHTForAdmissionSheet, setIsShowBHTForAdmissionSheet] =
     useState(false);
@@ -65,6 +71,22 @@ export default function InpatientDepartment() {
       }
     }
   };
+
+  const fetchTableData = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/warddetails`);
+      if (response.status === 200) {
+        setWardData(response.data);
+      }
+    } catch (error: any) {
+      console.log("Error fetching table data", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTableData();
+  }, []);
+
   return (
     <div className="relative">
       {isShowNicForm ? (
@@ -264,7 +286,7 @@ export default function InpatientDepartment() {
                   )
                 )}
               </div> */}
-                <InpatienDashboardTable />
+                <InpatienDashboardTable wardData={wardData} />
               </CardContent>
             </Card>
           </TabsContent>
