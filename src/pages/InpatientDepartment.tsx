@@ -4,7 +4,6 @@ import InputBHTFormForAdmissionBookSearch from "@/components/input-id-models/bht
 import InputNicForm from "@/components/input-id-models/nic-input";
 import {
   InpatienDashboardTable,
-  WardDetails,
   WardData,
 } from "@/components/tables/InpatienDashboardTable";
 import { Button } from "@/components/ui/button";
@@ -48,6 +47,9 @@ export default function InpatientDepartment() {
     useState(false);
   const { setPatientNic, setPatient } = usePatientStore((state) => state);
   const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
+  const { noOfTotalBeds, noOfFreeBeds, setNoOfFreeBeds, setNoOfTotalBeds } =
+    useWardTableInpatient((state) => state);
+
   const navigate = useNavigate();
   const patientProfileHandler = async () => {
     try {
@@ -76,7 +78,9 @@ export default function InpatientDepartment() {
     try {
       const response = await axios.get(`http://localhost:8000/warddetails`);
       if (response.status === 200) {
-        setWardData(response.data);
+        setWardData(response.data.wardData);
+        setNoOfFreeBeds(response.data.totalNoOfFreeBeds);
+        setNoOfTotalBeds(response.data.totalBeds);
       }
     } catch (error: any) {
       console.log("Error fetching table data", error);
@@ -86,7 +90,7 @@ export default function InpatientDepartment() {
   useEffect(() => {
     fetchTableData();
   }, []);
-
+  console.log("noOfFreeBeds", noOfFreeBeds);
   return (
     <div className="relative">
       {isShowNicForm ? (
@@ -157,14 +161,16 @@ export default function InpatientDepartment() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Bed Availability</CardTitle>
+              <CardTitle>Total Bed Availability in IPD Wards</CardTitle>
               <CardDescription>Current bed status</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-2xl font-bold">24/30</p>
-                  <p className="text-sm text-muted-foreground">Occupied Beds</p>
+                  <p className="text-2xl font-bold">{`${noOfFreeBeds}/ ${noOfTotalBeds}`}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Available Beds
+                  </p>
                 </div>
                 <BedIcon className="h-8 w-8 text-blue-500" />
               </div>

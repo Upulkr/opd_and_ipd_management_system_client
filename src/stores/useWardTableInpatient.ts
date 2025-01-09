@@ -13,21 +13,30 @@ interface WardData {
   noOfdoctors: number;
   noOfnurses: number;
   telephone: number;
-};
+}
 
 interface State {
   wardData: WardData[];
+  noOfTotalBeds: number;
+  noOfFreeBeds: number;
 }
 interface Actions {
   setWardData: (wardData: WardData[]) => void;
+  setNoOfFreeBeds: (noOfFreeBeds: number) => void;
+  setNoOfTotalBeds: (noOfTotalBeds: number) => void;
 }
 
 export const useWardTableInpatient = create<State & Actions>()(
   persist(
     (set) => ({
       wardData: [],
-      setWardData: (wardData:WardData[]) => set({ wardData }),
+      noOfTotalBeds: 0,
+      noOfFreeBeds: 0,
+      setWardData: (wardData: WardData[]) => set({ wardData }),
+      setNoOfFreeBeds: (value: number) => set({ noOfFreeBeds: value }),
+      setNoOfTotalBeds: (value: number) => set({ noOfTotalBeds: value }),
     }),
+
     { name: "ward-table-data" }
   )
 );

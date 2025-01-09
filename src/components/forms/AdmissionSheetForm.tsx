@@ -26,6 +26,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useWardTableInpatient } from "@/stores/useWardTableInpatient";
 
 const formSchema = z.object({
   bht: z.string(),
@@ -51,6 +52,7 @@ export const AdmissionSheetForm = () => {
   const { patient } = usePatientStore((state) => state);
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
   const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -100,6 +102,10 @@ export const AdmissionSheetForm = () => {
         toast.success("Admission Sheet Created");
         // form.reset();
         setIsLoading(false);
+        await axios.put(
+          `http://localhost:8000/wardBedsController/${values.wardNo}`
+        );
+
         navigate("/inpatient-department");
       }
     } catch (error: any) {

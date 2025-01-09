@@ -15,7 +15,6 @@ const tableHeaders = [
   "No.of Patients Undergoing Treatment",
   "No.of Today Admitted",
   "No.of Today Discharged",
-  "No.of Deaths",
   "No.of Doctors working",
   "No.of Nurses working",
   "No.of Beds",
@@ -44,7 +43,7 @@ export function InpatienDashboardTable({
   wardData: WardDetails;
 }) {
   // Debugging: log the data before rendering
-
+  console.log("wardData", wardData);
   return (
     <Table>
       <TableCaption>View More</TableCaption>
@@ -91,7 +90,7 @@ export function InpatienDashboardTable({
                 <TableCell className="text-center">
                   {noOfDischargedToday}
                 </TableCell>
-                <TableCell className="text-center">{noOfBeds}</TableCell>
+
                 <TableCell className="text-center">{noOfdoctors}</TableCell>
                 <TableCell className="text-center">{noOfnurses}</TableCell>
                 <TableCell className="text-center">{noOfBeds}</TableCell>
