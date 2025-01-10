@@ -43,7 +43,7 @@ export function InpatienDashboardTable({
   wardData: WardDetails;
 }) {
   // Debugging: log the data before rendering
-  console.log("wardData", wardData);
+
   return (
     <Table>
       <TableCaption>View More</TableCaption>
@@ -101,7 +101,18 @@ export function InpatienDashboardTable({
             )
           )
         ) : (
-          <h2>No Data</h2>
+          <tr>
+            <td colSpan={11} className="text-center py-6">
+              <div className="flex flex-col items-center justify-center">
+                <h2 className="text-lg font-semibold text-gray-600">
+                  No Data Available
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Please check back later or add new entries.
+                </p>
+              </div>
+            </td>
+          </tr>
         )}
       </TableBody>
       <TableFooter>
