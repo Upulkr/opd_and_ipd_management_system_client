@@ -4,14 +4,19 @@ import { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
-interface StatisticsData {
-  totalPatients: number;
-  patientsScheduledToday: number;
-  patientsSeenToday: number;
-  admittedToIPD: number;
+// interface StatisticsData {
+//   totalPatients: number;
+//   patientsScheduledToday: number;
+//   patientsSeenToday: number;
+//   admittedToIPD: number;
+// }
+interface StatisticsProps {
+  numberOfTodayOutPatients: number;
 }
 
-export default function Statistics({ data }: { data: StatisticsData }) {
+export default function Statistics({
+  numberOfTodayOutPatients,
+}: StatisticsProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = () => {
@@ -46,9 +51,9 @@ export default function Statistics({ data }: { data: StatisticsData }) {
           <UserPlus className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">
+          {/* <div className="text-2xl font-bold">
             {data.patientsScheduledToday}
-          </div>
+          </div> */}
         </CardContent>
       </Card>
       <Card>
@@ -59,7 +64,7 @@ export default function Statistics({ data }: { data: StatisticsData }) {
           <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data.patientsSeenToday}</div>
+          <div className="text-2xl font-bold">{numberOfTodayOutPatients}</div>
         </CardContent>
       </Card>
       <Card>
@@ -68,7 +73,7 @@ export default function Statistics({ data }: { data: StatisticsData }) {
           <BedDouble className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{data.admittedToIPD}</div>
+          {/* <div className="text-2xl font-bold">{data.admittedToIPD}</div> */}
         </CardContent>
       </Card>
     </div>

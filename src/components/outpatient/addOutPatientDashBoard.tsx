@@ -46,6 +46,8 @@ import { CalendarIcon, Plus, UserPlus, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
+import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 
 const prescriptionSchema = z.object({
   medicationName: z.string().min(2, {
@@ -72,11 +74,21 @@ const formSchema = z.object({
   phone: z.string().min(10, {
     message: "Contact number must be at least 10 characters.",
   }),
-  streetAddress: z.string().min(5, { message: "Street Address is required." }),
-  city: z.string().min(2, { message: "City is required." }),
-  stateProvince: z.string().min(2, { message: "State/Province is required." }),
-  postalCode: z.string().min(5, { message: "Postal Code is required." }),
+  streetAddress: z
+    .string()
+    .min(5, { message: "Street Address is required." })
+    .optional(),
+  city: z.string().min(2, { message: "City is required." }).optional(),
+  stateProvince: z
+    .string()
+    .min(2, { message: "State/Province is required." })
+    .optional(),
+  postalCode: z
+    .string()
+    .min(5, { message: "Postal Code is required." })
+    .optional(),
   description: z.string().optional(),
+
   prescriptions: z.array(prescriptionSchema).optional(),
   // nic: z.string(),
   // name: z.string(),
@@ -90,12 +102,16 @@ const formSchema = z.object({
   // prescriptions: z.array(prescriptionSchema).optional(),
 });
 
-export function AddOutpatientForm() {
+export function AddOutpatientForm({
+  setActiveTab,
+}: {
+  setActiveTab: (tab: string) => void;
+}) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { patient, setPatient } = usePatientStore((state) => state);
-
-  console.log("patient", patient);
+  const [IsPatientGoingToAddIPD, setIsPatientGoingToAddIPD] = useState(false);
+  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -128,21 +144,25 @@ export function AddOutpatientForm() {
         data: JSON.stringify(values),
       });
       if (response.status === 201) {
-        setIsLoading(false);
         toast.success(
           "The outpatient has been successfully added to the system"
         );
+        setIsLoading(false);
 
         form.reset();
-        navigate("/outpatient-department");
-        // setPatient([]);
+        setActiveTab("overview");
+        setPatient([]);
+        if (IsPatientGoingToAddIPD) {
+          navigate("/admission-sheet-register-page");
+        }
       }
     } catch (error: any) {
       setIsLoading(false);
       if (error.status === 400) {
         toast.error(" Error. Please try again later.");
       }
-      // setPatient([]);
+      setPatient([]);
+      setActiveTab("overview");
     }
   }
 
@@ -484,13 +504,26 @@ export function AddOutpatientForm() {
           </form>
         </Form>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex gap-4">
         <Button
           type="submit"
-          className="w-full"
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white"
           onClick={form.handleSubmit(onSubmit)}
+          disabled={isLoading}
         >
           {isLoading ? "Adding..." : "Add Outpatient"}
+        </Button>
+        <Button
+          type="submit"
+          className="w-full bg-red-500 hover:bg-red-600 text-white"
+          onClick={() => {
+            form.handleSubmit(onSubmit)();
+            setIsPatientGoingToAddIPD(true);
+            setAdmissionSheetByBHT([]);
+          }}
+          disabled={isLoading}
+        >
+          {isLoading ? "Adding..." : "Admit TO IPD"}
         </Button>
       </CardFooter>
     </Card>

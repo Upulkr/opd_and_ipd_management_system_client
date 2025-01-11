@@ -23,6 +23,7 @@ import {
 } from "../ui/form";
 import { usePatientStore } from "@/stores/usePatientStore";
 import { useNavigate } from "react-router-dom";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
 const formSchema = z.object({
   nic: z.string(),
@@ -42,6 +43,11 @@ export const PatientRegisterForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { patientNic, setPatient } = usePatientStore((state) => state);
+  const {
+    navigateOutPatientPage,
+    IsNAvigateToOutPatientPage,
+    setEnableAddOutPatient,
+  } = useFrontendComponentsStore((state) => state);
   console.log("NIC", patientNic);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,8 +81,15 @@ export const PatientRegisterForm = () => {
 
       if (createPatient.status === 200) {
         setPatient(createPatient.data.newPatient);
+
         toast.success("Patient created successfully");
-        navigate("/admission-sheet-register-page");
+        navigateOutPatientPage(true);
+        if (IsNAvigateToOutPatientPage) {
+          setEnableAddOutPatient(true);
+          navigate("/outpatient-department");
+        } else {
+          navigate("/admission-sheet-register-page");
+        }
       } else if (createPatient.status === 400) {
         toast.error("User already exists");
       }

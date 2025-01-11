@@ -5,9 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
 export function InputNicFormForOutPatient({
   onClose,
+  setActiveTab,
 }: {
   onClose: () => void;
 }) {
@@ -15,6 +17,7 @@ export function InputNicFormForOutPatient({
   const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");
   const { setPatient, setPatientNic } = usePatientStore((state) => state);
+
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
