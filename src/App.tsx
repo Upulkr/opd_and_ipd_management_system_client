@@ -29,6 +29,8 @@ import PatientRegister from "./pages/PatientRegister";
 import Pharamacy from "./pages/Pharamacy";
 import AdmissionBookPage from "./pages/AdmiisionBookPage";
 import PatientProfilePage from "./pages/PatientProfilePAge";
+import AddOutPatientForm from "./pages/AddOutPatientFormPage";
+import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
 
 function App() {
   const Departments = [
@@ -134,6 +136,14 @@ function App() {
           <Route
             path="/patient-profile-page"
             element={<PatientProfilePage />}
+          />
+          <Route
+            path="/admission-outpatient-register-page/:id?"
+            element={<AddOutPatientForm />}
+          />
+          <Route
+            path="/individual-outpatientViewForms-page"
+            element={<IndividuslOutPatientForms />}
           />
         </Routes>
       </SidebarProvider>

@@ -43,11 +43,8 @@ export const PatientRegisterForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { patientNic, setPatient } = usePatientStore((state) => state);
-  const {
-    navigateOutPatientPage,
-    IsNAvigateToOutPatientPage,
-    setEnableAddOutPatient,
-  } = useFrontendComponentsStore((state) => state);
+  const { navigateOutPatientPage, IsNAvigateToOutPatientPage } =
+    useFrontendComponentsStore((state) => state);
   console.log("NIC", patientNic);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,8 +82,7 @@ export const PatientRegisterForm = () => {
         toast.success("Patient created successfully");
         navigateOutPatientPage(true);
         if (IsNAvigateToOutPatientPage) {
-          setEnableAddOutPatient(true);
-          navigate("/outpatient-department");
+          navigate("/admission-outpatient-register-page");
         } else {
           navigate("/admission-sheet-register-page");
         }

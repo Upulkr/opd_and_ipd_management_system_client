@@ -2,12 +2,11 @@ import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
-export function InputNicFormForOutPatient({
+export function InputNicFormForOutPatientView({
   onClose,
   setActiveTab,
 }: {
@@ -16,7 +15,7 @@ export function InputNicFormForOutPatient({
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");
-  const { setPatient, setPatientNic } = usePatientStore((state) => state);
+  const { setOutPatient } = usePatientStore((state) => state);
 
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -37,31 +36,31 @@ export function InputNicFormForOutPatient({
   const handleSubmit = async () => {
     setIsLoading(true);
 
-    console.log("NIC:", nic);
     if (!nic) {
-      setPatientNic(nic);
       toast.error("NIC is required");
       setIsLoading(false);
+      onClose();
       return;
-    } else {
-      setPatientNic(nic);
     }
 
     try {
-      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      const response = await axios.get(
+        `http://localhost:8000/outPatient/${nic}`
+      );
       if (response.status === 200) {
-        setPatient(response.data.Patient);
-        navigate("/admission-outpatient-register-page");
+        console.log("response", response.data.outPatient);
+        setOutPatient(response.data.outPatient);
+        navigate("/individual-outpatientViewForms-page");
 
         setIsLoading(false);
       }
     } catch (err: any) {
       if (err.response?.status === 404) {
-        toast.error("Patient not found, please register the patient");
-        const timeout = setTimeout(() => {
-          navigate("/patient-register-form");
+        toast.error("Patient not found, please register the Outpatient");
+        const timeOut = setTimeout(() => {
+          navigate("/admission-outpatient-register-page/:id?");
         }, 5000);
-        return () => clearTimeout(timeout);
+        return () => clearTimeout(timeOut);
       } else {
         console.error("Error fetching patient", err);
         toast.error(err.message || "Error fetching patient");
@@ -74,9 +73,8 @@ export function InputNicFormForOutPatient({
       className="bg-white p-6 rounded-lg shadow-lg"
       onClick={(e) => e.stopPropagation()}
     >
-      <ToastContainer />
       <h2 className="text-2xl font-semibold mb-4 text-center">
-        Input Patient NIC
+        Input Patient NIC Number
       </h2>
 
       <InputOTP maxLength={14} value={nic} onChange={(value) => setNic(value)}>
@@ -112,4 +110,4 @@ export function InputNicFormForOutPatient({
   );
 }
 
-export default InputNicFormForOutPatient;
+export default InputNicFormForOutPatientView;

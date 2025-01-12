@@ -25,7 +25,7 @@ export function TodaysPatients({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today's Patients</CardTitle>
+        <CardTitle>{`Today's channeled Patients ${new Date().toLocaleDateString()}`}</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>

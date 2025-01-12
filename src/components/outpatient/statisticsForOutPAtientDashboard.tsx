@@ -3,6 +3,10 @@ import { BedDouble, Search, UserCheck, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import { usePatientStore } from "@/stores/usePatientStore";
 
 // interface StatisticsData {
 //   totalPatients: number;
@@ -12,21 +16,44 @@ import { Button } from "../ui/button";
 // }
 interface StatisticsProps {
   numberOfTodayOutPatients: number;
+  setShowNicInput: (show: boolean) => void;
+  setShowNicInputForView: (show: boolean) => void;
 }
 
 export default function Statistics({
   numberOfTodayOutPatients,
+  setShowNicInput,
+  setShowNicInputForView,
 }: StatisticsProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const handleSearch = () => {
-    // In a real application, this would trigger a search in your patient database
-    console.log("Searching for:", searchTerm);
-    // You would typically update state here or navigate to a search results page
+  const [nic, setNic] = useState<string>("");
+  const [isSearcing, setIsSearching] = useState(false);
+  const navigate = useNavigate();
+  const { setPatient, setOutPatient } = usePatientStore((state) => state);
+  const patientProfileHandler = async () => {
+    try {
+      setIsSearching(true);
+      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      if (response.status === 200) {
+        setPatient(response.data.Patient);
+        setIsSearching(false);
+        toast.success("Patient found successfully");
+        navigate(`/patient-profile-page`);
+      }
+    } catch (error: any) {
+      if (error.status === 500) {
+        setIsSearching(false);
+        toast.error("Patient not found");
+        return;
+      } else {
+        setIsSearching(false);
+        console.log("Error fetching patient", error);
+      }
+    }
   };
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
+        <ToastContainer />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Patient Search</CardTitle>
           <Search className="h-4 w-4 text-muted-foreground" />
@@ -36,20 +63,25 @@ export default function Statistics({
             <Input
               type="text"
               placeholder="Search patients..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={nic}
+              onChange={(e) => setNic(e.target.value)}
             />
-            <Button onClick={handleSearch}>Search</Button>
+            <Button onClick={patientProfileHandler}>Search</Button>
           </div>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Patients Scheduled Today
+            Out Patient Form
           </CardTitle>
           <UserPlus className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
+        <CardContent>
+          <Button className="w-full mt-4" onClick={() => setShowNicInput(true)}>
+            Add New Out Patient
+          </Button>
+        </CardContent>
         <CardContent>
           {/* <div className="text-2xl font-bold">
             {data.patientsScheduledToday}
@@ -69,11 +101,27 @@ export default function Statistics({
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Admitted to IPD</CardTitle>
-          <BedDouble className="h-4 w-4 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">
+            Out Patient Form
+          </CardTitle>
+          <UserPlus className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          {/* <div className="text-2xl font-bold">{data.admittedToIPD}</div> */}
+          <Button
+            className="w-full mt-4"
+            onClick={() => {
+              setShowNicInputForView(true);
+              setPatient([]);
+              setOutPatient([]);
+            }}
+          >
+            View OutPatient Form
+          </Button>
+        </CardContent>
+        <CardContent>
+          {/* <div className="text-2xl font-bold">
+            {data.patientsScheduledToday}
+          </div> */}
         </CardContent>
       </Card>
     </div>

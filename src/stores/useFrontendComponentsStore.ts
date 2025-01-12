@@ -2,10 +2,10 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type State = {
+  IsNAvigateToOutPatientPage: boolean;
   showBhtInput: boolean;
   enableUpdate: boolean;
-  enableAddOutPatient: boolean;
-  IsNAvigateToOutPatientPage: boolean;
+  enableAddOutPatient: null;
 };
 
 export type Actions = {
@@ -13,7 +13,6 @@ export type Actions = {
 
   setEnableUpdating: (value: boolean) => void;
   navigateOutPatientPage: (value: boolean) => void;
-  setEnableAddOutPatient: (value: boolean) => void;
 };
 
 export const useFrontendComponentsStore = create<State & Actions>()(
@@ -22,13 +21,12 @@ export const useFrontendComponentsStore = create<State & Actions>()(
       showBhtInput: false,
       enableUpdate: false,
       IsNAvigateToOutPatientPage: false,
-      enableAddOutPatient: false,
+      enableAddOutPatient: null,
       setShowBhtInput: () =>
         set((state) => ({ showBhtInput: !state.showBhtInput })),
       setEnableUpdating: (value) => set({ enableUpdate: value }),
       navigateOutPatientPage: (value) =>
         set({ IsNAvigateToOutPatientPage: value }),
-      setEnableAddOutPatient: (value) => set({ enableAddOutPatient: value }),
     }),
 
     { name: "frontend-components-store" }
