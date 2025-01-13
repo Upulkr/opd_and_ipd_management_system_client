@@ -1,32 +1,36 @@
-import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
 
-export function SearchDrugs() {
-  const [searchQuery, setSearchQuery] = useState("");
+interface Drug {
+  drugId: number;
+  drugName: string;
+  unit: string;
+  totalQuantity: number;
+  usedQuantity: number;
+  remainingQuantity: number;
+  expiryDate: Date;
+}
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Implement search functionality here
-    console.log("Searching for:", searchQuery);
+export function SearchDrugs({
+  drugs,
+  setSearchedDrug,
+}: {
+  drugs: Drug[];
+  setSearchedDrug: (drugs: Drug[]) => void;
+}) {
+  const handleSearch = (e: string) => {
+    const searchedDrugs = drugs.filter((drug) =>
+      drug.drugName.toLowerCase().includes(e.toLowerCase())
+    );
+    setSearchedDrug(searchedDrugs);
   };
 
   return (
-    <form
-      onSubmit={handleSearch}
-      className="flex w-full max-w-sm items-center space-x-2"
-    >
+    <div className="flex items-center">
       <Input
         type="text"
         placeholder="Search drugs..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => handleSearch(e.target.value)}
       />
-      <Button type="submit" size="icon">
-        <Search className="h-4 w-4" />
-        <span className="sr-only">Search</span>
-      </Button>
-    </form>
+    </div>
   );
 }

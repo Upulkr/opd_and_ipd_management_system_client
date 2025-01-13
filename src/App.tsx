@@ -31,6 +31,8 @@ import AdmissionBookPage from "./pages/AdmiisionBookPage";
 import PatientProfilePage from "./pages/PatientProfilePAge";
 import AddOutPatientForm from "./pages/AddOutPatientFormPage";
 import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
+import { AddNewDrugFormpage } from "./pages/AddNewDrugFormpage";
+import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
 
 function App() {
   const Departments = [
@@ -144,6 +146,14 @@ function App() {
           <Route
             path="/individual-outpatientViewForms-page"
             element={<IndividuslOutPatientForms />}
+          />
+          <Route
+            path="/add-new-drug-page/:drugId?"
+            element={<AddNewDrugFormpage />}
+          />
+          <Route
+            path="/drug-allocating-to-wards"
+            element={<DrugsAllocatingToWardPAge />}
           />
         </Routes>
       </SidebarProvider>
