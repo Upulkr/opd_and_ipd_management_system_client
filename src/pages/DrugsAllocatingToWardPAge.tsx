@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
 import { useDrugsStore } from "@/stores/useDrugsStore";
+import axios from "axios";
 
 const wards = [
   "Pediatric Ward",
@@ -30,16 +31,35 @@ const wards = [
   "General Ward",
 ];
 
-const units = ["mg", "g", "ml", "tablets", "capsules"];
+const units = [
+  "ml",
+  "L",
+  "mg",
+  "g",
+  "kg",
+  "mcg",
+  "tablet",
+  "capsule",
+  "ampule",
+  "vial",
+  "suppository",
+  "patch",
+  "drop",
+  "spray",
+  "unit",
+  "iu",
+];
 
 type Allocation = {
   drugId: number;
   drugName: string;
-  ward: string;
+  wardName: string;
   //   amount: number;
-  quantity: number;
+  totalQuantity: number;
   unit: string;
   dateGiven: Date;
+  usedQuantity: number;
+  createdAt: Date;
 };
 
 export default function DrugAllocation() {
@@ -47,7 +67,6 @@ export default function DrugAllocation() {
   const [allocations, setAllocations] = useState<Allocation[]>([]);
   const [selectedDrug, setSelectedDrug] = useState<string>("");
   const [selectedWard, setSelectedWard] = useState<string>("");
-  //   const [amount, setAmount] = useState<string>("");
   const [quantity, setQuantity] = useState<string>("");
   const [selectedUnit, setSelectedUnit] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -58,29 +77,40 @@ export default function DrugAllocation() {
   const filteredDrugs = drugs.filter((drug) =>
     drug.drugName.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleAllocate = () => {
+  const handleAllocate = async () => {
     if (selectedDrug && selectedWard && quantity && selectedUnit) {
       const drug = drugs.find((d) => d.drugId.toString() === selectedDrug);
       if (drug) {
-        setAllocations([
-          ...allocations,
-          {
+        try {
+          await axios.post("http://localhost:8000/drugs/createdrugallocation", {
             drugId: drug.drugId,
-
             drugName: drug.drugName,
-            ward: selectedWard,
-            quantity: drug.totalQuantity - parseFloat(quantity),
+            totalQuantity: drug.totalQuantity - parseFloat(quantity),
+            usedQuantity: 0,
+            wardName: selectedWard,
             unit: selectedUnit,
-            dateGiven: new Date(), // Current date
-          },
-        ]);
+          });
+        } catch (error) {
+          console.error("Error allocating drug:", error);
+        }
+
         setSelectedDrug("");
         setSelectedWard("");
-        // setAmount("");
         setQuantity("");
         setSelectedUnit("");
       }
+    }
+  };
+
+  const getAllocationByWard = async (wardName: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/drugs/getdrugallocationbywardname/${wardName}`
+      );
+
+      setAllocations(response.data.allocations);
+    } catch (error) {
+      console.error("Error fetching allocations:", error);
     }
   };
 
@@ -89,12 +119,7 @@ export default function DrugAllocation() {
       <h1 className="text-2xl font-bold mb-4">Drug Allocation</h1>
 
       <div className="flex flex-wrap gap-4 mb-4">
-        <div className="relative">
-          {/* <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-            size={20}
-          /> */}
-        </div>
+        <div className="relative"></div>
         <Select value={selectedDrug} onValueChange={setSelectedDrug}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select a drug" />
@@ -128,14 +153,6 @@ export default function DrugAllocation() {
           </SelectContent>
         </Select>
 
-        {/* <Input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          className="w-[120px]"
-        /> */}
-
         <Input
           type="number"
           placeholder="Quantity"
@@ -164,17 +181,23 @@ export default function DrugAllocation() {
         {wards.map((ward) => (
           <Card
             key={ward}
-            className="cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => setSelectedWardForDetails(ward)}
+            className={`cursor-pointer hover:shadow-lg transition-shadow ${
+              selectedWardForDetails === ward ? "bg-blue-100" : ""
+            }`}
+            onClick={() => {
+              setSelectedWardForDetails(ward);
+              getAllocationByWard(ward);
+            }}
           >
             <CardHeader>
               <CardTitle>{ward}</CardTitle>
             </CardHeader>
-            <CardContent>
+            {/* <CardContent>
               <p>
-                {allocations.filter((a) => a.ward === ward).length} allocations
+                {allocations.filter((a) => a.wardName === ward).length}{" "}
+                allocations
               </p>
-            </CardContent>
+            </CardContent> */}
           </Card>
         ))}
       </div>
@@ -189,28 +212,49 @@ export default function DrugAllocation() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Drug Name</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Quantity</TableHead>
                   <TableHead>Unit</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Used Quantity</TableHead>
+
                   <TableHead>Date Given</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {allocations
-                  .filter(
-                    (allocation) => allocation.ward === selectedWardForDetails
-                  )
-                  .map((allocation, index) => (
-                    <TableRow key={`${allocation.drugId}-${index}`}>
-                      <TableCell>{allocation.drugName}</TableCell>
-                      {/* <TableCell>{allocation.amount}</TableCell> */}
-                      <TableCell>{allocation.quantity}</TableCell>
-                      <TableCell>{allocation.unit}</TableCell>
-                      <TableCell>
-                        {allocation.dateGiven.toLocaleDateString()}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                {allocations.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center">
+                      No allocations found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  allocations
+                    .filter(
+                      (allocation) =>
+                        allocation.wardName === selectedWardForDetails
+                    )
+                    .map((allocation, index) => (
+                      <TableRow key={`${allocation.drugId}-${index}`}>
+                        <TableCell>{allocation.drugName}</TableCell>
+                        <TableCell>{allocation.unit}</TableCell>
+                        <TableCell>{allocation.totalQuantity}</TableCell>
+                        <TableCell>{allocation.usedQuantity}</TableCell>
+                        <TableCell>
+                          {new Date(allocation.createdAt).toLocaleString(
+                            "en-US",
+                            {
+                              timeZone: "Asia/Colombo",
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

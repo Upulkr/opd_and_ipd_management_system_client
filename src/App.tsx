@@ -33,6 +33,8 @@ import AddOutPatientForm from "./pages/AddOutPatientFormPage";
 import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
 import { AddNewDrugFormpage } from "./pages/AddNewDrugFormpage";
 import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
+import AddClininicFormpage from "./pages/AddClininicFormpage";
+import ClinincAssignPAge from "./pages/clinincAssignPAge";
 
 function App() {
   const Departments = [
@@ -155,6 +157,8 @@ function App() {
             path="/drug-allocating-to-wards"
             element={<DrugsAllocatingToWardPAge />}
           />
+          <Route path="/create-new-clinic" element={<AddClininicFormpage />} />
+          <Route path="/clinic-assign" element={<ClinincAssignPAge />} />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>

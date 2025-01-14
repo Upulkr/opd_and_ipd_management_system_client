@@ -7,77 +7,60 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-
-const appointments = [
-  {
-    id: 1,
-    time: "09:00 AM",
-    patient: "John Doe",
-    type: "Check-up",
-    phoneNumber: "1234567890",
-    nic: "ABC123456",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    time: "10:30 AM",
-    patient: "Jane Smith",
-    type: "Follow-up",
-    phoneNumber: "0987654321",
-    nic: "XYZ789012",
-    status: "Completed",
-  },
-  {
-    id: 3,
-    time: "02:00 PM",
-    patient: "Bob Johnson",
-    type: "Consultation",
-    phoneNumber: "5678901234",
-    nic: "PQR345678",
-    status: "Pending",
-  },
-];
+import { useClinincStore } from "@/stores/useClinicStore";
 
 export default function AppointmentsOverview() {
+  const { clinincs } = useClinincStore((state) => state);
+  const sheduledClinincs = clinincs.filter((clinic) => {
+    const today = new Date().toLocaleDateString("en-CA"); // 'en-CA' ensures format 'YYYY-MM-DD'
+    const clinicDate = new Date(clinic.sheduledAt).toLocaleDateString("en-CA");
+    return clinicDate !== today;
+  });
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today's Appointments</CardTitle>
+        <CardTitle>Sheduled Clinincs</CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Time</TableHead>
-              <TableHead>Patient</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Phone Number</TableHead>
-              <TableHead>NIC</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Clininc Name</TableHead>
+              <TableHead>Doctor Name</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Sheduled At</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {appointments.map((appointment) => (
-              <TableRow key={appointment.id}>
-                <TableCell>{appointment.time}</TableCell>
-                <TableCell>{appointment.patient}</TableCell>
-                <TableCell>{appointment.type}</TableCell>
-                <TableCell>{appointment.phoneNumber}</TableCell>
-                <TableCell>{appointment.nic}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      appointment.status === "Completed"
-                        ? "default"
-                        : "secondary"
-                    }
-                  >
-                    {appointment.status}
-                  </Badge>
+            {sheduledClinincs.length > 0 ? (
+              sheduledClinincs.map((clininc, i) => (
+                <TableRow key={clininc.id}>
+                  <TableCell>{i + 1}</TableCell>
+                  <TableCell>{clininc.name}</TableCell>
+                  <TableCell>{clininc.doctorName}</TableCell>
+                  <TableCell>{clininc.location}</TableCell>
+                  <TableCell>
+                    {new Date(clininc.sheduledAt).toLocaleString("en-US", {
+                      timeZone: "Asia/Colombo",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} style={{ textAlign: "center" }}>
+                  No Scheduled Appointments
                 </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </CardContent>
