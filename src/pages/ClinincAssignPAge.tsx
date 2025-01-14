@@ -1,7 +1,13 @@
 /* Previous imports remain the same */
-import React, { useState, useEffect } from "react";
-import { Search, X, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,96 +16,124 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Card, CardContent } from "@/components/ui/card";
+import { useClinincStore } from "@/stores/useClinicStore";
+import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
+import debounce from "lodash.debounce";
+import { MessageSquare, Search, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
 
 // Previous data and state management code remains the same...
-const clinics = [
-  {
-    id: 1,
-    name: "BackPain",
-    doctorName: "Dr. Smith",
-    location: "Room106",
-    sheduledAt: "2025-01-14T10:11:00.000Z",
-    patientCount: 15,
-  },
-  {
-    id: 2,
-    name: "Physio",
-    doctorName: "Dr. Johnson",
-    location: "Room107",
-    sheduledAt: "2025-01-14T11:00:00.000Z",
-    patientCount: 8,
-  },
-];
-
-const patients = [
-  {
-    id: 1,
-    name: "John Doe",
-    address: "123 Main St",
-    phone: "555-0123",
-    nic: "951234567V",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    address: "456 Oak Ave",
-    phone: "555-0456",
-    nic: "982345678V",
-  },
-  {
-    id: 3,
-    name: "Bob Wilson",
-    address: "789 Pine Rd",
-    phone: "555-0789",
-    nic: "957654321V",
-  },
-  {
-    id: 4,
-    name: "Alice Brown",
-    address: "321 Elm St",
-    phone: "555-0321",
-    nic: "986543210V",
-  },
-];
-
+interface Suggestion {
+  nic: string;
+  name: string;
+}
 export default function ClinicPage() {
   // Previous state and handlers remain the same...
+  const [loading, setLoading] = useState(false);
   const [selectedClinic, setSelectedClinic] = useState("");
   const [searchNic, setSearchNic] = useState("");
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [clinicsAssign, setClinicsAssign] = useState([]);
+  const { setPatient, patient: patients } = usePatientStore((state) => state);
+  const { clinincs } = useClinincStore((state) => state);
 
-  const fetchPatients = async () => {
-    const response = await axios.get(`http://localhost:8000/patient`);
-  };
-  useEffect(() => {
-    if (searchNic) {
-      const filtered = patients
-        .filter((patient) =>
-          patient.nic.toLowerCase().includes(searchNic.toLowerCase())
-        )
-        .map((patient) => ({
-          nic: patient.nic,
-          name: patient.name,
-        }));
-      setSuggestions(filtered);
-      setShowSuggestions(true);
-    } else {
-      setSuggestions([]);
-      setShowSuggestions(false);
+  const handlePatientAssign = async () => {
+    if (!selectedClinic || !searchNic) {
+      toast.error("Please select a clinic and patient");
+      return;
     }
-  }, [searchNic]);
+    try {
+      setLoading(true);
+      const response = await axios(`http://localhost:8000/clinicassigmnent`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: {
+          nic: searchNic,
+          clinicName: selectedClinic,
+          clinicId: clinincs.find((clinic) => clinic.name === selectedClinic)
+            ?.id,
+        },
+      });
+      if (response.status === 200) {
+        toast.success("Patient assigned successfully");
+      }
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      if (error.response?.status === 404) {
+        toast.error("Patient not found, please register the patient");
+      } else {
+        console.error("Error assigning patient", error);
+      }
+    }
+  };
 
-  const handleNicSelect = (nic) => {
+  function handleSendSMS(id: number): void {
+    throw new Error("Function not implemented.");
+  }
+  const getAllClinicAssigmentsForTable = useCallback(async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/clinicassigmnent/getAllClinicAssigmentsfortable`
+      );
+      if (response.status === 200) {
+        setClinicsAssign(response.data.clinicAssigments);
+      }
+    } catch (error) {
+      console.log("Error fetching patients", error);
+    }
+  }, []);
+
+  const fetchPatients = useCallback(async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/patient`);
+      if (response.status === 200) {
+        setPatient(response.data.Patients);
+      }
+    } catch (error) {
+      console.log("Error fetching patients", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPatients();
+    getAllClinicAssigmentsForTable();
+    // Fetch patients once when the component mounts
+  }, [fetchPatients, getAllClinicAssigmentsForTable]);
+
+  // Debounce logic for searchNic changes
+  const debouncedSearchNic = useCallback(
+    debounce((nic: string) => {
+      if (nic) {
+        const filtered = patients
+          .filter((patient) =>
+            patient.nic.toLowerCase().includes(nic.toLowerCase())
+          )
+          .map((patient) => ({
+            nic: patient.nic,
+            name: patient.name,
+          }));
+        setSuggestions(filtered);
+        setShowSuggestions(true);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300), // 300ms debounce time
+    [patients]
+  );
+
+  useEffect(() => {
+    debouncedSearchNic(searchNic);
+    return () => debouncedSearchNic.cancel(); // Cleanup debounce on unmount
+  }, [searchNic, debouncedSearchNic]);
+
+  const handleNicSelect = (nic: string) => {
     setSearchNic(nic);
     setShowSuggestions(false);
   };
@@ -110,13 +144,9 @@ export default function ClinicPage() {
     setShowSuggestions(false);
   };
 
-  const handleSendSMS = (clinicId) => {
-    // Implement your SMS sending logic here
-    console.log(`Sending SMS to all patients in clinic ${clinicId}`);
-  };
-
   return (
     <div className="container mx-auto p-4 space-y-6">
+      <ToastContainer />
       {/* Search section remains the same */}
       <Card className="p-6">
         <CardContent className="space-y-4">
@@ -162,15 +192,17 @@ export default function ClinicPage() {
                 <SelectValue placeholder="Select Clinic" />
               </SelectTrigger>
               <SelectContent>
-                {clinics.map((clinic) => (
-                  <SelectItem key={clinic.id} value={clinic.id.toString()}>
+                {clinincs.map((clinic) => (
+                  <SelectItem key={clinic.id} value={clinic.name}>
                     {clinic.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Button className="w-full md:w-auto">Assign Patient</Button>
+            <Button className="w-full md:w-auto" onClick={handlePatientAssign}>
+              {loading ? "Assigning..." : " Assign Patient"}
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -182,27 +214,45 @@ export default function ClinicPage() {
             <table className="w-full border-collapse">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-4 py-2 text-left border-b">Clinic Name</th>
-                  <th className="px-4 py-2 text-left border-b">Doctor</th>
-                  <th className="px-4 py-2 text-left border-b">Location</th>
+                  <th className="px-4 py-2 text-center border-b">
+                    Clinic Name
+                  </th>
+                  <th className="px-4 py-2 text-center border-b">Doctor</th>
+                  <th className="px-4 py-2 text-center border-b">Location</th>
                   <th className="px-4 py-2 text-right border-b">
                     No. of Patients
                   </th>
-                  <th className="px-4 py-2 text-left border-b">Time</th>
-                  <th className="px-4 py-2 text-right border-b">Actions</th>
+                  <th className="px-4 py-2 text-center border-b">
+                    Sheduled Time
+                  </th>
+                  <th className="px-4 py-2 text-center border-b">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {clinics.map((clinic) => (
+                {clinicsAssign?.map((clinic) => (
                   <tr key={clinic.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 border-b">{clinic.name}</td>
-                    <td className="px-4 py-2 border-b">{clinic.doctorName}</td>
-                    <td className="px-4 py-2 border-b">{clinic.location}</td>
-                    <td className="px-4 py-2 text-right border-b">
-                      {clinic.patientCount}
+                    <td className="px-4 py-2 border-b text-center">
+                      {clinic.clinicName}
                     </td>
-                    <td className="px-4 py-2 border-b">
-                      {new Date(clinic.sheduledAt).toLocaleTimeString()}
+                    <td className="px-4 py-2 border-b text-center">
+                      {clinic.doctorName}
+                    </td>
+                    <td className="px-4 py-2 border-b text-center">
+                      {clinic.location}
+                    </td>
+                    <td className="px-4 py-2 text-center border-b">
+                      {clinic.noofpatients}
+                    </td>
+                    <td className="px-4 py-2 border-b text-center">
+                      {new Date(clinic.sheduledAt).toLocaleString("en-US", {
+                        timeZone: "Asia/Colombo",
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
                     </td>
                     <td className="px-4 py-2 text-right border-b">
                       <div className="flex justify-end gap-2">
@@ -212,7 +262,7 @@ export default function ClinicPage() {
                               View Patients
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-3xl">
+                          {/* <DialogContent className="max-w-3xl">
                             <DialogHeader>
                               <DialogTitle>
                                 {clinic.name} - Patient Details
@@ -237,29 +287,30 @@ export default function ClinicPage() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {patients.map((patient) => (
-                                    <tr
-                                      key={patient.id}
-                                      className="hover:bg-gray-50"
-                                    >
-                                      <td className="px-4 py-2 border-b">
-                                        {patient.name}
-                                      </td>
-                                      <td className="px-4 py-2 border-b">
-                                        {patient.address}
-                                      </td>
-                                      <td className="px-4 py-2 border-b">
-                                        {patient.phone}
-                                      </td>
-                                      <td className="px-4 py-2 border-b">
-                                        {patient.nic}
-                                      </td>
-                                    </tr>
-                                  ))}
+                                  {patients &&
+                                    patients.map((patient) => (
+                                      <tr
+                                        key={patient.id}
+                                        className="hover:bg-gray-50"
+                                      >
+                                        <td className="px-4 py-2 border-b text-center">
+                                          {patient.name}
+                                        </td>
+                                        <td className="px-4 py-2 border-b text-center">
+                                          {patient.address}
+                                        </td>
+                                        <td className="px-4 py-2 border-b text-center">
+                                          {patient.phone}
+                                        </td>
+                                        <td className="px-4 py-2 border-b text-center">
+                                          {patient.nic}
+                                        </td>
+                                      </tr>
+                                    ))}
                                 </tbody>
                               </table>
                             </div>
-                          </DialogContent>
+                          </DialogContent> */}
                         </Dialog>
                         <Button
                           variant="outline"
@@ -282,3 +333,40 @@ export default function ClinicPage() {
     </div>
   );
 }
+
+//HERE IS HOW useEffect,useCallback,debounce work together
+
+// import React, { useState, useEffect, useCallback } from "react";
+// import debounce from "lodash.debounce";
+
+// const App = () => {
+//   const [searchTerm, setSearchTerm] = useState("");
+
+//   // Debounce the API call
+//   const fetchResults = debounce((term) => {
+//     console.log("Fetching results for:", term);
+//     // API call here
+//   }, 300);
+
+//   // Stable callback for useEffect
+//   const handleSearch = useCallback(
+//     (term) => {
+//       fetchResults(term);
+//     },
+//     [fetchResults]
+//   );
+
+//   useEffect(() => {
+//     if (searchTerm) {
+//       handleSearch(searchTerm);
+//     }
+//   }, [searchTerm, handleSearch]); // Reacts to searchTerm changes
+
+//   return (
+//     <input
+//       type="text"
+//       placeholder="Search..."
+//       onChange={(e) => setSearchTerm(e.target.value)}
+//     />
+//   );
+// };
