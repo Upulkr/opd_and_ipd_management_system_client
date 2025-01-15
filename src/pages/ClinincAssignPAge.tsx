@@ -25,10 +25,31 @@ import { MessageSquare, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
+interface SMSScheduleRequest {
+  phoneNumbers: string[];
+  message: string;
+  scheduleTime: string;
+  jobId: string;
+}
+
+interface SMSScheduleResponse {
+  message: string;
+  jobId: string;
+  scheduledTime: string;
+  recipientCount: number;
+}
 // Previous data and state management code remains the same...
 interface Suggestion {
   nic: string;
   name: string;
+}
+
+interface Patient {
+  id: string;
+  name: string;
+  phone: string;
+  city: string;
+  nic: string;
 }
 export default function ClinicPage() {
   // Previous state and handlers remain the same...
@@ -38,7 +59,8 @@ export default function ClinicPage() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [clinicsAssign, setClinicsAssign] = useState([]);
-  const [clinincPAtients, setClinincPAtients] = useState([]);
+  const [clinincPAtients, setClinincPAtients] = useState<Patient[]>([]);
+  const [smsPhoneNumbers, setSmsPhoneNumbers] = useState<string[]>([]);
   const { setPatient, patient: patients } = usePatientStore((state) => state);
   const { clinincs } = useClinincStore((state) => state);
 
@@ -93,9 +115,6 @@ export default function ClinicPage() {
     }
   };
 
-  function handleSendSMS(id: number): void {
-    throw new Error("Function not implemented.");
-  }
   const getAllClinicAssigmentsForTable = useCallback(async () => {
     try {
       const response = await axios.get(
@@ -162,6 +181,93 @@ export default function ClinicPage() {
     setSearchNic("");
     setSuggestions([]);
     setShowSuggestions(false);
+  };
+
+  const scheduleNewSMS = async (smsData: SMSScheduleRequest) => {
+    try {
+      const response = await axios.post<SMSScheduleResponse>(
+        "http://localhost:8000/sendsms/schedule-sms",
+        smsData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Handle Axios specific errors
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          throw new Error(
+            error.response.data.error || "Failed to schedule SMS"
+          );
+        } else if (error.request) {
+          // The request was made but no response was received
+          throw new Error("No response received from server");
+        } else {
+          // Something happened in setting up the request
+          throw new Error("Error setting up the request");
+        }
+      } else {
+        // Handle non-Axios errors
+        throw new Error("An unexpected error occurred");
+      }
+    }
+  };
+
+  // Example usage:
+  const scheduleSMS = async (
+    message: string,
+    sheduledAt: string | Date,
+    patientName: string,
+    location: string
+  ) => {
+    try {
+      console.log("clicking");
+      setLoading(true);
+
+      // Validate input type for `sheduledAt`
+      if (typeof sheduledAt !== "string" && !(sheduledAt instanceof Date)) {
+        throw new Error(
+          `Invalid type for sheduledAt. Expected a string or Date, received: ${typeof sheduledAt}`
+        );
+      }
+
+      // // Ensure `sheduledAt` is a valid Date object
+      // const scheduleDate = new Date(sheduledAt);
+      // // if (isNaN(scheduleDate.getTime())) {
+      // //   throw new Error(
+      // //     `Invalid date format for sheduledAt: ${JSON.stringify(sheduledAt)}`
+      // //   );
+      // // }
+
+      // // Deduct one day from the scheduled date
+      // const adjustedScheduleTime = new Date(scheduleDate);
+      // adjustedScheduleTime.setDate(adjustedScheduleTime.getDate() - 1);
+
+      const smsData = {
+        phoneNumbers: ["+94720979028"],
+        message: `Hello ${patientName}, your ${message} clinic is scheduled at ${sheduledAt} in ${location}, please be on time`,
+        scheduleTime: new Date(Date.now()).toISOString(),
+        jobId: `sms-${Date.now()}`, // Generate unique job ID
+      };
+
+      const result = await scheduleNewSMS(smsData);
+      setSmsPhoneNumbers([]);
+      console.log("SMS Scheduled successfully:", result);
+    } catch (error) {
+      setSmsPhoneNumbers([]);
+      console.error(
+        "Failed to schedule SMS:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -249,8 +355,8 @@ export default function ClinicPage() {
                 </tr>
               </thead>
               <tbody>
-                {clinicsAssign?.map((clinic: any) => (
-                  <tr key={clinic.id} className="hover:bg-gray-50">
+                {clinicsAssign?.map((clinic: any, i) => (
+                  <tr key={i} className="hover:bg-gray-50">
                     <td className="px-4 py-2 border-b text-center">
                       {clinic.clinicName}
                     </td>
@@ -316,7 +422,7 @@ export default function ClinicPage() {
                                 </thead>
                                 <tbody>
                                   {clinincPAtients.length > 0 &&
-                                    clinincPAtients.map((patient) => (
+                                    clinincPAtients.map((patient: Patient) => (
                                       <tr
                                         key={patient.id}
                                         className="hover:bg-gray-50"
@@ -343,11 +449,22 @@ export default function ClinicPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleSendSMS(clinic.id)}
+                          onClick={() => {
+                            const phoneNumbers = clinincPAtients.map(
+                              (patient) => patient.phone
+                            );
+                            setSmsPhoneNumbers(phoneNumbers);
+                            scheduleSMS(
+                              clinic.clinicName,
+                              clinic.doctorName,
+                              clinic.sheduledAt,
+                              clinic.location
+                            );
+                          }}
                           className="inline-flex items-center gap-2"
                         >
                           <MessageSquare className="h-4 w-4" />
-                          Send SMS
+                          {loading ? "Sending SMS..." : "Send SMS"}
                         </Button>
                       </div>
                     </td>
