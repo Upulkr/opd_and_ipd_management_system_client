@@ -19,6 +19,7 @@ import {
 import { useClinincStore } from "@/stores/useClinicStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
+import { set } from "date-fns";
 import debounce from "lodash.debounce";
 import { MessageSquare, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -37,8 +38,27 @@ export default function ClinicPage() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [clinicsAssign, setClinicsAssign] = useState([]);
+  const [clinincPAtients, setClinincPAtients] = useState([]);
   const { setPatient, patient: patients } = usePatientStore((state) => state);
   const { clinincs } = useClinincStore((state) => state);
+
+  const handlegetPatientDetailsByClinicName = async (clinicName: string) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `http://localhost:8000/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`
+      );
+
+      if (response.status === 200) {
+        setLoading(false);
+        setClinincPAtients(response.data.patientDetails);
+        console.log("fetched patient details");
+      }
+    } catch (error: any) {
+      setLoading(false);
+      console.error("Error fetching patient details", error);
+    }
+  };
 
   const handlePatientAssign = async () => {
     if (!selectedClinic || !searchNic) {
@@ -229,7 +249,7 @@ export default function ClinicPage() {
                 </tr>
               </thead>
               <tbody>
-                {clinicsAssign?.map((clinic) => (
+                {clinicsAssign?.map((clinic: any) => (
                   <tr key={clinic.id} className="hover:bg-gray-50">
                     <td className="px-4 py-2 border-b text-center">
                       {clinic.clinicName}
@@ -258,11 +278,19 @@ export default function ClinicPage() {
                       <div className="flex justify-end gap-2">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button variant="outline" size="sm">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                handlegetPatientDetailsByClinicName(
+                                  clinic.clinicName
+                                )
+                              }
+                            >
                               View Patients
                             </Button>
                           </DialogTrigger>
-                          {/* <DialogContent className="max-w-3xl">
+                          <DialogContent className="max-w-3xl">
                             <DialogHeader>
                               <DialogTitle>
                                 {clinic.name} - Patient Details
@@ -287,8 +315,8 @@ export default function ClinicPage() {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {patients &&
-                                    patients.map((patient) => (
+                                  {clinincPAtients.length > 0 &&
+                                    clinincPAtients.map((patient) => (
                                       <tr
                                         key={patient.id}
                                         className="hover:bg-gray-50"
@@ -297,10 +325,10 @@ export default function ClinicPage() {
                                           {patient.name}
                                         </td>
                                         <td className="px-4 py-2 border-b text-center">
-                                          {patient.address}
-                                        </td>
-                                        <td className="px-4 py-2 border-b text-center">
                                           {patient.phone}
+                                        </td>{" "}
+                                        <td className="px-4 py-2 border-b text-center">
+                                          {patient.city}
                                         </td>
                                         <td className="px-4 py-2 border-b text-center">
                                           {patient.nic}
@@ -310,7 +338,7 @@ export default function ClinicPage() {
                                 </tbody>
                               </table>
                             </div>
-                          </DialogContent> */}
+                          </DialogContent>
                         </Dialog>
                         <Button
                           variant="outline"
