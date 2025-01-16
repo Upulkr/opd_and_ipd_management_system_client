@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -48,6 +48,8 @@ const formSchema = z.object({
 
 export default function NewClinicForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [customClinicName, setCustomClinicName] = useState<string | null>(null);
+  const [predefinedClinics, setPrediufinedClinicsName] = useState([]);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -59,6 +61,19 @@ export default function NewClinicForm() {
     },
   });
 
+  const getAllclincsName = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/clinic");
+      if (response.status === 200) {
+        setPrediufinedClinicsName(response.data.clinics);
+      }
+    } catch (error) {
+      console.error("Error fetching clinics:", error);
+    }
+  };
+  useEffect(() => {
+    getAllclincsName();
+  }, []);
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
@@ -76,7 +91,7 @@ export default function NewClinicForm() {
         setTimeout(() => {
           navigate("/clinic");
           toast.dismiss();
-        }, 5000);
+        }, 3000);
       }
     } catch (error: any) {
       setIsLoading(false);
@@ -103,12 +118,45 @@ export default function NewClinicForm() {
                 <FormItem>
                   <FormLabel>Clinic Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter clinic name" {...field} />
+                    <div className="space-y-2">
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          setCustomClinicName(""); // Clear custom input when dropdown is used
+                        }}
+                        disabled={customClinicName?.length > 0} // Disable dropdown if custom name is entered
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a clinic name" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {predefinedClinics?.map((clinic) => (
+                            <SelectItem key={clinic} value={clinic.name}>
+                              {clinic.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        placeholder="Or enter a custom clinic name"
+                        value={customClinicName}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setCustomClinicName(value);
+                          field.onChange(value); // Update form value with custom name
+                        }}
+                        disabled={
+                          !!field.value &&
+                          predefinedClinics.some((c) => c.name === field.value)
+                        } // Disable input if dropdown is selected
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="doctorName"

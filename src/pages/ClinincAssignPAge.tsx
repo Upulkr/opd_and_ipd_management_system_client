@@ -64,6 +64,8 @@ export default function ClinicPage() {
   const { setPatient, patient: patients } = usePatientStore((state) => state);
   const { clinincs } = useClinincStore((state) => state);
 
+  console.log("clinincs", clinincs);
+  console.log("selectedClinic", selectedClinic);
   const handlegetPatientDetailsByClinicName = async (clinicName: string) => {
     try {
       setLoading(true);
@@ -83,6 +85,10 @@ export default function ClinicPage() {
   };
 
   const handlePatientAssign = async () => {
+    const clinicId = selectedClinic
+      ? clinincs.filter((clinic) => clinic.name === selectedClinic)
+      : [];
+    console.log("clinicId+++++++++++", clinicId?.[0]?.id);
     if (!selectedClinic || !searchNic) {
       toast.error("Please select a clinic and patient");
       return;
