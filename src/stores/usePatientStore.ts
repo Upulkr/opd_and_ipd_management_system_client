@@ -4,6 +4,7 @@ import { persist } from "zustand/middleware";
 interface Patient {
   id?: string;
   nic: string;
+  city?: string;
   name: string;
   gender: string;
   phone: string;

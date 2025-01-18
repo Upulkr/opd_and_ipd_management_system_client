@@ -16,11 +16,6 @@ const stats = [
     value: 128,
     description: "visited this month",
   },
-  {
-    title: "Average Distance",
-    value: "4.7 km",
-    description: "per visit",
-  },
 ];
 
 export const ClinicStats = () => {
@@ -28,6 +23,12 @@ export const ClinicStats = () => {
     <>
       {stats.map((stat) => (
         <Card key={stat.title}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Add A New mobile clininc
+            </CardTitle>
+          </CardHeader>
+
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
           </CardHeader>
