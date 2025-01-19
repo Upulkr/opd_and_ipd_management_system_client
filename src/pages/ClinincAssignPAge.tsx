@@ -85,10 +85,6 @@ export default function ClinicPage() {
   };
 
   const handlePatientAssign = async () => {
-    const clinicId = selectedClinic
-      ? clinincs.filter((clinic) => clinic.name === selectedClinic)
-      : [];
-    console.log("clinicId+++++++++++", clinicId?.[0]?.id);
     if (!selectedClinic || !searchNic) {
       toast.error("Please select a clinic and patient");
       return;

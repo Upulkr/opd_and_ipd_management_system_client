@@ -88,10 +88,11 @@ export default function NewClinicForm() {
         setIsLoading(false);
         toast.success("New clinic created successfully");
         form.reset();
-        setTimeout(() => {
+        const timeOut = setTimeout(() => {
           navigate("/clinic");
           toast.dismiss();
         }, 3000);
+        return () => clearTimeout(timeOut);
       }
     } catch (error: any) {
       setIsLoading(false);
