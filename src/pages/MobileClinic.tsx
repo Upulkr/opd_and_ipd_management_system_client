@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 
 import { PatientTable } from "@/components/mobile-clinic/patient-table";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { format, set } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { useClinincStore } from "@/stores/useClinicStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import {
@@ -31,6 +32,7 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 import axios from "axios";
+import { format } from "date-fns";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -47,9 +49,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import { stat } from "fs";
 
 const visitsTrendData = [
   { name: "Jan", visits: 65 },
@@ -70,31 +69,13 @@ const patientDemographicsData = [
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-const recentVisits = [
-  { patientName: "Maria Garcia", date: "2023-06-15", status: "Completed" },
-  { patientName: "John Smith", date: "2023-06-16", status: "Scheduled" },
-  { patientName: "Emma Johnson", date: "2023-06-14", status: "Completed" },
-  { patientName: "Robert Lee", date: "2023-06-17", status: "Pending" },
-  { patientName: "Sophia Brown", date: "2023-06-15", status: "Completed" },
-];
-
-const upcomingVisits = [
-  { patientName: "Alice Johnson", date: "2023-06-18", time: "10:00 AM" },
-  { patientName: "David Lee", date: "2023-06-18", time: "2:30 PM" },
-  { patientName: "Sarah Williams", date: "2023-06-19", time: "11:15 AM" },
-  { patientName: "Michael Brown", date: "2023-06-19", time: "3:45 PM" },
-  { patientName: "Emily Davis", date: "2023-06-20", time: "9:30 AM" },
-];
 interface Suggestion {
   nic: string;
   name: string;
 }
-export default function MobileClininic() {
-  const {
-    setPatient,
-    patient: patients,
-    setPatientNic,
-  } = usePatientStore((state) => state);
+export const MobileClinic = () => {
+  const { setPatientNic } = usePatientStore((state) => state);
+  const [patients, setPatients] = useState<{ nic: string; name: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchNic, setSearchNic] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -157,7 +138,7 @@ export default function MobileClininic() {
     try {
       const response = await axios.get(`http://localhost:8000/patient`);
       if (response.status === 200) {
-        setPatient(response.data.Patients);
+        setPatients(response.data.Patients);
       }
     } catch (error) {
       console.log("Error fetching patients", error);
@@ -167,16 +148,19 @@ export default function MobileClininic() {
   const getPAtientByNic = patients.filter(
     (patient) => patient.nic === searchNic
   );
+
   const mobileClinincsForTable = useCallback(async () => {
     try {
       const res = await axios.get(
         `http://localhost:8000/mobileclinic/sheduled`
       );
       if (res.status === 200) {
-        // Ensure `sheduledMobileclinics` is defined and `patients` is valid
-
-        // Update state correctly
-        setSheduledMobileclinics(res.data.mobileclinicAssigments);
+        const mobileclinicAssigments = res.data.mobileclinicAssigments;
+        if (mobileclinicAssigments) {
+          setSheduledMobileclinics(mobileclinicAssigments);
+        } else {
+          setSheduledMobileclinics([]); // default value
+        }
       }
     } catch (error: any) {
       // Correct error handling
@@ -192,7 +176,7 @@ export default function MobileClininic() {
     mobileClinincsForTable();
     // getAllClinicAssigmentsForTable();
     // Fetch patients once when the component mounts
-  }, [fetchPatients, mobileClinincsForTable]);
+  }, []);
 
   // Debounce logic for searchNic changes
   const debouncedSearchNic = useCallback(
@@ -269,7 +253,7 @@ export default function MobileClininic() {
       }
     }
   };
-  console.log("sheduledMobileclinics", sheduledMobileclinics);
+
   return (
     <div className="min-h-screen bg-gray-50 p-6 w-full">
       <ToastContainer />
@@ -614,8 +598,10 @@ export default function MobileClininic() {
         </div>
 
         {/* Patient Table */}
-        <PatientTable />
+        <PatientTable sheduledMobileclinics={sheduledMobileclinics} />
       </div>
     </div>
   );
-}
+};
+
+export default MobileClinic;

@@ -9,43 +9,44 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
+import axios from "axios";
+import { usePatientStore } from "@/stores/usePatientStore";
+import { useNavigate } from "react-router-dom";
 
-const patients = [
-  {
-    name: "John Doe",
-    clinicType: "General Checkup",
-    location: "123 Main St, Cityville",
-    distance: "5.2 km",
-    phoneNumber: "(555) 123-4567",
-    status: "completed",
-  },
-  {
-    name: "Jane Smith",
-    clinicType: "Physiotherapy",
-    location: "456 Elm St, Townsburg",
-    distance: "3.8 km",
-    phoneNumber: "(555) 987-6543",
-    status: "pending",
-  },
-  {
-    name: "Bob Johnson",
-    clinicType: "Vaccination",
-    location: "789 Oak Ave, Villageton",
-    distance: "7.1 km",
-    phoneNumber: "(555) 246-8135",
-    status: "completed",
-  },
-  {
-    name: "Alice Brown",
-    clinicType: "Blood Test",
-    location: "321 Pine Rd, Hamletville",
-    distance: "2.5 km",
-    phoneNumber: "(555) 369-2580",
-    status: "pending",
-  },
-];
+interface Patient {
+  name: string;
+  phone: string;
+}
 
-export function PatientTable() {
+interface ScheduledMobileClinic {
+  Patient: Patient;
+  clinicName: string;
+  sheduledAt: string;
+  location: string;
+  distance: string;
+  status: string;
+  nic: string;
+}
+
+interface PatientTableProps {
+  sheduledMobileclinics: ScheduledMobileClinic[];
+}
+
+export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
+  const navigate = useNavigate();
+  const { setPatient } = usePatientStore((state) => state);
+
+  const getPatientProfile = async (nic: string) => {
+    try {
+      setPatient([]);
+      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+
+      setPatient(response.data.Patient);
+      navigate(`/patient-profile-page`);
+    } catch (error: any) {
+      console.log("Error fetching patient", error);
+    }
+  };
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -53,21 +54,35 @@ export function PatientTable() {
           <TableRow>
             <TableHead>Patient Name</TableHead>
             <TableHead>Clinic Type</TableHead>
+            <TableHead>Sheduled At</TableHead>
             <TableHead>Location</TableHead>
-            <TableHead>Distance</TableHead>
+            <TableHead>View On Map</TableHead>
             <TableHead>Phone Number</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {patients.map((patient) => (
-            <TableRow key={patient.name}>
-              <TableCell className="font-medium">{patient.name}</TableCell>
-              <TableCell>{patient.clinicType}</TableCell>
+          {sheduledMobileclinics.map((patient, i: number) => (
+            <TableRow key={i}>
+              <TableCell className="font-medium">
+                {patient.Patient.name}
+              </TableCell>
+              <TableCell>{patient.clinicName}</TableCell>
+              <TableCell>
+                {new Date(patient.sheduledAt).toLocaleString("en-US", {
+                  timeZone: "Asia/Colombo",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: true,
+                })}
+              </TableCell>
               <TableCell>{patient.location}</TableCell>
               <TableCell>{patient.distance}</TableCell>
-              <TableCell>{patient.phoneNumber}</TableCell>
+              <TableCell>{patient.Patient.phone}</TableCell>
               <TableCell>
                 <Badge
                   variant={
@@ -83,7 +98,13 @@ export function PatientTable() {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Button variant="ghost" size="sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    getPatientProfile(patient.nic);
+                  }}
+                >
                   <Eye className="mr-2 h-4 w-4" />
                   View Profile
                 </Button>

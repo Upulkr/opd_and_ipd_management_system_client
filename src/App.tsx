@@ -28,13 +28,13 @@ import MobileClinic from "./pages/MobileClinic";
 import PatientRegister from "./pages/PatientRegister";
 import Pharamacy from "./pages/Pharamacy";
 import AdmissionBookPage from "./pages/AdmiisionBookPage";
-import PatientProfilePage from "./pages/PatientProfilePAge";
+import PatientProfilePage from "./pages/PatientProfilePage";
 import AddOutPatientForm from "./pages/AddOutPatientFormPage";
 import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
 import { AddNewDrugFormpage } from "./pages/AddNewDrugFormpage";
 import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
 import AddClininicFormpage from "./pages/AddClininicFormpage";
-import ClinincAssignPAge from "./pages/clinincAssignPAge";
+import ClinincAssignPAge from "./pages/ClinincAssignPAge";
 
 function App() {
   const Departments = [
