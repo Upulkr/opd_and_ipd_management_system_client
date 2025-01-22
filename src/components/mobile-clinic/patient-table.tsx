@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,7 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Eye } from "lucide-react";
 import axios from "axios";
 import { usePatientStore } from "@/stores/usePatientStore";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
 interface Patient {
   name: string;
@@ -81,7 +81,12 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
                 })}
               </TableCell>
               <TableCell>{patient.location}</TableCell>
-              <TableCell>{patient.distance}</TableCell>
+              <TableCell>
+                <Link to={`/view-in-map/${patient.location}`}>
+                  <Button>View On Map</Button>
+                </Link>
+              </TableCell>
+
               <TableCell>{patient.Patient.phone}</TableCell>
               <TableCell>
                 <Badge
@@ -99,8 +104,6 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
               </TableCell>
               <TableCell>
                 <Button
-                  variant="ghost"
-                  size="sm"
                   onClick={() => {
                     getPatientProfile(patient.nic);
                   }}

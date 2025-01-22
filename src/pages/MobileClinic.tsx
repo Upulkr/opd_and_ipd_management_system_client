@@ -86,6 +86,7 @@ export const MobileClinic = () => {
   const [customCity, setCustomCity] = useState("");
   const [sheduledMobileclinics, setSheduledMobileclinics] = useState([]);
   const [date, setDate] = React.useState<Date>();
+  const [openMap, setOpenMap] = useState(false);
   const navigate = useNavigate();
   const clearSearch = () => {
     setSearchNic("");

@@ -35,6 +35,7 @@ import { AddNewDrugFormpage } from "./pages/AddNewDrugFormpage";
 import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
 import AddClininicFormpage from "./pages/AddClininicFormpage";
 import ClinincAssignPAge from "./pages/ClinincAssignPAge";
+import ViewInMapPage from "./pages/ViewInMapPage";
 
 function App() {
   const Departments = [
@@ -159,6 +160,7 @@ function App() {
           />
           <Route path="/create-new-clinic" element={<AddClininicFormpage />} />
           <Route path="/clinic-assign" element={<ClinincAssignPAge />} />
+          <Route path="/view-in-map/:location?" element={<ViewInMapPage />} />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>
