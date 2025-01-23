@@ -87,6 +87,10 @@ export const MobileClinic = () => {
   const [sheduledMobileclinics, setSheduledMobileclinics] = useState([]);
   const [date, setDate] = React.useState<Date>();
   const [openMap, setOpenMap] = useState(false);
+  const [monthlyHomeVisit, setMonthlyHomeVisits] = useState([]);
+  const [completedClinincCountFor30days, setCompletedClinincCountFor30days] =
+    useState(0);
+  const [totalCompletedVisits, setTotalCompletedVisits] = useState(0);
   const navigate = useNavigate();
   const clearSearch = () => {
     setSearchNic("");
@@ -135,6 +139,33 @@ export const MobileClinic = () => {
   //   }
   // };
 
+  const getMonthlyhomevisitsForEachMonth = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/mobileclinic/monthlyhomevisits`
+      );
+      if (response.status === 200) {
+        setMonthlyHomeVisits(response.data.monthlyhomevisits);
+      }
+    } catch (error: any) {
+      console.log("Error assigning patient", error);
+    }
+  };
+
+  const getCountCompletedVisits = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/mobileclinic/getcountofcompletedmobileclinincs`
+      );
+      if (res.status === 200) {
+        setCompletedClinincCountFor30days(res.data.completedMobileClinics);
+        setTotalCompletedVisits(res.data.totalcompletedMobileClinics);
+      }
+    } catch (error: any) {
+      console.log("Error assigning patient", error);
+    }
+  };
+
   const fetchPatients = useCallback(async () => {
     try {
       const response = await axios.get(`http://localhost:8000/patient`);
@@ -175,6 +206,8 @@ export const MobileClinic = () => {
   useEffect(() => {
     fetchPatients();
     mobileClinincsForTable();
+    getCountCompletedVisits();
+    getMonthlyhomevisitsForEachMonth();
     // getAllClinicAssigmentsForTable();
     // Fetch patients once when the component mounts
   }, []);
@@ -489,36 +522,36 @@ export const MobileClinic = () => {
           </CardContent>
         </Card>
         {/* Statistics Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-3 ">
           {[
             {
               title: "Total Home Visits",
-              value: "1,284",
+              value: totalCompletedVisits,
               icon: HomeIcon,
               change: "+20% from last month",
               color: "text-blue-600",
             },
             {
-              title: "New Patients",
-              value: "32",
+              title: "Completed Visits between 30days",
+              value: completedClinincCountFor30days,
               icon: UserPlusIcon,
               change: "+5 this week",
               color: "text-green-600",
             },
             {
               title: "Pending Visits",
-              value: "18",
+              value: sheduledMobileclinics.length,
               icon: ClipboardListIcon,
               change: "3 urgent cases",
               color: "text-yellow-600",
             },
-            {
-              title: "Avg. Visit Duration",
-              value: "45 min",
-              icon: ActivityIcon,
-              change: "-5 min from last week",
-              color: "text-purple-600",
-            },
+            // {
+            //   title: "Avg. Visit Duration",
+            //   value: "45 min",
+            //   icon: ActivityIcon,
+            //   change: "-5 min from last week",
+            //   color: "text-purple-600",
+            // },
           ].map((card, index) => (
             <Card key={index} className="hover:shadow-lg transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
