@@ -50,23 +50,6 @@ import {
   YAxis,
 } from "recharts";
 
-const visitsTrendData = [
-  { name: "Jan", visits: 65 },
-  { name: "Feb", visits: 59 },
-  { name: "Mar", visits: 80 },
-  { name: "Apr", visits: 81 },
-  { name: "May", visits: 56 },
-  { name: "Jun", visits: 55 },
-  { name: "Jul", visits: 40 },
-];
-
-const patientDemographicsData = [
-  { name: "Elderly", value: 400 },
-  { name: "Adults", value: 300 },
-  { name: "Children", value: 200 },
-  { name: "Infants", value: 100 },
-];
-
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 interface Suggestion {
@@ -86,7 +69,10 @@ export const MobileClinic = () => {
   const [customCity, setCustomCity] = useState("");
   const [sheduledMobileclinics, setSheduledMobileclinics] = useState([]);
   const [date, setDate] = React.useState<Date>();
-  const [openMap, setOpenMap] = useState(false);
+  const [clinincAgeGroups, setClinincAgeGroups] = useState<
+    { age_group: string; value: number }[]
+  >([]);
+
   const [monthlyHomeVisit, setMonthlyHomeVisits] = useState([]);
   const [completedClinincCountFor30days, setCompletedClinincCountFor30days] =
     useState(0);
@@ -138,6 +124,20 @@ export const MobileClinic = () => {
   //     }
   //   }
   // };
+
+  const getPatientsbyAge = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8000/mobileclinic/getpatientsbyage`
+      );
+      if (response.status === 200) {
+        setPatients(response.data.ageGroupCounts);
+        setClinincAgeGroups(response.data.ageGroupCounts);
+      }
+    } catch (error: any) {
+      console.log("Error assigning patient", error);
+    }
+  };
 
   const getMonthlyhomevisitsForEachMonth = async () => {
     try {
@@ -208,6 +208,7 @@ export const MobileClinic = () => {
     mobileClinincsForTable();
     getCountCompletedVisits();
     getMonthlyhomevisitsForEachMonth();
+    getPatientsbyAge();
     // getAllClinicAssigmentsForTable();
     // Fetch patients once when the component mounts
   }, []);
@@ -287,7 +288,7 @@ export const MobileClinic = () => {
       }
     }
   };
-
+  console.log("ClinincAgeGroups", clinincAgeGroups);
   return (
     <div className="min-h-screen bg-gray-50 p-6 w-full">
       <ToastContainer />
@@ -574,19 +575,19 @@ export const MobileClinic = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ActivityIcon className="h-5 w-5" />
-                Home Visits Trend
+                Home Visits Trend in 30days
               </CardTitle>
             </CardHeader>
             <CardContent className="w-full aspect-[4/3]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={visitsTrendData}>
+                <LineChart data={monthlyHomeVisit}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
-                  <XAxis dataKey="name" />
+                  <XAxis dataKey="month" />
                   <YAxis />
                   <Tooltip />
                   <Line
                     type="monotone"
-                    dataKey="visits"
+                    dataKey="count"
                     stroke="#8884d8"
                     strokeWidth={2}
                     dot={{ r: 4 }}
@@ -601,25 +602,27 @@ export const MobileClinic = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <UserPlusIcon className="h-5 w-5" />
-                Patient Demographics
+                Patient Demographics in 30days
               </CardTitle>
             </CardHeader>
             <CardContent className="w-full aspect-[4/3]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={patientDemographicsData}
+                    data={clinincAgeGroups}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
                     outerRadius={80}
                     fill="#8884d8"
-                    dataKey="value"
+                    dataKey="total_count"
                   >
-                    {patientDemographicsData.map((entry, index) => (
+                    {clinincAgeGroups.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={COLORS[index % COLORS.length]}
+                        stroke={COLORS[index % COLORS.length]}
+                        name={entry.age_group}
                       />
                     ))}
                   </Pie>
