@@ -95,7 +95,9 @@ export function AddNewDrugFormpage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       drugName: drugTobeUpdate[0]?.drugName || "",
-      unit: drugTobeUpdate[0]?.unit || undefined,
+      unit: drugTobeUpdate[0]?.unit as
+        | z.infer<typeof formSchema>["unit"]
+        | undefined,
       totalQuantity: drugTobeUpdate[0]?.totalQuantity || undefined,
       usedQuantity: drugTobeUpdate[0]?.usedQuantity || 0,
       remainingQuantity: drugTobeUpdate[0]?.remainingQuantity || 0,

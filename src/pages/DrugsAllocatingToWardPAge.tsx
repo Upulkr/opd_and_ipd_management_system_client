@@ -85,7 +85,7 @@ export default function DrugAllocation() {
           await axios.post("http://localhost:8000/drugs/createdrugallocation", {
             drugId: drug.drugId,
             drugName: drug.drugName,
-            totalQuantity: drug.totalQuantity - parseFloat(quantity),
+            totalQuantity: quantity,
             usedQuantity: 0,
             wardName: selectedWard,
             unit: selectedUnit,

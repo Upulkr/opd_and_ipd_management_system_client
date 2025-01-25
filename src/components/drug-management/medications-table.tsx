@@ -15,7 +15,7 @@ interface Drug {
   unit: string;
   totalQuantity: number;
   usedQuantity: number;
-  remainingQuantity: number;
+
   expiryDate: Date;
 }
 export function MedicationsTable({
@@ -30,7 +30,8 @@ export function MedicationsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead> <TableHead>Unit</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Unit</TableHead>
             <TableHead>Stock</TableHead>
             <TableHead>Used</TableHead>
             <TableHead>Remaining</TableHead>
@@ -49,7 +50,9 @@ export function MedicationsTable({
                   <TableCell>
                     {drug.usedQuantity ? drug.usedQuantity : "-"}
                   </TableCell>
-                  <TableCell>{drug.remainingQuantity}</TableCell>
+                  <TableCell>
+                    {drug.totalQuantity - drug.usedQuantity}
+                  </TableCell>
                   <TableCell
                     className={`${
                       new Date(drug.expiryDate).getTime() - Date.now() <=
