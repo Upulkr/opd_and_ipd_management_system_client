@@ -1,7 +1,4 @@
-import React, { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,6 +6,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -19,17 +24,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { zodResolver } from "@hookform/resolvers/zod";
+import axios from "axios";
 import { Activity, Heart, Stethoscope } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast, ToastContainer } from "react-toastify";
+import * as z from "zod";
 
 const testTypes = [
   {
@@ -39,17 +40,31 @@ const testTypes = [
     icon: Activity,
     color: "bg-blue-500",
     schema: z.object({
+      pregnencies: z.string().regex(/^\d+$/, "Must be a number").optional(),
       glucose: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
       bloodPressure: z
         .string()
         .min(1, "Required")
         .regex(/^\d+$/, "Must be a number"),
-      insulin: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      skinThickness: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      insulin: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
       bmi: z
         .string()
         .min(1, "Required")
         .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
-      age: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      diabetesPedigreeFunction: z
+        .string()
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      age: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
     }),
   },
   {
@@ -106,6 +121,11 @@ const testTypes = [
 const testFields = {
   diabetes: [
     {
+      name: "pregnencies",
+      label: "Number of Pregnancies",
+      description: "Number of pregnancies",
+    },
+    {
       name: "glucose",
       label: "Glucose Level (mg/dL)",
       description: "Fasting blood glucose level",
@@ -116,11 +136,21 @@ const testFields = {
       description: "Resting blood pressure",
     },
     {
+      name: "skinThickness",
+      label: "Skin Thickness (mm)",
+      description: "Triceps skin fold thickness",
+    },
+    {
       name: "insulin",
       label: "Insulin (mu U/ml)",
       description: "2-Hour serum insulin",
     },
     { name: "bmi", label: "BMI", description: "Body mass index" },
+    {
+      name: "diabetesPedigreeFunction",
+      label: "Diabetes Pedigree",
+      description: "Diabetes pedigree function",
+    },
     { name: "age", label: "Age", description: "Patient's age" },
   ],
   heart: [
@@ -177,6 +207,7 @@ export default function DiseasePrediction() {
   >("");
   const [showResult, setShowResult] = useState(false);
   const [prediction, setPrediction] = useState({ result: "", message: "" });
+  const [loading, setLoading] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(
@@ -184,57 +215,32 @@ export default function DiseasePrediction() {
     ),
   });
 
-  const onSubmit = (data) => {
-    const isPositive = Math.random() > 0.5;
-    const results = {
-      diabetes: {
-        positive: {
-          result: "High Risk Detected",
-          message:
-            "The analysis indicates a high risk of diabetes. Please consult a healthcare provider immediately for a complete evaluation.",
-        },
-        negative: {
-          result: "Low Risk",
-          message:
-            "The analysis suggests a low risk of diabetes. Continue maintaining a healthy lifestyle and regular check-ups.",
-        },
-      },
-      heart: {
-        positive: {
-          result: "Risk Factors Present",
-          message:
-            "Several heart disease risk factors have been detected. We recommend immediate consultation with a cardiologist.",
-        },
-        negative: {
-          result: "Normal Results",
-          message:
-            "No significant heart disease risk factors detected. Maintain heart-healthy habits and regular check-ups.",
-        },
-      },
-      breastCancer: {
-        positive: {
-          result: "Abnormal Findings",
-          message:
-            "The analysis has detected potential abnormal indicators. Please seek immediate medical consultation for further evaluation.",
-        },
-        negative: {
-          result: "Normal Findings",
-          message:
-            "No concerning indicators detected in the analysis. Continue with regular screening as recommended.",
-        },
-      },
-    };
-    console.log(results.diabetes.positive);
-    if (selectedTest) {
-      setPrediction(
-        isPositive
-          ? results[selectedTest].positive
-          : results[selectedTest].negative
-      );
-    }
-    setShowResult(true);
-  };
+  const onSubmit = async (data: any) => {
+    console.log("Data:", data);
 
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        "http://localhost:8000/predict/diabetes",
+        data
+      );
+      if (response.status === 200) {
+        setPrediction({
+          result: response.data.prediction,
+          message: response.data.message,
+        });
+        setShowResult(true);
+      }
+      setLoading(false);
+    } catch (error: any) {
+      setLoading(false);
+      if (error.status === 400) {
+        console.log(error.data.message);
+        toast.error("Unable to fetch prediction. Please try again.");
+      }
+    }
+  };
+  console.log("prediction", prediction);
   return (
     <div className="container mx-auto py-10">
       <div className="max-w-5xl mx-auto space-y-8">
@@ -244,7 +250,7 @@ export default function DiseasePrediction() {
             Select a test type to begin the analysis
           </p>
         </div>
-
+        <ToastContainer />
         {!selectedTest ? (
           <div className="grid md:grid-cols-3 gap-6">
             {testTypes.map((test) => (
@@ -323,8 +329,14 @@ export default function DiseasePrediction() {
                         ))}
                     </div>
                   </div>
-                  <Button type="submit" className="w-full">
-                    Generate Prediction
+                  <Button
+                    disabled={loading}
+                    type="submit"
+                    className={`w-full ${
+                      loading ? "bg-gray-400" : "bg-blue-500"
+                    }`}
+                  >
+                    {loading ? " Generating Prediction" : "Generate Prediction"}
                   </Button>
                 </form>
               </Form>
@@ -337,18 +349,28 @@ export default function DiseasePrediction() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle
-              className={
-                prediction.result.includes("High") ||
-                prediction.result.includes("Risk") ||
-                prediction.result.includes("Abnormal")
-                  ? "text-red-500"
-                  : "text-green-500"
-              }
+              className={` ${
+                prediction.result === "1" ? "text-red-500" : "text-green-500"
+              }`}
             >
-              {prediction.result}
+              {prediction.result === "1"
+                ? "Diabetes Prediction: Positive"
+                : "Diabetes Prediction: Negative"}
             </DialogTitle>
             <DialogDescription className="pt-2">
-              {prediction.message}
+              <p className="text-md xl:text-lg">
+                {prediction.result === "1"
+                  ? "The model has detected a positive indication for diabetes. Please consult with a healthcare professional for further analysis and diagnosis."
+                  : "The model has detected no indication of diabetes based on the provided information. However, maintaining a healthy lifestyle is always recommended."}
+              </p>
+              {/* Apply the color to the message based on the result */}
+              <p
+                className={`text-md xl:text-lg ${
+                  prediction.result === "1" ? "text-red-500" : "text-green-500"
+                }`}
+              >
+                {prediction.message}
+              </p>
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
