@@ -96,29 +96,132 @@ const testTypes = [
     }),
   },
   {
-    id: "breastCancer",
-    title: "Breast Cancer Prediction",
+    id: "breast_cancer",
+    title: "Breast Cancer Prediction ",
+    title2:
+      "Features should be computed from a digitized image of a fine needle aspirate (FNA) of a breast mass",
     description: "Evaluate breast cancer indicators",
+
     icon: Stethoscope,
     color: "bg-purple-500",
     schema: z.object({
-      radius: z
+      meanradius: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+$/, "Must be a number"),
+      meantexture: z
         .string()
         .min(1, "Required")
         .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
-      texture: z
+      meanperimeter: z
         .string()
         .min(1, "Required")
         .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
-      perimeter: z
+      meanarea: z
         .string()
         .min(1, "Required")
         .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
-      area: z
+      meansmoothness: z
         .string()
         .min(1, "Required")
         .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
-      smoothness: z
+      meancompactness: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      meanconcavity: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      meanconcavepoints: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      meansymmetry: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      meanfractaldimension: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      radiuserror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      textureerror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      perimetererror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      areaerror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      smoothnesserror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      compactnesserror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      concavityerror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      concavepointserror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      symmetryerror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      fractaldimensionerror: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstradius: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worsttexture: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstperimeter: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstarea: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstsmoothness: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstcompactness: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstconcavity: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstconcavepoints: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstsymmetry: z
+        .string()
+        .min(1, "Required")
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      worstfractaldimension: z
         .string()
         .min(1, "Required")
         .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
@@ -229,27 +332,156 @@ const testFields = {
         "Thalassemia (3 = normal, 6 = fixed defect, 7 = reversible defect)",
     },
   ],
-  breastCancer: [
+  breast_cancer: [
     {
-      name: "radius",
+      name: "meanradius",
       label: "Mean Radius",
       description: "Mean of distances from center to points on the perimeter",
     },
     {
-      name: "texture",
+      name: "meantemperature",
       label: "Mean Texture",
       description: "Standard deviation of gray-scale values",
     },
     {
-      name: "perimeter",
+      name: "meanperimeter",
       label: "Mean Perimeter",
-      description: "Mean size of the core tumor",
+      description: "Mean perimeter of the cell nucleus",
     },
-    { name: "area", label: "Mean Area", description: "Mean area of the tumor" },
     {
-      name: "smoothness",
-      label: "Smoothness",
+      name: "meanarea",
+      label: "Mean Area",
+      description: "Mean area of the cell nucleus",
+    },
+    {
+      name: "meansmoothness",
+      label: "Mean Smoothness",
       description: "Local variation in radius lengths",
+    },
+    {
+      name: "meancompactness",
+      label: "Mean Compactness",
+      description: "Compactness, calculated as (perimeter² / area - 1.0)",
+    },
+    {
+      name: "meanconcavity",
+      label: "Mean Concavity",
+      description: "Severity of concave portions of the contour",
+    },
+    {
+      name: "meanconcavepoints",
+      label: "Mean Concave Points",
+      description: "Number of concave portions of the contour",
+    },
+    {
+      name: "meansymmetry",
+      label: "Mean Symmetry",
+      description: "Symmetry of the cell nucleus",
+    },
+    {
+      name: "meanfractaldimension",
+      label: "Mean Fractal Dimension",
+      description: "Fractal dimension, 'coastline approximation' - 1",
+    },
+    {
+      name: "radiuserror",
+      label: "Radius Error",
+      description: "Standard error of radius measurement",
+    },
+    {
+      name: "textureerror",
+      label: "Texture Error",
+      description: "Standard error of texture measurement",
+    },
+    {
+      name: "perimetererror",
+      label: "Perimeter Error",
+      description: "Standard error of perimeter measurement",
+    },
+    {
+      name: "areaerror",
+      label: "Area Error",
+      description: "Standard error of area measurement",
+    },
+    {
+      name: "smoothnesserror",
+      label: "Smoothness Error",
+      description: "Standard error of smoothness measurement",
+    },
+    {
+      name: "compactnesserror",
+      label: "Compactness Error",
+      description: "Standard error of compactness measurement",
+    },
+    {
+      name: "concavityerror",
+      label: "Concavity Error",
+      description: "Standard error of concavity measurement",
+    },
+    {
+      name: "concavepointserror",
+      label: "Concave Points Error",
+      description: "Standard error of concave points measurement",
+    },
+    {
+      name: "symmetryerror",
+      label: "Symmetry Error",
+      description: "Standard error of symmetry measurement",
+    },
+    {
+      name: "fractaldimensionerror",
+      label: "Fractal Dimension Error",
+      description: "Standard error of fractal dimension measurement",
+    },
+    {
+      name: "worstradius",
+      label: "Worst Radius",
+      description: "Largest mean value for radius",
+    },
+    {
+      name: "worsttexture",
+      label: "Worst Texture",
+      description: "Largest mean value for texture",
+    },
+    {
+      name: "worstperimeter",
+      label: "Worst Perimeter",
+      description: "Largest mean value for perimeter",
+    },
+    {
+      name: "worstarea",
+      label: "Worst Area",
+      description: "Largest mean value for area",
+    },
+    {
+      name: "worstsmoothness",
+      label: "Worst Smoothness",
+      description: "Largest mean value for smoothness",
+    },
+    {
+      name: "worstcompactness",
+      label: "Worst Compactness",
+      description: "Largest mean value for compactness",
+    },
+    {
+      name: "worstconcavity",
+      label: "Worst Concavity",
+      description: "Largest mean value for concavity",
+    },
+    {
+      name: "worstconcavepoints",
+      label: "Worst Concave Points",
+      description: "Largest mean value for concave points",
+    },
+    {
+      name: "worstsymmetry",
+      label: "Worst Symmetry",
+      description: "Largest mean value for symmetry",
+    },
+    {
+      name: "worstfractaldimension",
+      label: "Worst Fractal Dimension",
+      description: "Largest mean value for fractal dimension",
     },
   ],
 };
@@ -269,7 +501,14 @@ export default function DiseasePrediction() {
   });
 
   const onSubmit = async (data: any) => {
+    if (data.length === 0) {
+      toast.error("Please fill in all the fields.");
+    }
     console.log("Data:", data);
+
+    if (!selectedTest) {
+      toast.error("Please select a test type.");
+    }
 
     try {
       setLoading(true);
@@ -350,8 +589,15 @@ export default function DiseasePrediction() {
               >
                 Change Test
               </Button>
-              <CardTitle className="text-2xl">
+              <CardTitle className="lg:text-2xl">
                 {testTypes.find((t) => t.id === selectedTest)?.title}
+              </CardTitle>
+              <CardTitle className="lg:text-2xl text-center">
+                {
+                  testTypes.find(
+                    (t) => t.id === selectedTest && t.title2 && t.title2
+                  )?.title2
+                }
               </CardTitle>
               <CardDescription className="text-gray-500">
                 Enter patient information for analysis
@@ -363,9 +609,9 @@ export default function DiseasePrediction() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 `}>
                     {selectedTest &&
-                      testFields[selectedTest].map((field) => (
+                      testFields[selectedTest]?.map((field) => (
                         <FormField
                           key={field.name}
                           control={form.control}
