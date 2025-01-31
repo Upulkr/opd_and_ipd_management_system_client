@@ -68,23 +68,31 @@ const testTypes = [
     }),
   },
   {
-    id: "heart",
+    id: "heart_disease",
     title: "Heart Disease Prediction",
     description: "Analyze cardiac health indicators",
     icon: Heart,
     color: "bg-red-500",
     schema: z.object({
       age: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
-      bp: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
-      cholesterol: z
+      sex: z.string().min(1, "Required").regex(/^\d+$/, "Must be a 0 or 1"),
+      cp: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      trestbps: z
         .string()
         .min(1, "Required")
         .regex(/^\d+$/, "Must be a number"),
-      maxHr: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
-      fastingBS: z
+      chol: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      fbs: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      restecg: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      thalach: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      exang: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      oldpeak: z
         .string()
         .min(1, "Required")
-        .regex(/^\d+$/, "Must be a number"),
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      slope: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      ca: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      thal: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
     }),
   },
   {
@@ -153,27 +161,72 @@ const testFields = {
     },
     { name: "age", label: "Age", description: "Patient's age" },
   ],
-  heart: [
+  heart_disease: [
     { name: "age", label: "Age", description: "Patient's age" },
     {
-      name: "bp",
-      label: "Blood Pressure (mm Hg)",
-      description: "Resting blood pressure",
+      name: "sex",
+      label: "Sex",
+      description: "The gender of the patient. (1 = male, 0 = female).",
     },
     {
-      name: "cholesterol",
-      label: "Cholesterol (mg/dL)",
-      description: "Serum cholesterol",
+      name: "cp",
+      label: "Chest Pain",
+      description:
+        " 1 = typical angina, 2 = atypical angina, 3 = non — anginal pain, 4 = asymptotic",
     },
     {
-      name: "maxHr",
-      label: "Maximum Heart Rate",
-      description: "Maximum heart rate achieved",
+      name: "trestbps",
+      label: "Resting Blood Pressure",
+      description: "Resting blood pressure in mmHg",
     },
     {
-      name: "fastingBS",
+      name: "chol",
+      label: "Cholesterol",
+      description: "Serum Cholestero in mg/dl",
+    },
+    {
+      name: "fbs",
       label: "Fasting Blood Sugar",
-      description: "Fasting blood sugar level",
+      description:
+        "1 = fasting blood sugar is more than 120mg/dl, 0 = otherwise",
+    },
+    {
+      name: "restecg",
+      label: "Resting Electrocardiogram",
+      description:
+        "0 = normal, 1 = ST-T wave abnormality, 2 = left ventricular hyperthrophy",
+    },
+    {
+      name: "thalach",
+      label: "Maximum Heart Rate",
+      description: "Max heart rate achieved",
+    },
+    {
+      name: "exang",
+      label: "Exercise Induced Angina",
+      description: "Exercise induced angina (1 = yes, 0 = no)",
+    },
+    {
+      name: "oldpeak",
+      label: "ST Depression",
+      description: " ST depression induced by exercise relative to rest",
+    },
+    {
+      name: "slope",
+      label: "Slope",
+      description:
+        "Peak exercise ST segment (1 = upsloping, 2 = flat, 3 = downsloping)",
+    },
+    {
+      name: "ca",
+      label: "Number of Major Vessels",
+      description: "Number of major vessels (0–3) colored by flourosopy",
+    },
+    {
+      name: "thal",
+      label: "Thalassemia",
+      description:
+        "Thalassemia (3 = normal, 6 = fixed defect, 7 = reversible defect)",
     },
   ],
   breastCancer: [
@@ -221,7 +274,7 @@ export default function DiseasePrediction() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:8000/predict/diabetes",
+        `http://localhost:8000/predict/${selectedTest}`,
         data
       );
       if (response.status === 200) {
@@ -242,46 +295,54 @@ export default function DiseasePrediction() {
   };
   console.log("prediction", prediction);
   return (
-    <div className="container mx-auto py-10">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Medical Prediction System</h1>
-          <p className="text-gray-500">
+    <div className="container mx-auto py-12 px-4">
+      <div className="max-w-5xl mx-auto space-y-10">
+        {/* Title Section */}
+        <div className="text-center space-y-3">
+          <h1 className="text-4xl font-bold tracking-tight">
+            Medical Prediction System
+          </h1>
+          <p className="text-gray-600 text-lg">
             Select a test type to begin the analysis
           </p>
         </div>
+
         <ToastContainer />
+
+        {/* Test Selection or Form */}
         {!selectedTest ? (
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
             {testTypes.map((test) => (
               <Card
                 key={test.id}
-                className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                className="relative overflow-hidden hover:shadow-xl transition-all cursor-pointer rounded-lg border border-gray-200"
                 onClick={() =>
                   setSelectedTest(test.id as keyof typeof testFields)
                 }
               >
                 <div
-                  className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-20 ${test.color}`}
+                  className={`absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full opacity-20 ${test.color}`}
                 />
-                <CardHeader>
+                <CardHeader className="p-6 space-y-4">
                   <div
-                    className={`w-12 h-12 rounded-lg ${test.color} flex items-center justify-center`}
+                    className={`w-14 h-14 rounded-lg ${test.color} flex items-center justify-center`}
                   >
-                    <test.icon className="w-6 h-6 text-white" />
+                    <test.icon className="w-7 h-7 text-white" />
                   </div>
-                  <CardTitle className="mt-4">{test.title}</CardTitle>
-                  <CardDescription>{test.description}</CardDescription>
+                  <CardTitle className="text-xl">{test.title}</CardTitle>
+                  <CardDescription className="text-gray-500">
+                    {test.description}
+                  </CardDescription>
                 </CardHeader>
               </Card>
             ))}
           </div>
         ) : (
-          <Card className="max-w-2xl mx-auto scale-90">
-            <CardHeader className="relative">
+          <Card className="max-w-3xl mx-auto scale-95">
+            <CardHeader className="relative p-6">
               <Button
                 variant="ghost"
-                className="absolute right-4 top-4"
+                className="absolute right-6 top-6 text-gray-500 hover:text-gray-700"
                 onClick={() => {
                   setSelectedTest("");
                   form.reset();
@@ -289,54 +350,56 @@ export default function DiseasePrediction() {
               >
                 Change Test
               </Button>
-              <CardTitle>
+              <CardTitle className="text-2xl">
                 {testTypes.find((t) => t.id === selectedTest)?.title}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-gray-500">
                 Enter patient information for analysis
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6">
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6 "
+                  className="space-y-6"
                 >
-                  <div className=" pr-4 ">
-                    <div className="space-y-4 ">
-                      {selectedTest &&
-                        testFields[selectedTest].map((field) => (
-                          <FormField
-                            key={field.name}
-                            control={form.control}
-                            name={field.name}
-                            render={({ field: inputField }) => (
-                              <FormItem>
-                                <FormLabel>{field.label}</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Enter value"
-                                    {...inputField}
-                                  />
-                                </FormControl>
-                                <FormDescription>
-                                  {field.description}
-                                </FormDescription>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        ))}
-                    </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {selectedTest &&
+                      testFields[selectedTest].map((field) => (
+                        <FormField
+                          key={field.name}
+                          control={form.control}
+                          name={field.name}
+                          render={({ field: inputField }) => (
+                            <FormItem className="flex flex-col space-y-2">
+                              <FormLabel className="text-lg font-medium">
+                                {field.label}
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  className="w-full p-3 text-base border border-gray-300 rounded-lg"
+                                  placeholder="Enter value"
+                                  {...inputField}
+                                />
+                              </FormControl>
+                              <FormDescription className="text-sm text-gray-500">
+                                {field.description}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
                   </div>
                   <Button
                     disabled={loading}
                     type="submit"
-                    className={`w-full ${
-                      loading ? "bg-gray-400" : "bg-blue-500"
-                    }`}
+                    className="w-full py-3 text-lg font-semibold transition-all duration-200 rounded-lg text-white"
+                    style={{ backgroundColor: loading ? "#A0AEC0" : "#3182CE" }}
                   >
-                    {loading ? " Generating Prediction" : "Generate Prediction"}
+                    {loading
+                      ? "Generating Prediction..."
+                      : "Generate Prediction"}
                   </Button>
                 </form>
               </Form>
@@ -345,27 +408,27 @@ export default function DiseasePrediction() {
         )}
       </div>
 
+      {/* Prediction Result Dialog */}
       <Dialog open={showResult} onOpenChange={setShowResult}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle
-              className={` ${
+              className={`${
                 prediction.result === "1" ? "text-red-500" : "text-green-500"
-              }`}
+              } text-2xl`}
             >
               {prediction.result === "1"
-                ? "Diabetes Prediction: Positive"
-                : "Diabetes Prediction: Negative"}
+                ? `${selectedTest} Prediction: Positive`
+                : `${selectedTest} Prediction: Negative`}
             </DialogTitle>
-            <DialogDescription className="pt-2">
-              <p className="text-md xl:text-lg">
+            <DialogDescription className="pt-3 text-gray-600">
+              <p className="text-lg">
                 {prediction.result === "1"
-                  ? "The model has detected a positive indication for diabetes. Please consult with a healthcare professional for further analysis and diagnosis."
-                  : "The model has detected no indication of diabetes based on the provided information. However, maintaining a healthy lifestyle is always recommended."}
+                  ? `The model has detected a positive indication for ${selectedTest}. Please consult with a healthcare professional for further analysis.`
+                  : `The model has detected no indication of ${selectedTest}. However, maintaining a healthy lifestyle is always recommended.`}
               </p>
-              {/* Apply the color to the message based on the result */}
               <p
-                className={`text-md xl:text-lg ${
+                className={`text-lg ${
                   prediction.result === "1" ? "text-red-500" : "text-green-500"
                 }`}
               >
