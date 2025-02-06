@@ -37,7 +37,7 @@ export function InputBHTFormForAdmissionBookSearch({
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -54,7 +54,7 @@ export function InputBHTFormForAdmissionBookSearch({
     console.log("+++++++,", enableUpdate);
     try {
       const isAdmissionBookExisting = await axios.get(
-        `http://localhost:8000/admissionBook/bht?bht=${bht}`
+        `/api/admissionBook/bht?bht=${bht}`
       );
 
       if (!isAdmissionBookExisting.data.admissionBook) {
@@ -65,8 +65,8 @@ export function InputBHTFormForAdmissionBookSearch({
       }
       const response = await axios.get(
         enableUpdate === true
-          ? `http://localhost:8000/admissionbook/bht?bht=${bht}`
-          : `http://localhost:8000/admissionSheet/bht?bht=${bht}`
+          ? `/api/admissionbook/bht?bht=${bht}`
+          : `/api/admissionSheet/bht?bht=${bht}`
       );
       if (enableUpdate === true) {
         setAdmissionBook(response.data.admissionBook);

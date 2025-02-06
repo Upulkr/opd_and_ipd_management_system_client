@@ -13,7 +13,7 @@ function ClinicNotifier() {
 
   const fetchSheduledClinincs = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/clinic");
+      const response = await axios.get("/api/clinic");
       if (response.status === 200) {
         setClinics(response.data.clinics);
       }

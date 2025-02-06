@@ -82,7 +82,7 @@ export default function DrugAllocation() {
       const drug = drugs.find((d) => d.drugId.toString() === selectedDrug);
       if (drug) {
         try {
-          await axios.post("http://localhost:8000/drugs/createdrugallocation", {
+          await axios.post("/api/drugs/createdrugallocation", {
             drugId: drug.drugId,
             drugName: drug.drugName,
             totalQuantity: quantity,
@@ -105,7 +105,7 @@ export default function DrugAllocation() {
   const getAllocationByWard = async (wardName: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/drugs/getdrugallocationbywardname/${wardName}`
+        `/api/drugs/getdrugallocationbywardname/${wardName}`
       );
 
       setAllocations(response.data.allocations);

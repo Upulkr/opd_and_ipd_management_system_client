@@ -111,7 +111,7 @@ export function AddNewDrugFormpage() {
       setIsLoading(true);
       if (drugTobeUpdate[0]?.drugId) {
         const response = await axios.put(
-          `http://localhost:8000/drugs/${drugTobeUpdate[0].drugId}`,
+          `/api/drugs/${drugTobeUpdate[0].drugId}`,
           values
         );
         if (response.status === 200) {
@@ -128,7 +128,7 @@ export function AddNewDrugFormpage() {
           toast.error(`Failed to update ${values.drugName}`);
         }
       } else {
-        const response = await axios("http://localhost:8000/drugs", {
+        const response = await axios("/api/drugs", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -26,7 +26,7 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -43,7 +43,7 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
 
     try {
       const isAdmissionBookExisting = await axios.get(
-        `http://localhost:8000/admissionBook/bht?bht=${bht}`
+        `/api/admissionBook/bht?bht=${bht}`
       );
 
       if (isAdmissionBookExisting.data.admissionBook) {
@@ -52,9 +52,7 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
 
         return;
       }
-      const response = await axios.get(
-        `http://localhost:8000/admissionSheet/bht?bht=${bht}`
-      );
+      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`);
       console.log("response", response);
       setAdmissionSheetByBHT(response.data.admissionSheet);
       navigate("/admission-book-page");

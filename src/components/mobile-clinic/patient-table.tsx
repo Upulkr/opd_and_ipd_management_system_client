@@ -46,7 +46,7 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
   const getPatientProfile = async (nic: string) => {
     try {
       setPatient([]);
-      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      const response = await axios.get(`/api/patient/${nic}`);
 
       setPatient(response.data.Patient);
       navigate(`/patient-profile-page`);
@@ -79,16 +79,13 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
     try {
       console.log("selectedRows", selectedRows);
       setloading(true);
-      const response = await axios(
-        "http://localhost:8000/mobileclinic/markascompleted",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "PUT",
-          data: { selectedRows },
-        }
-      );
+      const response = await axios("/api/mobileclinic/markascompleted", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "PUT",
+        data: { selectedRows },
+      });
       if (response.status === 200) {
         toast.success("Marked as complete");
         setloading(false);

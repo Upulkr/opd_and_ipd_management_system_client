@@ -54,7 +54,7 @@ export default function InpatientDepartment() {
   const patientProfileHandler = async () => {
     try {
       setIsSearching(true);
-      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      const response = await axios.get(`/api/patient/${nic}`);
       if (response.status === 200) {
         console.log("response", response.data.Patient);
         setPatient(response.data.Patient);
@@ -76,7 +76,7 @@ export default function InpatientDepartment() {
 
   const fetchTableData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/warddetails`);
+      const response = await axios.get(`/api/warddetails`);
       if (response.status === 200) {
         setWardData(response.data.wardData);
         setNoOfFreeBeds(response.data.totalNoOfFreeBeds);

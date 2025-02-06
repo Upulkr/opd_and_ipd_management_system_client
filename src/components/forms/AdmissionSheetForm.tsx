@@ -89,7 +89,7 @@ export const AdmissionSheetForm = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await axios(`http://localhost:8000/admissionSheet`, {
+      const response = await axios(`/api/admissionSheet`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -101,9 +101,7 @@ export const AdmissionSheetForm = () => {
         toast.success("Admission Sheet Created");
         // form.reset();
         setIsLoading(false);
-        await axios.put(
-          `http://localhost:8000/wardBedsController/${values.wardNo}`
-        );
+        await axios.put(`/api/wardBedsController/${values.wardNo}`);
 
         navigate("/inpatient-department");
       }

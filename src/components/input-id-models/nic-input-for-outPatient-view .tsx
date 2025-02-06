@@ -29,7 +29,7 @@ export function InputNicFormForOutPatientView({
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -44,9 +44,7 @@ export function InputNicFormForOutPatientView({
     }
 
     try {
-      const response = await axios.get(
-        `http://localhost:8000/outPatient/${nic}`
-      );
+      const response = await axios.get(`/api/outPatient/${nic}`);
       if (response.status === 200) {
         console.log("response", response.data.outPatient);
         setOutPatient(response.data.outPatient);

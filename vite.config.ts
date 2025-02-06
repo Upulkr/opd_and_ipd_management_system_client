@@ -16,8 +16,9 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: process.env.API_URL || "http://localhost:8000",
-        secure: false,
+        target: process.env.VITE_API_URL || "/api",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""), // Remove the /api prefix before forwarding
       },
     },
   },

@@ -68,7 +68,7 @@ export const AdmissionBookForm = () => {
   // const fetchAdmissionBookbyBHT = useCallback(async () => {
   //   try {
   //     const response = await axios.get(
-  //       `http://localhost:8000/admissionBook/${pattientBHT}`
+  //       `/api/admissionBook/${pattientBHT}`
   //     );
   //     setAdmissionBook(response.data.admissionBook);
   //   } catch (error) {
@@ -82,7 +82,7 @@ export const AdmissionBookForm = () => {
         return;
       }
       const fetchAdmissionSheetperDay = await axios.get(
-        `http://localhost:8000/admissionSheet/noOfAdmissionSheetsperday`
+        `/api/admissionSheet/noOfAdmissionSheetsperday`
       );
       setNoOfAdmissionSheetsperDay(
         Number(fetchAdmissionSheetperDay.data.NoOfAdmissionSheetsPerDay)
@@ -98,7 +98,7 @@ export const AdmissionBookForm = () => {
         return;
       }
       const fetchAdmissionSheetperYear = await axios.get(
-        `http://localhost:8000/admissionSheet/noOfAdmissionSheetsperyear`
+        `/api/admissionSheet/noOfAdmissionSheetsperyear`
       );
       setNoOfAdmissionSheetsperYear(
         Number(fetchAdmissionSheetperYear.data.NoOfAdmissionSheetsPerYear)
@@ -199,7 +199,7 @@ export const AdmissionBookForm = () => {
     try {
       setIsLoading(true);
 
-      const response = await axios(`http://localhost:8000/admissionbook`, {
+      const response = await axios(`/api/admissionbook`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

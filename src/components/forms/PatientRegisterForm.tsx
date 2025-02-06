@@ -68,7 +68,7 @@ export const PatientRegisterForm = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const createPatient = await axios("http://localhost:8000/patient", {
+      const createPatient = await axios("/api/patient", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

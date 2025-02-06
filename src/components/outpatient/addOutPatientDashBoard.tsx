@@ -128,7 +128,7 @@ export function AddOutpatientForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await axios("http://localhost:8000/outPatient", {
+      const response = await axios("/api/outPatient", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

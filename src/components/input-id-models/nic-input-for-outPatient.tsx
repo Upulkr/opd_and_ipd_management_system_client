@@ -30,7 +30,7 @@ export function InputNicFormForOutPatient({
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -48,7 +48,7 @@ export function InputNicFormForOutPatient({
     }
 
     try {
-      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      const response = await axios.get(`/api/patient/${nic}`);
       if (response.status === 200) {
         setPatient(response.data.Patient);
         navigate("/admission-outpatient-register-page");

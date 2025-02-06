@@ -33,7 +33,7 @@ export function InputBHTFormFrAdmissionSheet({
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -50,7 +50,7 @@ export function InputBHTFormFrAdmissionSheet({
 
     try {
       const isAdmissionSheetExisting = await axios.get(
-        `http://localhost:8000/admissionSheet/bht?bht=${bht}`
+        `/api/admissionSheet/bht?bht=${bht}`
       );
 
       if (!isAdmissionSheetExisting.data.admissionSheet) {
@@ -59,9 +59,7 @@ export function InputBHTFormFrAdmissionSheet({
         navigate("/inpatient-department/admission-sheet");
         return;
       }
-      const response = await axios.get(
-        `http://localhost:8000/admissionSheet/bht?bht=${bht}`
-      );
+      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`);
 
       setAdmissionSheetByBHT(response.data.admissionSheet);
 

@@ -63,7 +63,7 @@ export default function NewClinicForm() {
 
   const getAllclincsName = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/clinic");
+      const response = await axios.get("/api/clinic");
       if (response.status === 200) {
         setPrediufinedClinicsName(response.data.clinics);
       }
@@ -77,7 +77,7 @@ export default function NewClinicForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await axios("http://localhost:8000/clinic", {
+      const response = await axios("/api/clinic", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

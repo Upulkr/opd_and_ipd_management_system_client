@@ -70,7 +70,7 @@ export default function ClinicPage() {
     try {
       setLoading(true);
       const response = await axios.get(
-        `http://localhost:8000/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`
+        `/api/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`
       );
 
       if (response.status === 200) {
@@ -91,7 +91,7 @@ export default function ClinicPage() {
     }
     try {
       setLoading(true);
-      const response = await axios(`http://localhost:8000/clinicassigmnent`, {
+      const response = await axios(`/api/clinicassigmnent`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +120,7 @@ export default function ClinicPage() {
   const getAllClinicAssigmentsForTable = useCallback(async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/clinicassigmnent/getAllClinicAssigmentsfortable`
+        `/api/clinicassigmnent/getAllClinicAssigmentsfortable`
       );
       if (response.status === 200) {
         setClinicsAssign(response.data.clinicAssigments);
@@ -132,7 +132,7 @@ export default function ClinicPage() {
 
   const fetchPatients = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/patient`);
+      const response = await axios.get(`/api/patient`);
       if (response.status === 200) {
         setPatient(response.data.Patients);
       }
@@ -188,7 +188,7 @@ export default function ClinicPage() {
   const scheduleNewSMS = async (smsData: SMSScheduleRequest) => {
     try {
       const response = await axios.post<SMSScheduleResponse>(
-        "http://localhost:8000/sendsms/schedule-sms",
+        "/api/sendsms/schedule-sms",
         smsData,
         {
           headers: {

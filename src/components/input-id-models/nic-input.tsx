@@ -23,7 +23,7 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`http://localhost:8000/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -41,7 +41,7 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
     }
 
     try {
-      const response = await axios.get(`http://localhost:8000/patient/${nic}`);
+      const response = await axios.get(`/api/patient/${nic}`);
       console.log("response", response);
       setPatient(response.data.Patient);
       navigate("/admission-sheet-register-page");

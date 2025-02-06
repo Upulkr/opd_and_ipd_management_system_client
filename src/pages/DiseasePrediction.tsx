@@ -339,7 +339,7 @@ const testFields = {
       description: "Mean of distances from center to points on the perimeter",
     },
     {
-      name: "meantemperature",
+      name: "meantexture",
       label: "Mean Texture",
       description: "Standard deviation of gray-scale values",
     },
@@ -513,12 +513,20 @@ export default function DiseasePrediction() {
     try {
       setLoading(true);
       const response = await axios.post(
-        `http://localhost:8000/predict/${selectedTest}`,
+        `http://localhost:5000/predict/${selectedTest}`,
         data
       );
       if (response.status === 200) {
         setPrediction({
-          result: response.data.prediction,
+          result:
+            response.data.disease === "breast_cancer"
+              ? response.data.message ===
+                  "No signs of breast cancer detected." &&
+                response.data.prediction === 1
+                ? 0
+                : 1
+              : response.data.prediction,
+
           message: response.data.message,
         });
         setShowResult(true);
@@ -609,7 +617,10 @@ export default function DiseasePrediction() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
-                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-6 `}>
+                  <div
+                    className={`
+                        grid grid-cols-1 sm:grid-cols-2 gap-6  `}
+                  >
                     {selectedTest &&
                       testFields[selectedTest]?.map((field) => (
                         <FormField

@@ -99,7 +99,7 @@ export const MobileClinic = () => {
   //   }
   //   try {
   //     setLoading(true);
-  //     const response = await axios(`http://localhost:8000/clinicassigmnent`, {
+  //     const response = await axios(`/api/clinicassigmnent`, {
   //       method: "POST",
   //       headers: {
   //         "Content-Type": "application/json",
@@ -127,9 +127,7 @@ export const MobileClinic = () => {
 
   const getPatientsbyAge = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8000/mobileclinic/getpatientsbyage`
-      );
+      const response = await axios.get(`/api/mobileclinic/getpatientsbyage`);
       if (response.status === 200) {
         setPatients(response.data.ageGroupCounts);
         setClinincAgeGroups(response.data.ageGroupCounts);
@@ -141,9 +139,7 @@ export const MobileClinic = () => {
 
   const getMonthlyhomevisitsForEachMonth = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8000/mobileclinic/monthlyhomevisits`
-      );
+      const response = await axios.get(`/api/mobileclinic/monthlyhomevisits`);
       if (response.status === 200) {
         setMonthlyHomeVisits(response.data.monthlyhomevisits);
       }
@@ -155,7 +151,7 @@ export const MobileClinic = () => {
   const getCountCompletedVisits = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/mobileclinic/getcountofcompletedmobileclinincs`
+        `/api/mobileclinic/getcountofcompletedmobileclinincs`
       );
       if (res.status === 200) {
         setCompletedClinincCountFor30days(res.data.completedMobileClinics);
@@ -168,7 +164,7 @@ export const MobileClinic = () => {
 
   const fetchPatients = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/patient`);
+      const response = await axios.get(`/api/patient`);
       if (response.status === 200) {
         setPatients(response.data.Patients);
       }
@@ -183,9 +179,7 @@ export const MobileClinic = () => {
 
   const mobileClinincsForTable = useCallback(async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8000/mobileclinic/sheduled`
-      );
+      const res = await axios.get(`/api/mobileclinic/sheduled`);
       if (res.status === 200) {
         const mobileclinicAssigments = res.data.mobileclinicAssigments;
         if (mobileclinicAssigments) {
@@ -248,7 +242,7 @@ export const MobileClinic = () => {
     }
     try {
       setLoading(true);
-      const response = await axios(`http://localhost:8000/mobileclinic`, {
+      const response = await axios(`/api/mobileclinic`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

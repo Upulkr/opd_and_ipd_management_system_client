@@ -13,7 +13,7 @@ function Pharamacy() {
   const [searchedDrug, setSearchedDrug] = useState([]);
   const fethingAllDrugs = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/drugs");
+      const response = await axios.get("/api/drugs");
       if (response.status === 200) {
         setDrugs(response.data.drugs);
       }

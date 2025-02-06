@@ -17,7 +17,7 @@ function OutpatientDepartment() {
 
   const fetchTodayOutPatients = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/outPatient");
+      const response = await axios.get("/api/outPatient");
       if (response.status === 200) {
         setTodayOutPatients(response.data);
       }
