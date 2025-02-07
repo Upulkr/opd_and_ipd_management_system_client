@@ -6,6 +6,7 @@ export type State = {
   showBhtInput: boolean;
   enableUpdate: boolean;
   enableAddOutPatient: null;
+  IssavePredictionButonClick: boolean;
 };
 
 export type Actions = {
@@ -13,6 +14,7 @@ export type Actions = {
 
   setEnableUpdating: (value: boolean) => void;
   navigateOutPatientPage: (value: boolean) => void;
+  setIsSavePredictionButonClick: (value: boolean) => void;
 };
 
 export const useFrontendComponentsStore = create<State & Actions>()(
@@ -22,11 +24,14 @@ export const useFrontendComponentsStore = create<State & Actions>()(
       enableUpdate: false,
       IsNAvigateToOutPatientPage: false,
       enableAddOutPatient: null,
+      IssavePredictionButonClick: false,
       setShowBhtInput: () =>
         set((state) => ({ showBhtInput: !state.showBhtInput })),
       setEnableUpdating: (value) => set({ enableUpdate: value }),
       navigateOutPatientPage: (value) =>
         set({ IsNAvigateToOutPatientPage: value }),
+      setIsSavePredictionButonClick: (value) =>
+        set({ IssavePredictionButonClick: value }),
     }),
 
     { name: "frontend-components-store" }

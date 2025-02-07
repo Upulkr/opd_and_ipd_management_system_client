@@ -1,3 +1,4 @@
+import { AlertDialogBox } from "@/components/Alert/AlertDialogBox";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,11 +25,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
+import { usePatientStore } from "@/stores/usePatientStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
+import { set } from "date-fns";
 import { Activity, Heart, Stethoscope } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import * as z from "zod";
 
@@ -487,24 +492,76 @@ const testFields = {
 };
 
 export default function DiseasePrediction() {
+  const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
+    useFrontendComponentsStore((state) => state);
+  const { patientNic, setPatientNic } = usePatientStore((state) => state);
   const [selectedTest, setSelectedTest] = useState<
     keyof typeof testFields | ""
   >("");
   const [showResult, setShowResult] = useState(false);
   const [prediction, setPrediction] = useState({ result: "", message: "" });
   const [loading, setLoading] = useState(false);
+  const [savePopup, setSavePopup] = useState(false);
 
+  const navigate = useNavigate();
   const form = useForm({
     resolver: zodResolver(
       testTypes.find((t) => t.id === selectedTest)?.schema || z.object({})
     ),
   });
 
+  //savePrediction relavant user
+  const savePrediction = async () => {
+    if (patientNic === "") return;
+    try {
+      const isPatientExist = await axios.get(
+        `/api/patient/isPatientexist/${patientNic}`
+      );
+
+      if (isPatientExist.data.patientExist === false) {
+        setIsSavePredictionButonClick(false);
+        toast.error("Patient not found, please register the patient");
+        navigate("/patient-register-form");
+      }
+      const response = await axios("/api/diseaseprediction", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: {
+          nic: patientNic,
+          disease: selectedTest,
+          prediction: prediction.message,
+        },
+      });
+
+      if (response.status === 200) {
+        setIsSavePredictionButonClick(false);
+        setSavePopup(false);
+        toast.success("Prediction saved successfully");
+        setPatientNic("");
+      }
+    } catch (error: any) {
+      setSavePopup(false);
+      setIsSavePredictionButonClick(false);
+      toast.error(
+        error.response?.status === 500
+          ? "Error saving prediction"
+          : "Unexpected error occurred"
+      );
+    }
+  };
+
+  // Run only when `isSavePredictionButtonClick` is true
+  useEffect(() => {
+    if (!IssavePredictionButonClick) return; // Exit if false
+    savePrediction();
+  }, [IssavePredictionButonClick]);
+
   const onSubmit = async (data: any) => {
     if (data.length === 0) {
       toast.error("Please fill in all the fields.");
     }
-    console.log("Data:", data);
 
     if (!selectedTest) {
       toast.error("Please select a test type.");
@@ -532,6 +589,7 @@ export default function DiseasePrediction() {
         setShowResult(true);
       }
       setLoading(false);
+      setSavePopup(true);
     } catch (error: any) {
       setLoading(false);
       if (error.status === 400) {
@@ -540,7 +598,7 @@ export default function DiseasePrediction() {
       }
     }
   };
-  console.log("prediction", prediction);
+
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="max-w-5xl mx-auto space-y-10">
@@ -555,7 +613,9 @@ export default function DiseasePrediction() {
         </div>
 
         <ToastContainer />
-
+        {savePopup && showResult === false && (
+          <AlertDialogBox savePopUp={savePopup} info={"Save Prediction"} />
+        )}
         {/* Test Selection or Form */}
         {!selectedTest ? (
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
