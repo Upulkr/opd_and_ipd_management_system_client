@@ -36,10 +36,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
 
 type StaffMember = {
   id: number;
-  registrationNumber: string;
+  registrationId: string;
   role: "doctor" | "nurse" | "pharmacist";
   ward?: string;
 };
@@ -66,36 +68,74 @@ export default function AdminDashboard() {
   const [newStaffWard, setNewStaffWard] = React.useState<string>("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState<StaffMember[]>([]);
+  const [fetchedStaff, setFetchedStaff] = React.useState<StaffMember[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(false);
+
+  const fetchStaff = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get("/api/staffwardassignment");
+      if (response.status === 200) {
+        setFetchedStaff(response.data.staffAssignments);
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching staff:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchStaff();
+  }, []);
 
   const assignStaffMember = () => {
     if (newStaffRegistration && newStaffRole) {
       const newStaff: StaffMember = {
         id: Date.now(),
-        registrationNumber: newStaffRegistration,
+        registrationId: newStaffRegistration,
         role: newStaffRole,
         ward: newStaffWard || undefined,
       };
-      setStaff([...staff, newStaff]);
+      setStaff([newStaff]);
       setNewStaffRegistration("");
       setNewStaffRole("doctor");
       setNewStaffWard("");
     }
   };
 
-  const assignToWard = (staffId: number, wardName: string) => {
-    setStaff(
-      staff.map((s) => (s.id === staffId ? { ...s, ward: wardName } : s))
-    );
+  const assignToWard = async (staffId: string, ward: string) => {
+    try {
+      const response = await axios(`/api/staffwardassignment/${staffId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: { ward },
+      });
+      if (response.status === 200) {
+        toast.success("Staff assigned successfully");
+      }
+    } catch (error) {
+      console.error("Error assigning staff to ward:", error);
+    }
   };
 
-  const removeFromWard = (staffId: number) => {
-    setStaff(
-      staff.map((s) => (s.id === staffId ? { ...s, ward: undefined } : s))
-    );
-  };
-
-  const deleteStaffMember = (staffId: number) => {
-    setStaff(staff.filter((s) => s.id !== staffId));
+  const deleteStaffMember = async (staffId: number) => {
+    try {
+      setLoading(true);
+      const response = await axios.delete(
+        `/api/staffwardassignment/${staffId}`
+      );
+      if (response.status === 200) {
+        setLoading(false);
+        toast.success("Staff deleted successfully");
+      }
+    } catch (error: any) {
+      setLoading(false);
+      toast.error("Error deleting staff");
+      console.error("Error deleting staff:", error);
+    }
   };
 
   const getWardStats = () => {
@@ -108,16 +148,23 @@ export default function AdminDashboard() {
     }));
   };
 
-  const searchStaff = () => {
-    const results = staff.filter((s) =>
-      s.registrationNumber.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setSearchResults(results);
-  };
+  // const searchStaff = () => {
+  //   const results =
+  //     fetchedStaff.length > 0
+  //       ? fetchedStaff?.filter((s) =>
+  //           s.registrationId.toString().includes(searchQuery.toLowerCase())
+  //         )
+  //       : [];
+  //   setSearchResults(results);
+  // };
 
   const StaffTable = ({ role }: { role: StaffMember["role"] }) => {
     const [showAll, setShowAll] = React.useState(false);
-    const filteredStaff = staff.filter((s) => s.role === role);
+
+    const filteredStaff =
+      fetchedStaff.length > 0
+        ? fetchedStaff?.filter((s) => s.role === role)
+        : [];
     const displayStaff = showAll ? filteredStaff : filteredStaff.slice(0, 4);
 
     return (
@@ -132,86 +179,90 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {displayStaff.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell>{s.registrationNumber}</TableCell>
-                  <TableCell>{s.ward || "Not assigned"}</TableCell>
-                  <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="mr-2">
-                          <UserCircle className="h-4 w-4 mr-2" />
-                          View Profile
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Staff Profile</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-2">
-                          <p>
-                            <strong>Registration Number:</strong>{" "}
-                            {s.registrationNumber}
-                          </p>
-                          <p>
-                            <strong>Role:</strong> {s.role}
-                          </p>
-                          <p>
-                            <strong>Ward:</strong> {s.ward || "Not assigned"}
-                          </p>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    {role !== "pharmacist" && (
+              {displayStaff.length > 0 ? (
+                displayStaff.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell>{s.registrationId}</TableCell>
+                    <TableCell>{s.ward || "Not assigned"}</TableCell>
+                    <TableCell className="flex">
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button variant="outline" size="sm" className="mr-2">
-                            <Edit className="h-4 w-4 mr-2" />
-                            Assign
+                            <UserCircle className="h-4 w-4 mr-2" />
+                            View Profile
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
-                            <DialogTitle>Assign to Ward</DialogTitle>
+                            <DialogTitle>Staff Profile</DialogTitle>
                           </DialogHeader>
-                          <Select
-                            onValueChange={(value) => assignToWard(s.id, value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a ward" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {WARDS.map((ward) => (
-                                <SelectItem key={ward.id} value={ward.name}>
-                                  {ward.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <div className="space-y-2">
+                            <p>
+                              <strong>Registration Number:</strong>{" "}
+                              {s.registrationId}
+                            </p>
+                            <p>
+                              <strong>Role:</strong> {s.role}
+                            </p>
+                            <p>
+                              <strong>Ward:</strong> {s.ward || "Not assigned"}
+                            </p>
+                          </div>
                         </DialogContent>
                       </Dialog>
-                    )}
-                    {s.ward && role !== "pharmacist" && (
+                      {role !== "pharmacist" && (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mr-2"
+                            >
+                              <Edit className="h-4 w-4 mr-2" />
+                              Assign
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Assign to Ward</DialogTitle>
+                            </DialogHeader>
+                            <Select
+                              onValueChange={(value) =>
+                                assignToWard(s.id.toString(), value)
+                              }
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a ward" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {WARDS.map((ward) => (
+                                  <SelectItem key={ward.id} value={ward.name}>
+                                    {ward.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+
                       <Button
-                        variant="outline"
+                        variant="destructive"
                         size="sm"
-                        onClick={() => removeFromWard(s.id)}
-                        className="mr-2"
+                        onClick={() => deleteStaffMember(s.id)}
+                        disabled={loading}
                       >
-                        Remove from Ward
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {loading ? "Deleting..." : "Delete"}
                       </Button>
-                    )}
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteStaffMember(s.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <p className="text-center text-md font-semibold ">
+                  No staff found
+                </p>
+              )}
             </TableBody>
           </Table>
         </div>
@@ -240,50 +291,77 @@ export default function AdminDashboard() {
     </div>
   );
 
-  const SearchComponent = () => (
-    <div className="mb-6">
-      <h2 className="text-lg font-semibold mb-2">Search Assignment</h2>
-      <div className="flex space-x-2">
-        <Input
-          type="text"
-          placeholder="Enter registration number"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <Button onClick={searchStaff}>
-          <Search className="h-4 w-4 mr-2" />
-          Search
-        </Button>
-      </div>
-      {searchResults.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-md font-semibold mb-2">Search Results:</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Registration Number</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Ward</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {searchResults.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell>{s.registrationNumber}</TableCell>
-                  <TableCell>{s.role}</TableCell>
-                  <TableCell>{s.ward || "Not assigned"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
-  );
+  // const SearchComponent = () => (
+  //   <div className="mb-6">
+  //     <h2 className="text-lg font-semibold mb-2">Search Assignment</h2>
+  //     <div className="flex space-x-2">
+  //       <Input
+  //         type="text"
+  //         placeholder="Enter registration number"
+  //         value={searchQuery}
+  //         onChange={(e) => setSearchQuery(e.target.value)}
+  //       />
+  //       <Button onClick={searchStaff}>
+  //         <Search className="h-4 w-4 mr-2" />
+  //         Search
+  //       </Button>
+  //     </div>
+  //     {searchResults.length > 0 && (
+  //       <div className="mt-4">
+  //         <h3 className="text-md font-semibold mb-2">Search Results:</h3>
+  //         <Table>
+  //           <TableHeader>
+  //             <TableRow>
+  //               <TableHead>Registration Number</TableHead>
+  //               <TableHead>Role</TableHead>
+  //               <TableHead>Ward</TableHead>
+  //             </TableRow>
+  //           </TableHeader>
+  //           <TableBody>
+  //             {searchResults.map((s) => (
+  //               <TableRow key={s.id}>
+  //                 <TableCell>{s.registrationId}</TableCell>
+  //                 <TableCell>{s.role}</TableCell>
+  //                 <TableCell>{s.ward || "Not assigned"}</TableCell>
+  //               </TableRow>
+  //             ))}
+  //           </TableBody>
+  //         </Table>
+  //       </div>
+  //     )}
+  //   </div>
+  // );
+
+  async function handleAssignStaff() {
+    try {
+      assignStaffMember();
+      console.log("staff", staff);
+      const response = await axios("/api/staffwardassignment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: {
+          staff,
+        },
+      });
+      if (response.status === 200) {
+        toast.success("Staff assigned successfully");
+      }
+    } catch (error: any) {
+      console.log("Error assigning staff", error);
+      toast.error(
+        error.response?.status === 500
+          ? "Error saving prediction"
+          : `${error.response?.data.error}`
+      );
+    }
+  }
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Hospital Admin Dashboard</h1>
+      <ToastContainer />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StaffCounter role="Total Staff" count={staff.length} />
         <StaffCounter
@@ -305,23 +383,25 @@ export default function AdminDashboard() {
             <CardTitle>Staff Management</CardTitle>
           </CardHeader>
           <CardContent>
-            <SearchComponent />
-            <Tabs defaultValue="doctors" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="doctors">Doctors</TabsTrigger>
-                <TabsTrigger value="nurses">Nurses</TabsTrigger>
-                <TabsTrigger value="pharmacists">Pharmacists</TabsTrigger>
-              </TabsList>
-              <TabsContent value="doctors">
-                <StaffTable role="doctor" />
-              </TabsContent>
-              <TabsContent value="nurses">
-                <StaffTable role="nurse" />
-              </TabsContent>
-              <TabsContent value="pharmacists">
-                <StaffTable role="pharmacist" />
-              </TabsContent>
-            </Tabs>
+            {/* <SearchComponent /> */}
+            {searchResults.length === 0 && (
+              <Tabs defaultValue="doctors" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="doctors">Doctors</TabsTrigger>
+                  <TabsTrigger value="nurses">Nurses</TabsTrigger>
+                  <TabsTrigger value="pharmacists">Pharmacists</TabsTrigger>
+                </TabsList>
+                <TabsContent value="doctors">
+                  <StaffTable role="doctor" />
+                </TabsContent>
+                <TabsContent value="nurses">
+                  <StaffTable role="nurse" />
+                </TabsContent>
+                <TabsContent value="pharmacists">
+                  <StaffTable role="pharmacist" />
+                </TabsContent>
+              </Tabs>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -332,14 +412,14 @@ export default function AdminDashboard() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                assignStaffMember();
+                handleAssignStaff();
               }}
               className="space-y-4"
             >
               <div>
-                <Label htmlFor="registrationNumber">Registration Number</Label>
+                <Label htmlFor="registrationId">Registration Number</Label>
                 <Input
-                  id="registrationNumber"
+                  id="registrationId"
                   value={newStaffRegistration}
                   onChange={(e) => setNewStaffRegistration(e.target.value)}
                   placeholder="Enter registration number"
@@ -364,7 +444,7 @@ export default function AdminDashboard() {
                 </Select>
               </div>
               <div>
-                <Label htmlFor="ward">Ward (Optional)</Label>
+                <Label htmlFor="ward">Ward </Label>
                 <Select value={newStaffWard} onValueChange={setNewStaffWard}>
                   <SelectTrigger id="ward">
                     <SelectValue placeholder="Select ward" />
@@ -379,9 +459,9 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={loading}>
                 <PlusCircle className="h-4 w-4 mr-2" />
-                Assign Staff
+                {loading ? "Assigning Staff" : "  Assign Staff"}
               </Button>
             </form>
           </CardContent>
