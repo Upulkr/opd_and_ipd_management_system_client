@@ -167,6 +167,20 @@ export default function AdminDashboard() {
         : [];
     const displayStaff = showAll ? filteredStaff : filteredStaff.slice(0, 4);
 
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const query = e.target.value;
+      setSearchQuery(query);
+
+      if (query.trim() === "") {
+        setSearchResults([]); // Reset when input is cleared
+      } else {
+        const searchedStaff = fetchedStaff.filter((s) =>
+          String(s.registrationId).includes(searchQuery)
+        );
+        setSearchResults(searchedStaff);
+      }
+    };
+
     return (
       <div>
         <div className="max-h-80 overflow-y-auto">
@@ -175,14 +189,28 @@ export default function AdminDashboard() {
               <TableRow>
                 <TableHead>Registration Number</TableHead>
                 <TableHead>Ward</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead>Actions</TableHead>
+                <TableHead>
+                  {" "}
+                  <Input
+                    id="id"
+                    type="number"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    placeholder="Search by registration number..."
+                    min={1}
+                  />
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {displayStaff.length > 0 ? (
-                displayStaff.map((s) => (
+              {(searchResults.length > 0 ? searchResults : displayStaff).map(
+                (s) => (
                   <TableRow key={s.id}>
                     <TableCell>{s.registrationId}</TableCell>
+                    <TableCell>{s.role}</TableCell>
+
                     <TableCell>{s.ward || "Not assigned"}</TableCell>
                     <TableCell className="flex">
                       <Dialog>
@@ -257,11 +285,7 @@ export default function AdminDashboard() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                <p className="text-center text-md font-semibold ">
-                  No staff found
-                </p>
+                )
               )}
             </TableBody>
           </Table>
@@ -384,24 +408,25 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             {/* <SearchComponent /> */}
-            {searchResults.length === 0 && (
-              <Tabs defaultValue="doctors" className="w-full">
+
+            <Tabs defaultValue="doctors" className="w-full">
+              {searchResults.length === 0 && (
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="doctors">Doctors</TabsTrigger>
                   <TabsTrigger value="nurses">Nurses</TabsTrigger>
                   <TabsTrigger value="pharmacists">Pharmacists</TabsTrigger>
                 </TabsList>
-                <TabsContent value="doctors">
-                  <StaffTable role="doctor" />
-                </TabsContent>
-                <TabsContent value="nurses">
-                  <StaffTable role="nurse" />
-                </TabsContent>
-                <TabsContent value="pharmacists">
-                  <StaffTable role="pharmacist" />
-                </TabsContent>
-              </Tabs>
-            )}
+              )}
+              <TabsContent value="doctors">
+                <StaffTable role="doctor" />
+              </TabsContent>
+              <TabsContent value="nurses">
+                <StaffTable role="nurse" />
+              </TabsContent>
+              <TabsContent value="pharmacists">
+                <StaffTable role="pharmacist" />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
         <Card>
