@@ -44,6 +44,14 @@ type StaffMember = {
   registrationId: string;
   role: "doctor" | "nurse" | "pharmacist";
   ward?: string;
+  nic?: string;
+};
+
+type StaffCount = {
+  ward: string;
+  noofdoctors: number;
+  noofnurses: number;
+  noofpharmacist: number;
 };
 
 type Ward = {
@@ -70,7 +78,9 @@ export default function AdminDashboard() {
   const [searchResults, setSearchResults] = React.useState<StaffMember[]>([]);
   const [fetchedStaff, setFetchedStaff] = React.useState<StaffMember[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
-
+  const [staffCountsGroupByWard, setStaffCountsGroupByWard] = React.useState<
+    StaffCount[]
+  >([]);
   const fetchStaff = async () => {
     try {
       setLoading(true);
@@ -84,9 +94,22 @@ export default function AdminDashboard() {
       console.error("Error fetching staff:", error);
     }
   };
+  const getStaffCountsGroupByWard = async () => {
+    try {
+      const response = await axios.get(
+        "/api/staffwardassignment/getstaffcount"
+      );
 
+      if (response.status === 200) {
+        setStaffCountsGroupByWard(response.data.staffCountGroupByWard);
+      }
+    } catch (error) {
+      console.error("Error fetching staff counts:", error);
+    }
+  };
   React.useEffect(() => {
     fetchStaff();
+    getStaffCountsGroupByWard();
   }, []);
 
   const assignStaffMember = () => {
@@ -136,16 +159,6 @@ export default function AdminDashboard() {
       toast.error("Error deleting staff");
       console.error("Error deleting staff:", error);
     }
-  };
-
-  const getWardStats = () => {
-    return WARDS.map((ward) => ({
-      ...ward,
-      doctors: staff.filter((s) => s.ward === ward.name && s.role === "doctor")
-        .length,
-      nurses: staff.filter((s) => s.ward === ward.name && s.role === "nurse")
-        .length,
-    }));
   };
 
   // const searchStaff = () => {
@@ -309,7 +322,7 @@ export default function AdminDashboard() {
   };
 
   const StaffCounter = ({ role, count }: { role: string; count: number }) => (
-    <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+    <div className="flex items-center space-x-3  p-4 bg-secondary rounded-lg">
       <span className="text-sm font-medium">{role}</span>
       <span className="text-2xl font-bold">{count}</span>
     </div>
@@ -359,14 +372,28 @@ export default function AdminDashboard() {
   async function handleAssignStaff() {
     try {
       assignStaffMember();
-      console.log("staff", staff);
+      if (staff.length === 0) {
+        toast.error("Please select a staff member to assign");
+        return;
+      }
+
+      const { registrationId, ward, role } = staff[0];
+
+      if (!registrationId || !ward || !role) {
+        toast.error("Please fill all the fields");
+        return;
+      }
+
       const response = await axios("/api/staffwardassignment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         data: {
-          staff,
+          registrationId,
+
+          ward,
+          role,
         },
       });
       if (response.status === 200) {
@@ -376,7 +403,7 @@ export default function AdminDashboard() {
       console.log("Error assigning staff", error);
       toast.error(
         error.response?.status === 500
-          ? "Error saving prediction"
+          ? "Error saving Assignment"
           : `${error.response?.data.error}`
       );
     }
@@ -387,18 +414,34 @@ export default function AdminDashboard() {
       <h1 className="text-3xl font-bold mb-6">Hospital Admin Dashboard</h1>
       <ToastContainer />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StaffCounter role="Total Staff" count={staff.length} />
+        <StaffCounter
+          role="Total Staff"
+          count={staffCountsGroupByWard?.reduce(
+            (acc, curr) =>
+              acc + curr.noofdoctors + curr.noofnurses + curr.noofpharmacist,
+            0
+          )}
+        />
         <StaffCounter
           role="Doctors"
-          count={staff.filter((s) => s.role === "doctor").length}
+          count={staffCountsGroupByWard?.reduce(
+            (acc, curr) => acc + curr.noofdoctors,
+            0
+          )}
         />
         <StaffCounter
           role="Nurses"
-          count={staff.filter((s) => s.role === "nurse").length}
+          count={staffCountsGroupByWard?.reduce(
+            (acc, curr) => acc + curr.noofnurses,
+            0
+          )}
         />
         <StaffCounter
           role="Pharmacists"
-          count={staff.filter((s) => s.role === "pharmacist").length}
+          count={staffCountsGroupByWard?.reduce(
+            (acc, curr) => acc + curr.noofpharmacist,
+            0
+          )}
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -448,6 +491,7 @@ export default function AdminDashboard() {
                   value={newStaffRegistration}
                   onChange={(e) => setNewStaffRegistration(e.target.value)}
                   placeholder="Enter registration number"
+                  required
                 />
               </div>
               <div>
@@ -484,7 +528,16 @@ export default function AdminDashboard() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={
+                  loading ||
+                  !newStaffRegistration ||
+                  !newStaffRole! ||
+                  !newStaffWard
+                }
+              >
                 <PlusCircle className="h-4 w-4 mr-2" />
                 {loading ? "Assigning Staff" : "  Assign Staff"}
               </Button>
@@ -506,13 +559,18 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {getWardStats().map((ward) => (
-                <TableRow key={ward.id}>
-                  <TableCell>{ward.name}</TableCell>
-                  <TableCell>{ward.doctors}</TableCell>
-                  <TableCell>{ward.nurses}</TableCell>
-                </TableRow>
-              ))}
+              {staffCountsGroupByWard.length > 0 ? (
+                staffCountsGroupByWard.map((detail, i) => (
+                  <TableRow key={i + 1}>
+                    <TableCell>{detail.ward}</TableCell>
+                    <TableCell>{detail.noofdoctors}</TableCell>
+                    <TableCell>{detail.noofnurses}</TableCell>
+                    <TableCell>{detail.noofpharmacists}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <p>No Staff Assigned </p>
+              )}
             </TableBody>
           </Table>
         </CardContent>
