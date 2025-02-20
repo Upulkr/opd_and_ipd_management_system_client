@@ -7,6 +7,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 interface StaffMember {
   id: number;
@@ -62,13 +64,28 @@ const staffMembers: StaffMember[] = [
 ];
 
 export function StaffDutyCard() {
-  const doctorCount = staffMembers.filter(
-    (staff) => staff.role === "Doctor"
-  ).length;
-  const nurseCount = staffMembers.filter(
-    (staff) => staff.role === "Nurse"
-  ).length;
+  const [staffMembers, setStaffMembers] = useState([]);
 
+  const fetchStaffMembers = async () => {
+    try {
+      const response = await axios.get("/api/outPatient/getstaff");
+      if (response.status === 200) {
+        setStaffMembers(response.data.staffOutPatient);
+      }
+    } catch (error: any) {
+      if (error.status === 500) {
+        console.log(error.data.message);
+      } else {
+        console.log("Something went wrong", error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchStaffMembers();
+  }, []);
+  const doctors = staffMembers?.filter((staff) => staff.role === "doctor");
+  const nurses = staffMembers?.filter((staff) => staff.role === "nurse");
   return (
     <Card>
       <CardHeader>
@@ -77,11 +94,11 @@ export function StaffDutyCard() {
       <CardContent>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="text-center">
-            <p className="text-2xl font-bold">{doctorCount}</p>
+            <p className="text-2xl font-bold">{doctors.length}</p>
             <p className="text-sm text-muted-foreground">Doctors</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold">{nurseCount}</p>
+            <p className="text-2xl font-bold">{nurses.length}</p>
             <p className="text-sm text-muted-foreground">Nurses</p>
           </div>
         </div>

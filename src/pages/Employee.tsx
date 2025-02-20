@@ -66,6 +66,7 @@ const WARDS: Ward[] = [
   { id: 3, name: "Pediatrics" },
   { id: 4, name: "Surgery" },
   { id: 5, name: "Cardiology" },
+  { id: 6, name: "Outpatient" },
 ];
 
 export default function AdminDashboard() {
