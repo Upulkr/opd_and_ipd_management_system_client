@@ -20,22 +20,25 @@ import {
 } from "lucide-react";
 import SidebarComponent from "./components/SideBar/SidebarComponent";
 import { SidebarProvider } from "./components/ui/sidebar";
+import AddClininicFormpage from "./pages/AddClininicFormpage";
+import { AddNewDrugFormpage } from "./pages/AddNewDrugFormpage";
+import AddOutPatientForm from "./pages/AddOutPatientFormPage";
+import AdmissionBookPage from "./pages/AdmiisionBookPage";
 import AdmissionSheet from "./pages/AdmissionSheet";
 import AdmissionSheetRegisterPage from "./pages/AdmissionSheetRegisterPage";
 import ClinicNotifier from "./pages/ClinicNotifier";
+import ClinincAssignPAge from "./pages/ClinincAssignPAge";
+import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
+import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
 import IntensiveCareUnit from "./pages/IntensiceCareUnit";
+import LogIn from "./pages/LogIn";
 import MobileClinic from "./pages/MobileClinic";
+import PatientProfilePage from "./pages/PatientProfilePage";
 import PatientRegister from "./pages/PatientRegister";
 import Pharamacy from "./pages/Pharamacy";
-import AdmissionBookPage from "./pages/AdmiisionBookPage";
-import PatientProfilePage from "./pages/PatientProfilePage";
-import AddOutPatientForm from "./pages/AddOutPatientFormPage";
-import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
-import { AddNewDrugFormpage } from "./pages/AddNewDrugFormpage";
-import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
-import AddClininicFormpage from "./pages/AddClininicFormpage";
-import ClinincAssignPAge from "./pages/ClinincAssignPAge";
+import Signup from "./pages/SignUp";
 import ViewInMapPage from "./pages/ViewInMapPage";
+import EmailVerificationPage from "./pages/EmailVerificationPage";
 
 function App() {
   const Departments = [
@@ -161,6 +164,12 @@ function App() {
           <Route path="/create-new-clinic" element={<AddClininicFormpage />} />
           <Route path="/clinic-assign" element={<ClinincAssignPAge />} />
           <Route path="/view-in-map/:location?" element={<ViewInMapPage />} />
+          <Route path="/log-in" element={<LogIn />} />
+          <Route path="/sign-up" element={<Signup />} />
+          <Route
+            path={`/auth/verify-email/:token`}
+            element={<EmailVerificationPage />}
+          />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>
