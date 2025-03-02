@@ -110,9 +110,10 @@ export default function SignupPage() {
 
         form.reset();
 
-        setTimeout(() => {
+        const timeOut = setTimeout(() => {
           navigate("/log-in");
-        }, 6000); // Give 2 seconds for toast to show
+        }, 6000);
+        return () => clearTimeout(timeOut); // Give 2 seconds for toast to show
       }
     } catch (error: any) {
       setIsLoading(false);

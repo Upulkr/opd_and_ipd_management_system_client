@@ -41,10 +41,10 @@ function SidebarComponent({ Departments }: { Departments: Department[] }) {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-md xl:text-xl font-bold text-center">
+          {/* <SidebarGroupLabel className="text-md xl:text-xl font-bold text-center">
             Departments
-          </SidebarGroupLabel>
-          <SidebarGroupContent className="mt-4">
+          </SidebarGroupLabel> */}
+          <SidebarGroupContent className="mt-20">
             <SidebarMenu>
               {Departments.map((department) => (
                 <SidebarMenuItem key={department.id} className="mb-2 ">
