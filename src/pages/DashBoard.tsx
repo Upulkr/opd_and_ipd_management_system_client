@@ -1,27 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calendar,
-  Search,
-  UserPlus,
-  Users,
-  BedDouble,
-  Activity,
-  UserMinus,
-  UserCheck,
-} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,46 +19,80 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import axios from "axios";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+  Activity,
+  BedDouble,
+  Calendar,
+  Pill,
+  Search,
+  Stethoscope,
+  Syringe,
+  UserCheck,
+  UserMinus,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts";
-import { Stethoscope, Syringe, Pill } from "lucide-react";
 
-const monthlyVisitData = [
-  { name: "Jan", visits: 4000 },
-  { name: "Feb", visits: 3000 },
-  { name: "Mar", visits: 2000 },
-  { name: "Apr", visits: 2780 },
-  { name: "May", visits: 1890 },
-  { name: "Jun", visits: 2390 },
-  { name: "Jul", visits: 3490 },
-];
+// const monthlyVisitData = [
+//   { name: "Jan", visits: 4000 },
+//   { name: "Feb", visits: 3000 },
+//   { name: "Mar", visits: 2000 },
+//   { name: "Apr", visits: 2780 },
+//   { name: "May", visits: 1890 },
+//   { name: "Jun", visits: 2390 },
+//   { name: "Jul", visits: 3490 },
+// ];
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [noOfOutPatients, setNoOfOutPatients] = useState(0);
+  const [noOfInPatients, setNoOfInPatients] = useState(0);
+  const [monthlyVisitData, setMonthlyVisitData] = useState([]);
+  const getNoOfOutPatients = async () => {
+    try {
+      const response = await axios.get("/api/outPatient//outpatientscount");
+      setNoOfOutPatients(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getNoOfInPatients = async () => {
+    try {
+      const response = await axios.get(
+        "/api/admissionbook/noofadmissionbookstoday"
+      );
+      if (response.data) setNoOfInPatients(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getMOnthlyPatientVisits = async () => {
+    try {
+      const response = await axios.get("/api/getmonthlypatientvisit");
+      if (response.data) setMonthlyVisitData(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    getNoOfOutPatients();
+    getNoOfInPatients();
+    getMOnthlyPatientVisits();
+  }, []);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -114,27 +137,25 @@ export default function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                Total Patients
+                Total Patients Today
               </CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1,248</div>
-              <p className="text-xs text-muted-foreground">
-                +12% from last month
-              </p>
+              <div className="text-2xl font-bold">
+                {noOfInPatients + noOfOutPatients}
+              </div>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Outpatients</CardTitle>
-              <UserPlus className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">
+                Outpatients Today
+              </CardTitle>
+              {/* <UserPlus className="h-4 w-4 text-muted-foreground" /> */}
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">842</div>
-              <p className="text-xs text-muted-foreground">
-                +8% from last month
-              </p>
+              <div className="text-2xl font-bold">{noOfOutPatients}</div>
             </CardContent>
           </Card>
           <Card>
@@ -143,10 +164,7 @@ export default function Dashboard() {
               <BedDouble className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">406</div>
-              <p className="text-xs text-muted-foreground">
-                +18% from last month
-              </p>
+              <div className="text-2xl font-bold">{noOfInPatients}</div>
             </CardContent>
           </Card>
           <Card>
@@ -181,7 +199,7 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={monthlyVisitData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
+                  <XAxis dataKey="month_year" />
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="visits" fill="#8884d8" />
@@ -261,7 +279,7 @@ export default function Dashboard() {
                   <UserCheck className="mr-2 h-4 w-4 text-green-500" />
                   <span className="text-sm font-medium">Admissions:</span>
                   <span className="ml-auto text-2xl font-bold text-green-500">
-                    18
+                    {noOfInPatients}
                   </span>
                 </div>
                 <div className="flex items-center">
