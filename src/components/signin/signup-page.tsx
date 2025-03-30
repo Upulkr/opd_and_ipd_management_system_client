@@ -53,7 +53,7 @@ const signupFormSchema = z
       .string()
       .min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
-    phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+    phoneNumber: z.string().regex(/^\+?[0-9]\d{1,14}$/, {
       message: "Please enter a valid phone number",
     }),
     role: z.nativeEnum(Role),

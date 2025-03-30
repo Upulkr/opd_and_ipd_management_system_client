@@ -24,6 +24,7 @@ import {
 import { usePatientStore } from "@/stores/usePatientStore";
 import { useNavigate } from "react-router-dom";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
+import { useAuthStore } from "@/stores/useAuth";
 
 const formSchema = z.object({
   nic: z.string(),
@@ -43,9 +44,11 @@ export const PatientRegisterForm = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { patientNic, setPatient } = usePatientStore((state) => state);
+  const token = useAuthStore((state) => state.token);
+
   const { navigateOutPatientPage, IsNAvigateToOutPatientPage } =
     useFrontendComponentsStore((state) => state);
-  console.log("NIC", patientNic);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,6 +74,7 @@ export const PatientRegisterForm = () => {
       const createPatient = await axios("/api/patient", {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         data: JSON.stringify(values),

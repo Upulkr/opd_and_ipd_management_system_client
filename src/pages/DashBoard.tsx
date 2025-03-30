@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,19 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/stores/useAuth";
+import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import {
-  Activity,
   BedDouble,
   Calendar,
   Pill,
@@ -35,6 +26,8 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import {
   Bar,
   BarChart,
@@ -56,10 +49,40 @@ import {
 // ];
 
 export default function Dashboard() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [noOfOutPatients, setNoOfOutPatients] = useState(0);
   const [noOfInPatients, setNoOfInPatients] = useState(0);
   const [monthlyVisitData, setMonthlyVisitData] = useState([]);
+  const token = useAuthStore((state) => state.token);
+  const { setPatient } = usePatientStore((state) => state);
+  const [nic, setNic] = useState<string>("");
+
+  const navigate = useNavigate();
+  const patientProfileHandler = async () => {
+    try {
+      // setIsSearching(true);
+      const response = await axios.get(`/api/patient/${nic}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        console.log("response", response.data.Patient);
+        setPatient(response.data.Patient);
+        // setIsSearching(false);
+        toast.success("Patient found successfully");
+        navigate(`/patient-profile-page`);
+      }
+    } catch (error: any) {
+      if (error.status === 500) {
+        // setIsSearching(false);
+        toast.error("Patient not found");
+        return;
+      } else {
+        // setIsSearching(false);
+        console.log("Error fetching patient", error);
+      }
+    }
+  };
   const getNoOfOutPatients = async () => {
     try {
       const response = await axios.get("/api/outPatient//outpatientscount");
@@ -96,42 +119,6 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-white px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <Activity className="h-6 w-6 text-primary" />
-          <h1 className="text-lg font-semibold">MediCare</h1>
-        </div>
-        <div className="ml-auto flex items-center gap-4">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">Login</Button>
-            </DialogTrigger>
-          </Dialog>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button>Sign Up</Button>
-            </DialogTrigger>
-          </Dialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar>
-                  <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                  <AvatarFallback>US</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 mt-16">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
@@ -180,10 +167,14 @@ export default function Dashboard() {
                   type="search"
                   placeholder="Search by NIC..."
                   className="h-8 text-sm"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  value={nic}
+                  onChange={(e) => setNic(e.target.value)}
                 />
-                <Button size="sm" className="h-8">
+                <Button
+                  size="sm"
+                  className="h-8"
+                  onClick={patientProfileHandler}
+                >
                   Find
                 </Button>
               </div>

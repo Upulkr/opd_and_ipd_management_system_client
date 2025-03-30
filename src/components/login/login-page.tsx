@@ -1,8 +1,9 @@
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -21,11 +21,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/stores/useAuth";
+import axios from "axios";
 import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
+import { useUserProfileData } from "@/stores/useUserProfileData";
 
 // Define the form schema with Zod
 const loginFormSchema = z.object({
@@ -41,6 +43,8 @@ type LoginFormValues = z.infer<typeof loginFormSchema>;
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { setToken } = useAuthStore((state) => state);
+  const { setUserProfileData } = useUserProfileData((state) => state);
   const navigate = useNavigate();
   // Initialize the form with react-hook-form
   const form = useForm<LoginFormValues>({
@@ -64,6 +68,9 @@ export default function LoginPage() {
       });
 
       if (response.status === 200) {
+        setToken(response.data.token);
+        setUserProfileData(response.data.user);
+        console.log("token", response.data.token);
         toast.success("Login successful");
         form.reset();
         navigate("/");

@@ -8,7 +8,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
 const tableHeaders = [
   "Ward Number",

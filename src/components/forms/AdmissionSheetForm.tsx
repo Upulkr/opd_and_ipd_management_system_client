@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useAuthStore } from "@/stores/useAuth";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
-import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -49,9 +49,9 @@ const formSchema = z.object({
 export const AdmissionSheetForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { patient } = usePatientStore((state) => state);
-  const { enableUpdate } = useFrontendComponentsStore((state) => state);
-  const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
 
+  const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  const token = useAuthStore((state) => state.token);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -92,6 +92,7 @@ export const AdmissionSheetForm = () => {
       const response = await axios(`/api/admissionSheet`, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         data: JSON.stringify(values),

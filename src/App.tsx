@@ -39,6 +39,8 @@ import Pharamacy from "./pages/Pharamacy";
 import Signup from "./pages/SignUp";
 import ViewInMapPage from "./pages/ViewInMapPage";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
+import Header from "./components/Header/Header";
+import UserProfile from "./pages/UserProfile";
 
 function App() {
   const Departments = [
@@ -110,6 +112,7 @@ function App() {
   return (
     <BrowserRouter>
       <SidebarProvider>
+        <Header />
         <SidebarComponent Departments={Departments} />
 
         <Routes>
@@ -125,7 +128,6 @@ function App() {
           />
           <Route path="/icu" element={<IntensiveCareUnit />} />
           <Route path="/clinic" element={<ClinicNotifier />} />
-
           <Route path="/pharmacy" element={<Pharamacy />} />
           <Route path="/employee" element={<Employee />} />
           <Route path="/ward-details" element={<Wards />} />
@@ -169,7 +171,8 @@ function App() {
           <Route
             path={`/auth/verify-email/:token`}
             element={<EmailVerificationPage />}
-          />
+          />{" "}
+          <Route path="/user-profile" element={<UserProfile />} />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>

@@ -2,10 +2,7 @@ import InputBHTForm from "@/components/input-id-models/bht-input";
 import InputBHTFormFrAdmissionSheet from "@/components/input-id-models/bht-input-for--individualadmissionSheetSearch";
 import InputBHTFormForAdmissionBookSearch from "@/components/input-id-models/bht-input-for-individual-AdmissionBook";
 import InputNicForm from "@/components/input-id-models/nic-input";
-import {
-  InpatienDashboardTable,
-  WardData,
-} from "@/components/tables/InpatienDashboardTable";
+import { InpatienDashboardTable } from "@/components/tables/InpatienDashboardTable";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,19 +13,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthStore } from "@/stores/useAuth";
 import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import { useWardTableInpatient } from "@/stores/useWardTableInpatient";
 import axios from "axios";
-import {
-  BedIcon,
-  BookIcon,
-  FileTextIcon,
-  SearchIcon,
-  UserIcon,
-} from "lucide-react";
+import { BedIcon, BookIcon, FileTextIcon, SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -36,10 +28,10 @@ import { toast } from "react-toastify";
 export default function InpatientDepartment() {
   const { setEnableUpdating } = useFrontendComponentsStore((state) => state);
   const [nic, setNic] = useState<string>("");
-  const [isSearcing, setIsSearching] = useState(false);
+  // const [isSearcing, setIsSearching] = useState(false);
   const [isShowNicForm, setIsShowNicForm] = useState(false);
   const [isShoBhtForm, setIsShoBhtForm] = useState(false);
-  const [wardData, setWardData] = useState<WardData[]>([]);
+  const [wardData, setWardData] = useState([]);
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const [isShowBHTForAdmissionSheet, setIsShowBHTForAdmissionSheet] =
     useState(false);
@@ -49,26 +41,31 @@ export default function InpatientDepartment() {
   const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
   const { noOfTotalBeds, noOfFreeBeds, setNoOfFreeBeds, setNoOfTotalBeds } =
     useWardTableInpatient((state) => state);
+  const token = useAuthStore((state) => state.token);
 
   const navigate = useNavigate();
   const patientProfileHandler = async () => {
     try {
-      setIsSearching(true);
-      const response = await axios.get(`/api/patient/${nic}`);
+      // setIsSearching(true);
+      const response = await axios.get(`/api/patient/${nic}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         console.log("response", response.data.Patient);
         setPatient(response.data.Patient);
-        setIsSearching(false);
+        // setIsSearching(false);
         toast.success("Patient found successfully");
         navigate(`/patient-profile-page`);
       }
     } catch (error: any) {
       if (error.status === 500) {
-        setIsSearching(false);
+        // setIsSearching(false);
         toast.error("Patient not found");
         return;
       } else {
-        setIsSearching(false);
+        // setIsSearching(false);
         console.log("Error fetching patient", error);
       }
     }
@@ -76,7 +73,11 @@ export default function InpatientDepartment() {
 
   const fetchTableData = async () => {
     try {
-      const response = await axios.get(`/api/warddetails`);
+      const response = await axios.get(`/api/warddetails`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setWardData(response.data.wardData);
         setNoOfFreeBeds(response.data.totalNoOfFreeBeds);
@@ -261,7 +262,7 @@ export default function InpatientDepartment() {
         <Tabs defaultValue="patients" className="mt-6">
           <TabsList>
             <TabsTrigger value="patients">{`Today's Update: ${new Date().toLocaleDateString()}`}</TabsTrigger>
-            <TabsTrigger value="admissions">Recent Admissions</TabsTrigger>
+            {/* <TabsTrigger value="admissions">Recent Admissions</TabsTrigger> */}
           </TabsList>
           <TabsContent value="patients">
             <Card>
@@ -296,7 +297,7 @@ export default function InpatientDepartment() {
               </CardContent>
             </Card>
           </TabsContent>
-          <TabsContent value="admissions">
+          {/* <TabsContent value="admissions">
             <Card>
               <CardHeader>
                 <CardTitle>Recent Admissions</CardTitle>
@@ -325,7 +326,7 @@ export default function InpatientDepartment() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </TabsContent> */}
         </Tabs>
       </div>
     </div>

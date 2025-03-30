@@ -5,12 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
+import { useAuthStore } from "@/stores/useAuth";
 
 export function InputNicForm({ onClose }: { onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");
   const { setPatient, setPatientNic } = usePatientStore((state) => state);
+  const token = useAuthStore((state) => state.token);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
@@ -39,9 +41,14 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
     } else {
       setPatientNic(nic);
     }
-
+    console.log("token", token);
     try {
-      const response = await axios.get(`/api/patient/${nic}`);
+      const response = await axios.get(`/api/patient/${nic}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       console.log("response", response);
       setPatient(response.data.Patient);
       navigate("/admission-sheet-register-page");
@@ -50,6 +57,8 @@ export function InputNicForm({ onClose }: { onClose: () => void }) {
       if (err.response?.status === 404) {
         toast.error("Patient not found, please register the patient");
         navigate("/patient-register-form");
+      } else if (err.response?.status === 403) {
+        toast.error("You are not authorized to access this page");
       } else {
         console.error("Error fetching patient", err);
         toast.error(err.message || "Error fetching patient");
