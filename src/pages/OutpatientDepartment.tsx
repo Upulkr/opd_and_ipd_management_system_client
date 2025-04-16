@@ -6,6 +6,7 @@ import { StaffDutyCard } from "@/components/outpatient/staff-duty-card";
 import Statistics from "@/components/outpatient/statisticsForOutPAtientDashboard";
 import { TodaysPatients } from "@/components/outpatient/todays-patients";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthStore } from "@/stores/useAuth";
 import axios from "axios";
 import { useEffect, useState } from "react";
 function OutpatientDepartment() {
@@ -14,10 +15,14 @@ function OutpatientDepartment() {
   const [showNicInputForView, setShowNicInputForView] = useState(false);
   const [todayOutPatients, setTodayOutPatients] = useState([]);
   const [error, setError] = useState("");
-
+  const token = useAuthStore((state) => state.token);
   const fetchTodayOutPatients = async () => {
     try {
-      const response = await axios.get("/api/outPatient");
+      const response = await axios.get("/api/outPatient", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setTodayOutPatients(response.data);
       }

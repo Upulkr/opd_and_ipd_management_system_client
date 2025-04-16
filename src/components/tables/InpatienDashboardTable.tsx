@@ -20,7 +20,7 @@ const tableHeaders = [
   "No.of Beds",
   "No.of Beds Available",
   "No.of Beds Occupied",
-  "Telephone Number",
+  "Ward Telephone Number",
 ];
 
 export type WardDetails = {
@@ -94,8 +94,9 @@ export function InpatienDashboardTable({
                 <TableCell className="text-center">{noOfdoctors}</TableCell>
                 <TableCell className="text-center">{noOfnurses}</TableCell>
                 <TableCell className="text-center">{noOfBeds}</TableCell>
-                <TableCell className="text-center">{noOfUsedBeds}</TableCell>
+
                 <TableCell className="text-center">{noOfFreeBeds}</TableCell>
+                <TableCell className="text-center">{noOfUsedBeds}</TableCell>
                 <TableCell className="text-center">{telephone}</TableCell>
               </TableRow>
             )

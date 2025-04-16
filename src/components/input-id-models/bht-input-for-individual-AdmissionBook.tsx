@@ -8,23 +8,17 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
+import { useAuthStore } from "@/stores/useAuth";
 
-export function InputBHTFormForAdmissionBookSearch({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
+export function InputBHTFormForAdmissionBookSearch() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
   const { setPatientBHT } = usePatientStore((state) => state);
-  const { setEnableUpdating, enableUpdate } = useFrontendComponentsStore(
-    (state) => state
-  );
-  const { setAdmissionBook, admissionBook } = useAdmissionBookByBHT(
-    (state) => state
-  );
+  const { enableUpdate } = useFrontendComponentsStore((state) => state);
+  const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  const token = useAuthStore((state) => state.token);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
@@ -53,8 +47,17 @@ export function InputBHTFormForAdmissionBookSearch({
     }
     console.log("+++++++,", enableUpdate);
     try {
+      if (!token) {
+        toast.error("No token found in localStorage");
+        return;
+      }
       const isAdmissionBookExisting = await axios.get(
-        `/api/admissionBook/bht?bht=${bht}`
+        `/api/admissionBook/bht?bht=${bht}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (!isAdmissionBookExisting.data.admissionBook) {
@@ -63,10 +66,16 @@ export function InputBHTFormForAdmissionBookSearch({
         navigate("/inpatient-department");
         return;
       }
+
       const response = await axios.get(
         enableUpdate === true
           ? `/api/admissionbook/bht?bht=${bht}`
-          : `/api/admissionSheet/bht?bht=${bht}`
+          : `/api/admissionsheet/bht?bht=${bht}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (enableUpdate === true) {
         setAdmissionBook(response.data.admissionBook);

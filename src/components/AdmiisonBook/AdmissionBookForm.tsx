@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as z from "zod";
 import { Textarea } from "../ui/textarea";
+import { useAuthStore } from "@/stores/useAuth";
 const formSchema = z.object({
   bht: z.string().min(1, "BHT is required"),
   nic: z.string().min(1, "NIC is required"),
@@ -55,6 +56,7 @@ const formSchema = z.object({
 
 export const AdmissionBookForm = () => {
   const navigate = useNavigate();
+  const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
   const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const [noOfAdmissionSheetsperDay, setNoOfAdmissionSheetsperDay] = useState(0);
@@ -63,18 +65,6 @@ export const AdmissionBookForm = () => {
 
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
   const { admissionBook } = useAdmissionBookByBHT((state) => state);
-  // Fetching the number of admission sheets per day
-
-  // const fetchAdmissionBookbyBHT = useCallback(async () => {
-  //   try {
-  //     const response = await axios.get(
-  //       `/api/admissionBook/${pattientBHT}`
-  //     );
-  //     setAdmissionBook(response.data.admissionBook);
-  //   } catch (error) {
-  //     console.error("Error fetching admission book", error);
-  //   }
-  // }, [pattientBHT, setAdmissionBook]);
 
   const fetchingNoOfAdmissionSheetsperDay = async () => {
     try {
@@ -82,7 +72,12 @@ export const AdmissionBookForm = () => {
         return;
       }
       const fetchAdmissionSheetperDay = await axios.get(
-        `/api/admissionSheet/noOfAdmissionSheetsperday`
+        `/api/admissionSheet/noOfAdmissionSheetsperday`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setNoOfAdmissionSheetsperDay(
         Number(fetchAdmissionSheetperDay.data.NoOfAdmissionSheetsPerDay)
@@ -98,7 +93,12 @@ export const AdmissionBookForm = () => {
         return;
       }
       const fetchAdmissionSheetperYear = await axios.get(
-        `/api/admissionSheet/noOfAdmissionSheetsperyear`
+        `/api/admissionSheet/noOfAdmissionSheetsperyear`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setNoOfAdmissionSheetsperYear(
         Number(fetchAdmissionSheetperYear.data.NoOfAdmissionSheetsPerYear)
@@ -202,7 +202,7 @@ export const AdmissionBookForm = () => {
       const response = await axios(`/api/admissionbook`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         data: values,
       });

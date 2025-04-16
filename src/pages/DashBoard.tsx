@@ -38,16 +38,6 @@ import {
   YAxis,
 } from "recharts";
 
-// const monthlyVisitData = [
-//   { name: "Jan", visits: 4000 },
-//   { name: "Feb", visits: 3000 },
-//   { name: "Mar", visits: 2000 },
-//   { name: "Apr", visits: 2780 },
-//   { name: "May", visits: 1890 },
-//   { name: "Jun", visits: 2390 },
-//   { name: "Jul", visits: 3490 },
-// ];
-
 export default function Dashboard() {
   const [noOfOutPatients, setNoOfOutPatients] = useState(0);
   const [noOfInPatients, setNoOfInPatients] = useState(0);

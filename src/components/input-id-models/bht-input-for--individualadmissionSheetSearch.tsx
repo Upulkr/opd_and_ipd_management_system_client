@@ -1,4 +1,5 @@
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import { useState } from "react";
@@ -6,36 +7,15 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
-export function InputBHTFormFrAdmissionSheet({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
+export function InputBHTFormFrAdmissionSheet() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
   const { setPatientBHT } = usePatientStore((state) => state);
-  const { setEnableUpdating, enableUpdate } = useFrontendComponentsStore(
-    (state) => state
-  );
-  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
-  // const [isLoadingButton, setIsLoadingButton] = useState(false);
-  //   const handleKeyDown = (e: React.KeyboardEvent) => {
-  //     if (e.key === "Enter") {
-  //       e.preventDefault(); // Prevent the default Enter behavior
-  //       console.log("NIC Submitted");
-  //       onClose(); // Close the form after submission
-  //     }
-  //   };
 
-  // const { data, error, isLoading, refetch } = useQuery({
-  //   queryKey: ["patient"],
-  //   queryFn: () =>
-  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
-  //   enabled: false,
-  // });
+  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  const token = useAuthStore((state) => state.token);
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -50,7 +30,12 @@ export function InputBHTFormFrAdmissionSheet({
 
     try {
       const isAdmissionSheetExisting = await axios.get(
-        `/api/admissionSheet/bht?bht=${bht}`
+        `/api/admissionSheet/bht?bht=${bht}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (!isAdmissionSheetExisting.data.admissionSheet) {
@@ -59,7 +44,11 @@ export function InputBHTFormFrAdmissionSheet({
         navigate("/inpatient-department/admission-sheet");
         return;
       }
-      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`);
+      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       setAdmissionSheetByBHT(response.data.admissionSheet);
 

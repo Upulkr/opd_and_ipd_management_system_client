@@ -6,6 +6,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useAuthStore } from "@/stores/useAuth";
 
 export function InputBHTForm({ onClose }: { onClose: () => void }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,6 +15,7 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
   const { setPatientBHT, setPatient } = usePatientStore((state) => state);
 
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  const token = useAuthStore((state) => state.token);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
@@ -43,7 +45,12 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
 
     try {
       const isAdmissionBookExisting = await axios.get(
-        `/api/admissionBook/bht?bht=${bht}`
+        `/api/admissionbook/bht?bht=${bht}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (isAdmissionBookExisting.data.admissionBook) {
@@ -52,7 +59,11 @@ export function InputBHTForm({ onClose }: { onClose: () => void }) {
 
         return;
       }
-      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`);
+      const response = await axios.get(`/api/admissionsheet/bht?bht=${bht}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log("response", response);
       setAdmissionSheetByBHT(response.data.admissionSheet);
       navigate("/admission-book-page");

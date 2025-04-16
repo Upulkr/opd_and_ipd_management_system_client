@@ -102,7 +102,11 @@ export const AdmissionSheetForm = () => {
         toast.success("Admission Sheet Created");
         // form.reset();
         setIsLoading(false);
-        await axios.put(`/api/wardBedsController/${values.wardNo}`);
+        await axios.put(`/api/wardbedscontroller/${values.wardNo}`, undefined, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         navigate("/inpatient-department");
       }
