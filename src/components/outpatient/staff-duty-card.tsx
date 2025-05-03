@@ -13,58 +13,13 @@ import axios from "axios";
 interface StaffMember {
   id: number;
   name: string;
-  role: "Doctor" | "Nurse";
+  role: string;
   specialty: string;
   shift: string;
 }
 
-const staffMembers: StaffMember[] = [
-  {
-    id: 1,
-    name: "Dr. John Smith",
-    role: "Doctor",
-    specialty: "General Medicine",
-    shift: "Morning",
-  },
-  {
-    id: 2,
-    name: "Dr. Emily Johnson",
-    role: "Doctor",
-    specialty: "Pediatrics",
-    shift: "Evening",
-  },
-  {
-    id: 3,
-    name: "Nurse Sarah Brown",
-    role: "Nurse",
-    specialty: "General Care",
-    shift: "Morning",
-  },
-  {
-    id: 4,
-    name: "Nurse Michael Lee",
-    role: "Nurse",
-    specialty: "Emergency Care",
-    shift: "Night",
-  },
-  {
-    id: 5,
-    name: "Dr. David Wilson",
-    role: "Doctor",
-    specialty: "Orthopedics",
-    shift: "Morning",
-  },
-  {
-    id: 6,
-    name: "Nurse Jessica Taylor",
-    role: "Nurse",
-    specialty: "Pediatric Care",
-    shift: "Evening",
-  },
-];
-
 export function StaffDutyCard() {
-  const [staffMembers, setStaffMembers] = useState([]);
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
 
   const fetchStaffMembers = async () => {
     try {

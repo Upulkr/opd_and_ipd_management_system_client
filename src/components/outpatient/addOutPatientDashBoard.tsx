@@ -44,6 +44,7 @@ import { CalendarIcon, Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuthStore } from "@/stores/useAuth";
 
 const prescriptionSchema = z.object({
   medicationName: z.string().min(2, {
@@ -92,7 +93,7 @@ export function AddOutpatientForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { patient, setPatient } = usePatientStore((state) => state);
-
+  const token = useAuthStore((state) => state.token);
   const { id } = useParams();
   console.log("id", id);
   const { outPatients } = usePatientStore((state) => state);
@@ -131,7 +132,7 @@ export function AddOutpatientForm() {
       const response = await axios("/api/outPatient", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         data: JSON.stringify(values),
       });

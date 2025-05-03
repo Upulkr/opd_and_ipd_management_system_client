@@ -12,10 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
+import { useStaffStore } from "@/stores/useStaffStore";
 import axios from "axios";
 import {
   BedDouble,
   Calendar,
+  Heart,
   Pill,
   Search,
   Stethoscope,
@@ -26,7 +28,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   Bar,
@@ -42,9 +44,17 @@ export default function Dashboard() {
   const [noOfOutPatients, setNoOfOutPatients] = useState(0);
   const [noOfInPatients, setNoOfInPatients] = useState(0);
   const [monthlyVisitData, setMonthlyVisitData] = useState([]);
+  interface WardBedStatus {
+    wardName: string;
+    noOfBeds: number;
+    percentage: number;
+  }
+
+  const [wardBedStatus, setWardBedStatus] = useState<WardBedStatus[]>([]);
   const token = useAuthStore((state) => state.token);
   const { setPatient } = usePatientStore((state) => state);
   const [nic, setNic] = useState<string>("");
+  const { staffCount } = useStaffStore((state) => state);
 
   const navigate = useNavigate();
   const patientProfileHandler = async () => {
@@ -101,12 +111,34 @@ export default function Dashboard() {
       console.error(error);
     }
   };
+
+  const getWardbedstatus = async () => {
+    try {
+      const response = await axios.get("/api/getwardbedstatus");
+      if (response.data) setWardBedStatus(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
     getNoOfOutPatients();
     getNoOfInPatients();
     getMOnthlyPatientVisits();
+    getWardbedstatus();
   }, []);
+  const noOfDoctors = staffCount?.reduce(
+    (acc, curr) => acc + curr.noofdoctors,
+    0
+  );
 
+  const noOfNurses = staffCount?.reduce(
+    (acc, curr) => acc + curr.noofnurses,
+    0
+  );
+  const noOfPharmacists = staffCount?.reduce(
+    (acc, curr) => acc + curr.noofpharmacist,
+    0
+  );
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 mt-16">
@@ -198,49 +230,24 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="font-medium">General Ward (32 beds)</div>
-                    <div className="text-muted-foreground">85% Occupied</div>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted">
-                    <div className="h-full w-[85%] rounded-full bg-blue-500"></div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="font-medium">Pediatric Ward (24 beds)</div>
-                    <div className="text-muted-foreground">62% Occupied</div>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted">
-                    <div className="h-full w-[62%] rounded-full bg-green-500"></div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="font-medium">ICU (12 beds)</div>
-                    <div className="text-muted-foreground">92% Occupied</div>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted">
-                    <div className="h-full w-[92%] rounded-full bg-red-500"></div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="font-medium">Surgical Ward (28 beds)</div>
-                    <div className="text-muted-foreground">78% Occupied</div>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted">
-                    <div className="h-full w-[78%] rounded-full bg-yellow-500"></div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="font-medium">Maternity Ward (18 beds)</div>
-                    <div className="text-muted-foreground">56% Occupied</div>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-muted">
-                    <div className="h-full w-[56%] rounded-full bg-green-500"></div>
-                  </div>
+                  {wardBedStatus.map((ward) => (
+                    <div key={ward.wardName}>
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="font-medium">
+                          {ward.wardName} -- total beds {ward.noOfBeds}
+                        </div>
+                        <div className="text-muted-foreground">
+                          {ward.percentage}% Occupied
+                        </div>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-gray-300 relative overflow-hidden">
+                        <div
+                          className="h-full bg-red-500 rounded-full"
+                          style={{ width: `${ward.percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
@@ -270,13 +277,13 @@ export default function Dashboard() {
                     15
                   </span>
                 </div>
-                <div className="flex items-center pt-2 border-t">
+                {/* <div className="flex items-center pt-2 border-t">
                   <BedDouble className="mr-2 h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Net Change:</span>
                   <span className="ml-auto text-2xl font-bold text-primary">
                     +3
                   </span>
-                </div>
+                </div> */}
               </div>
             </CardContent>
           </Card>
@@ -285,23 +292,29 @@ export default function Dashboard() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
-              <Button className="w-full justify-start" variant="outline">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Register New Patient
-              </Button>
+              <Link to="/patient-register-form ">
+                {" "}
+                <Button className="w-full justify-start" variant="outline">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Register New Patient
+                </Button>
+              </Link>
+
               <Button className="w-full justify-start" variant="outline">
                 <Calendar className="mr-2 h-4 w-4" />
                 Schedule Appointment
               </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <BedDouble className="mr-2 h-4 w-4" />
-                Manage Bed Allocation
-              </Button>
+              <Link to="/disease-prediction">
+                <Button className="w-full justify-start" variant="outline">
+                  <Heart className="mr-2 h-4 w-4" />
+                  Disease Prediction
+                </Button>
+              </Link>
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Today's Staff Overview</CardTitle>
+              <CardTitle>Staff Overview</CardTitle>
               <CardDescription>
                 Medical personnel currently on duty
               </CardDescription>
@@ -311,21 +324,21 @@ export default function Dashboard() {
                 <Stethoscope className="h-5 w-5 text-blue-500" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">Doctors</p>
-                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-2xl font-bold">{noOfDoctors}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <Syringe className="h-5 w-5 text-green-500" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">Nurses</p>
-                  <p className="text-2xl font-bold">58</p>
+                  <p className="text-2xl font-bold">{noOfNurses}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <Pill className="h-5 w-5 text-purple-500" />
                 <div className="flex-1">
                   <p className="text-sm font-medium">Pharmacists</p>
-                  <p className="text-2xl font-bold">7</p>
+                  <p className="text-2xl font-bold">{noOfPharmacists}</p>
                 </div>
               </div>
             </CardContent>

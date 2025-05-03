@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import { useState } from "react";
@@ -12,6 +13,7 @@ export function InputNicFormForOutPatientView({
 }: {
   onClose: () => void;
 }) {
+  const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");
@@ -44,7 +46,11 @@ export function InputNicFormForOutPatientView({
     }
 
     try {
-      const response = await axios.get(`/api/outPatient/${nic}`);
+      const response = await axios.get(`/api/outPatient/${nic}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         console.log("response", response.data.outPatient);
         setOutPatient(response.data.outPatient);

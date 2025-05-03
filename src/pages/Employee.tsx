@@ -1,18 +1,23 @@
 "use client";
 
-import * as React from "react";
-import {
-  PlusCircle,
-  Edit,
-  Trash2,
-  UserCircle,
-  Search,
-  ChevronDown,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -21,22 +26,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuthStore } from "@/stores/useAuth";
+import { useStaffStore } from "@/stores/useStaffStore";
 import axios from "axios";
+import {
+  ChevronDown,
+  Edit,
+  PlusCircle,
+  Trash2,
+  UserCircle,
+} from "lucide-react";
+import * as React from "react";
 import { toast, ToastContainer } from "react-toastify";
 
 type StaffMember = {
@@ -45,13 +46,6 @@ type StaffMember = {
   role: "doctor" | "nurse" | "pharmacist";
   ward?: string;
   nic?: string;
-};
-
-type StaffCount = {
-  ward: string;
-  noofdoctors: number;
-  noofnurses: number;
-  noofpharmacist: number;
 };
 
 type Ward = {
@@ -79,13 +73,16 @@ export default function AdminDashboard() {
   const [searchResults, setSearchResults] = React.useState<StaffMember[]>([]);
   const [fetchedStaff, setFetchedStaff] = React.useState<StaffMember[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [staffCountsGroupByWard, setStaffCountsGroupByWard] = React.useState<
-    StaffCount[]
-  >([]);
+  const { staffCount, setStaffCount } = useStaffStore((state) => state);
+  const token = useAuthStore((state) => state.token);
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("/api/staffwardassignment");
+      const response = await axios.get("/api/staffwardassignment", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setFetchedStaff(response.data.staffAssignments);
       }
@@ -95,14 +92,19 @@ export default function AdminDashboard() {
       console.error("Error fetching staff:", error);
     }
   };
-  const getStaffCountsGroupByWard = async () => {
+  const getstaffCount = async () => {
     try {
       const response = await axios.get(
-        "/api/staffwardassignment/getstaffcount"
+        "/api/staffwardassignment/getstaffcount",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response.status === 200) {
-        setStaffCountsGroupByWard(response.data.staffCountGroupByWard);
+        setStaffCount(response.data.staffCountGroupByWard);
       }
     } catch (error) {
       console.error("Error fetching staff counts:", error);
@@ -110,7 +112,7 @@ export default function AdminDashboard() {
   };
   React.useEffect(() => {
     fetchStaff();
-    getStaffCountsGroupByWard();
+    getstaffCount();
   }, []);
 
   const assignStaffMember = () => {
@@ -417,7 +419,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StaffCounter
           role="Total Staff"
-          count={staffCountsGroupByWard?.reduce(
+          count={staffCount?.reduce(
             (acc, curr) =>
               acc + curr.noofdoctors + curr.noofnurses + curr.noofpharmacist,
             0
@@ -425,21 +427,15 @@ export default function AdminDashboard() {
         />
         <StaffCounter
           role="Doctors"
-          count={staffCountsGroupByWard?.reduce(
-            (acc, curr) => acc + curr.noofdoctors,
-            0
-          )}
+          count={staffCount?.reduce((acc, curr) => acc + curr.noofdoctors, 0)}
         />
         <StaffCounter
           role="Nurses"
-          count={staffCountsGroupByWard?.reduce(
-            (acc, curr) => acc + curr.noofnurses,
-            0
-          )}
+          count={staffCount?.reduce((acc, curr) => acc + curr.noofnurses, 0)}
         />
         <StaffCounter
           role="Pharmacists"
-          count={staffCountsGroupByWard?.reduce(
+          count={staffCount?.reduce(
             (acc, curr) => acc + curr.noofpharmacist,
             0
           )}
@@ -560,13 +556,13 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {staffCountsGroupByWard.length > 0 ? (
-                staffCountsGroupByWard.map((detail, i) => (
+              {staffCount.length > 0 ? (
+                staffCount.map((detail, i) => (
                   <TableRow key={i + 1}>
                     <TableCell>{detail.ward}</TableCell>
                     <TableCell>{detail.noofdoctors}</TableCell>
                     <TableCell>{detail.noofnurses}</TableCell>
-                    <TableCell>{detail.noofpharmacists}</TableCell>
+                    <TableCell>{detail.noofpharmacist}</TableCell>
                   </TableRow>
                 ))
               ) : (

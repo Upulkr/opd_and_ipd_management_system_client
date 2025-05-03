@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import { useState } from "react";
@@ -5,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 
 export function InputNicFormForOutPatient({
   onClose,
@@ -13,6 +13,7 @@ export function InputNicFormForOutPatient({
 }: {
   onClose: () => void;
 }) {
+  const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");
@@ -48,7 +49,11 @@ export function InputNicFormForOutPatient({
     }
 
     try {
-      const response = await axios.get(`/api/patient/${nic}`);
+      const response = await axios.get(`/api/patient/${nic}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setPatient(response.data.Patient);
         navigate("/admission-outpatient-register-page");

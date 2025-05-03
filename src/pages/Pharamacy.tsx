@@ -3,6 +3,7 @@ import { Header } from "@/components/drug-management/header";
 import { MedicationsTable } from "@/components/drug-management/medications-table";
 import { SearchDrugs } from "@/components/drug-management/search-drugs";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/stores/useAuth";
 import { useDrugsStore } from "@/stores/useDrugsStore";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -11,9 +12,15 @@ import { Link } from "react-router-dom";
 function Pharamacy() {
   const { drugs, setDrugs } = useDrugsStore((state) => state);
   const [searchedDrug, setSearchedDrug] = useState([]);
+  const token = useAuthStore((state) => state.token);
   const fethingAllDrugs = async () => {
     try {
-      const response = await axios.get("/api/drugs");
+      const response = await axios.get("/api/drugs", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       if (response.status === 200) {
         setDrugs(response.data.drugs);
       }

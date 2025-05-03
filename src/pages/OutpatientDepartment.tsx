@@ -14,21 +14,24 @@ function OutpatientDepartment() {
   const [showNicInput, setShowNicInput] = useState(false);
   const [showNicInputForView, setShowNicInputForView] = useState(false);
   const [todayOutPatients, setTodayOutPatients] = useState([]);
-  const [error, setError] = useState("");
+
   const token = useAuthStore((state) => state.token);
   const fetchTodayOutPatients = async () => {
     try {
       const response = await axios.get("/api/outPatient", {
         headers: {
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
       if (response.status === 200) {
         setTodayOutPatients(response.data);
       }
     } catch (error: any) {
-      if (error.status === 400) {
-        setError(error.data.message);
+      if (error.status === 500) {
+        console.log(error.data.message);
+      } else {
+        console.log("Something went wrong", error);
       }
     }
   };
@@ -93,7 +96,7 @@ function OutpatientDepartment() {
             setShowNicInputForView={setShowNicInputForView}
           />
           <div className="grid grid-cols-1 ">
-            <TodaysPatients todayOutPatients={todayOutPatients} error={error} />
+            <TodaysPatients todayOutPatients={todayOutPatients} />
             {/* <IPDAdmissions /> */}
           </div>
         </TabsContent>
