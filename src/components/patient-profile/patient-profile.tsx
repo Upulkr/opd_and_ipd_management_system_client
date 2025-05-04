@@ -1,3 +1,4 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -8,11 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { usePatientStore } from "@/stores/usePatientStore";
+import { useAuthStore } from "@/stores/useAuth";
+import axios from "axios";
 import { FileImage, FileIcon as FilePdf, FileText } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-// const patientData = {
+// const currentPatientData = {
 //   name: "John Doe",
 //   age: 45,
 //   gender: "Male",
@@ -50,164 +53,220 @@ const reportsAndDocuments = [
   { name: "Prescription", type: "pdf", date: "2023-09-19" },
 ];
 
-export default function PatientProfile() {
-  const { patient } = usePatientStore((state) => state);
-  console.log("patient", patient);
+type CurrentPatient = {
+  nic: string;
+  name: string;
+  age: string;
+  gender: string;
+  livingStatus: string;
+  phone: string;
+
+  reason?: string;
+  city: string;
+  stateProvince: string;
+  postalCode: string;
+  country: string;
+  streetAddress: string;
+};
+export default function CurrentPatientProfile() {
+  const [currentPatient, setCurrentPatient] = useState<CurrentPatient | null>(
+    null
+  );
+  const token = useAuthStore((state) => state.token);
+  const { nic } = useParams<{ nic: string }>();
+  const fetchCurrentPatient = async () => {
+    try {
+      const response = await axios.get(`/api/patient/${nic}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("response", response.data.Patient);
+      if (response.status === 200 && response.data.Patient) {
+        setCurrentPatient(response.data.Patient);
+      } else {
+        console.warn("No patient data found");
+      }
+    } catch (error) {
+      console.error("Error fetching currentPatient data:", error);
+    }
+  };
+  useEffect(() => {
+    if (nic) {
+      fetchCurrentPatient();
+    }
+  }, [nic, token]);
+
   return (
     <div className="container mx-auto p-6 space-y-8 bg-gray-50">
-      <h1 className="text-4xl font-bold text-gray-800">Patient Profile</h1>
+      <h1 className="text-4xl font-bold text-gray-800">
+        currentPatient Profile
+      </h1>
+      {currentPatient ? (
+        <>
+          <>
+            <Card className="bg-white shadow-md rounded-lg">
+              <CardHeader className="border-b border-gray-200">
+                <CardTitle className="text-xl font-semibold text-gray-800">
+                  Personal Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {currentPatient && (
+                  <div
+                    className="flex flex-col sm:flex-row items-center sm:items-start gap-8"
+                    key={currentPatient.nic}
+                  >
+                    {/* Avatar Section */}
+                    <div className="flex flex-col items-center space-y-3">
+                      <Avatar className="w-32 h-32 shadow-lg mt-2">
+                        <AvatarImage
+                          src="https://static.vecteezy.com/system/resources/thumbnails/001/840/612/small_2x/picture-profile-icon-male-icon-human-or-people-sign-and-symbol-free-vector.jpg"
+                          alt={currentPatient.name}
+                        />
+                        <AvatarFallback className="bg-gray-200 text-gray-700">
+                          {currentPatient.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <Badge variant="secondary" className="px-3 py-1">
+                        {/* {currentPatient.bloodType} */}
+                      </Badge>
+                    </div>
 
-      {/* Personal Information Card */}
-      <Card className="bg-white shadow-md rounded-lg">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-semibold text-gray-800">
-            Personal Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {patient && (
-            <div
-              className="flex flex-col sm:flex-row items-center sm:items-start gap-8"
-              key={patient.id}
-            >
-              {/* Avatar Section */}
-              <div className="flex flex-col items-center space-y-3">
-                <Avatar className="w-32 h-32 shadow-lg mt-2">
-                  <AvatarImage
-                    src="https://static.vecteezy.com/system/resources/thumbnails/001/840/612/small_2x/picture-profile-icon-male-icon-human-or-people-sign-and-symbol-free-vector.jpg"
-                    alt={patient.name}
-                  />
-                  <AvatarFallback className="bg-gray-200 text-gray-700">
-                    {patient.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-                <Badge variant="secondary" className="px-3 py-1">
-                  {patient.bloodType}
-                </Badge>
-              </div>
+                    {/* currentPatient and Address Details */}
+                    <div className="flex-1 grid md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow-sm">
+                      {/* currentPatient Details */}
+                      <div className="space-y-3">
+                        <h2 className="text-xl font-semibold text-gray-800">
+                          {currentPatient.name}
+                        </h2>
+                        <p className="text-gray-700">
+                          <span className="font-medium">NIC:</span>{" "}
+                          {currentPatient.nic}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Age:</span>{" "}
+                          {currentPatient.age}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Gender:</span>{" "}
+                          {currentPatient.gender}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Blood Group:</span>{" "}
+                          {/* {currentPatient.bloddgroup} */}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Contact:</span>{" "}
+                          {currentPatient.phone}
+                        </p>
+                      </div>
 
-              {/* Patient and Address Details */}
-              <div className="flex-1 grid md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow-sm">
-                {/* Patient Details */}
-                <div className="space-y-3">
-                  <h2 className="text-xl font-semibold text-gray-800">
-                    {patient.name}
-                  </h2>
-                  <p className="text-gray-700">
-                    <span className="font-medium">NIC:</span> {patient.nic}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Age:</span> {patient.age}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Gender:</span>{" "}
-                    {patient.gender}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Blood Group:</span>{" "}
-                    {/* {patient.bloddgroup} */}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Contact:</span>{" "}
-                    {patient.phone}
-                  </p>
-                </div>
-
-                {/* Address Details */}
-                <div className="space-y-3">
-                  <p className="text-gray-700">
-                    <span className="font-medium">Street Address:</span>{" "}
-                    {patient.streetAddress || "N/A"}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">City:</span>{" "}
-                    {patient.city || "N/A"}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Country:</span>{" "}
-                    {patient.country || "N/A"}
-                  </p>
-                  <p className="text-gray-700">
-                    <span className="font-medium">Province:</span>{" "}
-                    {patient.stateProvince || "N/A"}
-                  </p>{" "}
-                  <p className="text-gray-700">
-                    <span className="font-medium">Emergency Contact:</span>{" "}
-                    {patient.emergencyContact || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Reports and Documents Card */}
-      <Card className="bg-white shadow-md rounded-lg">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-semibold text-gray-800">
-            Reports and Documents
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {reportsAndDocuments.map((doc, index) => (
-              <div
-                key={index}
-                className="flex items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-              >
-                {doc.type === "pdf" && (
-                  <FilePdf className="mr-3 text-red-500" />
+                      {/* Address Details */}
+                      <div className="space-y-3">
+                        <p className="text-gray-700">
+                          <span className="font-medium">Street Address:</span>{" "}
+                          {currentPatient.streetAddress || "N/A"}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">City:</span>{" "}
+                          {currentPatient.city || "N/A"}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Country:</span>{" "}
+                          {currentPatient.country || "N/A"}
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-medium">Province:</span>{" "}
+                          {currentPatient.stateProvince || "N/A"}
+                        </p>{" "}
+                        <p className="text-gray-700">
+                          <span className="font-medium">
+                            Emergency Contact:
+                          </span>{" "}
+                          {currentPatient.phone || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 )}
-                {doc.type === "image" && (
-                  <FileImage className="mr-3 text-blue-500" />
-                )}
-                {doc.type === "text" && (
-                  <FileText className="mr-3 text-green-500" />
-                )}
-                <div>
-                  <p className="font-semibold text-gray-800">{doc.name}</p>
-                  <p className="text-sm text-gray-600">{doc.date}</p>
+              </CardContent>
+            </Card>
+            <Card className="bg-white shadow-md rounded-lg">
+              <CardHeader className="border-b border-gray-200">
+                <CardTitle className="text-xl font-semibold text-gray-800">
+                  Reports and Documents
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {reportsAndDocuments.map((doc, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                    >
+                      {doc.type === "pdf" && (
+                        <FilePdf className="mr-3 text-red-500" />
+                      )}
+                      {doc.type === "image" && (
+                        <FileImage className="mr-3 text-blue-500" />
+                      )}
+                      {doc.type === "text" && (
+                        <FileText className="mr-3 text-green-500" />
+                      )}
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          {doc.name}
+                        </p>
+                        <p className="text-sm text-gray-600">{doc.date}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Admission History Card */}
-      <Card className="bg-white shadow-md rounded-lg">
-        <CardHeader className="border-b border-gray-200">
-          <CardTitle className="text-xl font-semibold text-gray-800">
-            Admission History
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>BHT</TableHead>
-                <TableHead>Admission Sheet</TableHead>
-                <TableHead>Admission Book</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {admissionData.map((admission, index) => (
-                <TableRow key={index}>
-                  <TableCell>{admission.date}</TableCell>
-                  <TableCell>{admission.bht}</TableCell>
-                  <TableCell>{admission.admissionSheet}</TableCell>
-                  <TableCell>{admission.admissionBook}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
+          </>
+          <Card className="bg-white shadow-md rounded-lg">
+            <CardHeader className="border-b border-gray-200">
+              <CardTitle className="text-xl font-semibold text-gray-800">
+                Admission History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>BHT</TableHead>
+                    <TableHead>Admission Sheet</TableHead>
+                    <TableHead>Admission Book</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {admissionData.map((admission, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{admission.date}</TableCell>
+                      <TableCell>{admission.bht}</TableCell>
+                      <TableCell>{admission.admissionSheet}</TableCell>
+                      <TableCell>{admission.admissionBook}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-64">
+          <p className="text-gray-500 text-lg">No data available</p>
+          <p className="text-gray-400 text-sm">
+            Please check back later or contact support if the issue persists.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

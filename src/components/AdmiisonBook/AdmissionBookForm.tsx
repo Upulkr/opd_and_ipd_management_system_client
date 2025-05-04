@@ -27,7 +27,7 @@ import { format } from "date-fns";
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as z from "zod";
 import { Textarea } from "../ui/textarea";
@@ -44,7 +44,8 @@ const formSchema = z.object({
   country: z.string().min(1, "Country is required"),
   streetAddress: z.string().min(1, "Street address is required"),
   age: z.string().min(1, "Age is required"),
-  admittedDate: z.string().min(1, "Admitted date is required"),
+  admittedDate: z.string().optional(),
+
   reason: z.string().min(1, "Reason is required"),
   allergies: z.array(z.string()),
   transferCategory: z.enum(["ward", "hospital-to-hospital", "direct-admit"]),
@@ -55,6 +56,8 @@ const formSchema = z.object({
 });
 
 export const AdmissionBookForm = () => {
+  const { bht } = useParams();
+
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +68,62 @@ export const AdmissionBookForm = () => {
 
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
   const { admissionBook } = useAdmissionBookByBHT((state) => state);
+  function formatDateForInput(dateStr: string) {
+    const date = new Date(dateStr);
+    console.log("date", date);
+    console.log("dateStr", date.toISOString().slice(0, 16));
+    return date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
+  }
+  const getAdmissionBookByBHT = async () => {
+    try {
+      const reponse = await axios.get(`/api/admissionbook/bht?bht=${bht}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      if (reponse.status === 200) {
+        console.log("reponse", reponse.data.admissionBook.admittedDate);
+        form.setValue("bht", reponse.data.admissionBook.bht);
+        form.setValue("nic", reponse.data.admissionBook.nic);
+        form.setValue("name", reponse.data.admissionBook.name);
+        form.setValue("dailyno", reponse.data.admissionBook.dailyno);
+        form.setValue("yearlyno", reponse.data.admissionBook.yearlyno);
+        form.setValue("city", reponse.data.admissionBook.city);
+        form.setValue(
+          "stateProvince",
+          reponse.data.admissionBook.stateProvince
+        );
+        form.setValue("postalCode", reponse.data.admissionBook.postalCode);
+        form.setValue("country", reponse.data.admissionBook.country);
+        form.setValue(
+          "streetAddress",
+          reponse.data.admissionBook.streetAddress
+        );
+        form.setValue("phone", reponse.data.admissionBook.phone);
+        form.setValue("age", reponse.data.admissionBook.age);
+        form.setValue(
+          "admittedDate",
+          formatDateForInput(reponse.data.admissionBook.admittedDate)
+        );
+
+        form.setValue("reason", reponse.data.admissionBook.reason);
+        form.setValue("allergies", reponse.data.admissionBook.allergies);
+        form.setValue("wardNo", reponse.data.admissionBook.wardNo);
+        form.setValue(
+          "transferCategory",
+          reponse.data.admissionBook.transferCategory
+        );
+        form.setValue(
+          "dischargeDate",
+          reponse.data.admissionBook.dischargeDate
+        );
+        form.setValue("livingStatus", reponse.data.admissionBook.livingStatus);
+      }
+    } catch (error) {
+      console.error("Error fetching admission book by BHT", error);
+    }
+  };
   const fetchingNoOfAdmissionSheetsperDay = async () => {
     try {
       if (enableUpdate === true) {
@@ -113,74 +171,33 @@ export const AdmissionBookForm = () => {
       fetchingNoOfAdmissionSheetsperDay();
       fetchingNoOfAdmissionSheetsperYear();
     }
+    if (bht) {
+      getAdmissionBookByBHT();
+    }
   }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht:
-        String(
-          admissionSheetByBHT?.bht !== undefined ? admissionSheetByBHT?.bht : ""
-        ) ||
-        String(admissionBook?.bht !== undefined ? admissionBook?.bht : "") ||
-        "",
-      nic: admissionSheetByBHT?.nic || admissionBook?.nic || "",
-      name: admissionSheetByBHT?.name || admissionBook?.name || "",
-      dailyno:
-        (noOfAdmissionSheetsperDay > 0 && noOfAdmissionSheetsperDay) ||
-        admissionBook?.dailyno ||
-        0,
-      yearlyno:
-        (noOfAdmissionSheetsperYear > 0 && noOfAdmissionSheetsperYear) ||
-        admissionBook?.yearlyno ||
-        0,
-      city: admissionSheetByBHT?.city || admissionBook?.city || "",
-      stateProvince:
-        admissionSheetByBHT?.stateProvince ||
-        admissionBook?.stateProvince ||
-        "",
-      postalCode:
-        admissionSheetByBHT?.postalCode || admissionBook?.postalCode || "",
-      country: admissionSheetByBHT?.country || admissionBook?.country || "",
-      streetAddress:
-        admissionSheetByBHT?.streetAddress ||
-        admissionBook?.streetAddress ||
-        "",
-      phone: admissionSheetByBHT?.phone || admissionBook?.phone || "",
-      age: admissionSheetByBHT?.age || admissionBook?.age || "",
-      admittedDate:
-        admissionSheetByBHT.admittedDate ||
-        (admissionBook?.admittedDate &&
-          format(
-            new Date(admissionBook?.admittedDate),
-            "yyyy-MM-dd'T'HH:mm"
-          )) ||
-        (admissionSheetByBHT?.createdAt &&
-          format(
-            new Date(admissionSheetByBHT?.createdAt),
-            "yyyy-MM-dd'T'HH:mm"
-          )) ||
-        "",
-      reason: admissionSheetByBHT?.reason || admissionBook?.reason || "",
-      allergies:
-        admissionSheetByBHT?.allergies || admissionBook?.allergies || [],
-      wardNo: admissionSheetByBHT?.wardNo || admissionBook?.wardNo || "",
-      transferCategory:
-        admissionSheetByBHT.transferCategory ||
-        admissionBook?.transferCategory ||
-        "ward",
-      dischargeDate:
-        admissionSheetByBHT.dischargeDate ||
-        (admissionBook?.dischargeDate &&
-          format(
-            new Date(admissionBook?.dischargeDate),
-            "yyyy-MM-dd'T'HH:mm"
-          )) ||
-        "",
-      livingStatus:
-        admissionSheetByBHT?.livingStatus ||
-        admissionBook?.livingStatus ||
-        "live",
+      bht: "",
+      nic: "",
+      name: "",
+      dailyno: 0,
+      yearlyno: 0,
+      city: "",
+      stateProvince: "",
+      postalCode: "",
+      country: "",
+      streetAddress: "",
+      age: "",
+      admittedDate: undefined,
+      reason: "",
+      allergies: [],
+      transferCategory: "ward",
+      dischargeDate: undefined,
+      phone: "",
+      wardNo: "", // Set default value from admissionSheetByBHT
+      livingStatus: "ward", // Default value for life status
     },
   });
   const { setValue } = form; // Access setValue function
@@ -234,7 +251,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.bht}
+                    disabled={!!form.getValues("bht")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -251,7 +268,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.nic}
+                    disabled={!!form.getValues("nic")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -295,7 +312,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.name}
+                    disabled={!!form.getValues("name")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -315,7 +332,7 @@ export const AdmissionBookForm = () => {
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
-                    disabled={admissionBook?.dailyno}
+                    disabled={!!form.getValues("dailyno")}
                   />
                 </FormControl>
                 <FormMessage />
@@ -335,7 +352,7 @@ export const AdmissionBookForm = () => {
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
-                    disabled={admissionBook?.yearlyno}
+                    disabled={!!form.getValues("yearlyno")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -353,7 +370,7 @@ export const AdmissionBookForm = () => {
                   <Input
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                     placeholder="Ward Number"
-                    disabled={admissionSheetByBHT?.wardNo}
+                    disabled={!!form.getValues("wardNo")}
                     {...field}
                   />
                 </FormControl>
@@ -370,7 +387,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.city}
+                    disabled={!!form.getValues("city")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -389,7 +406,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.stateProvince}
+                    disabled={!!form.getValues("stateProvince")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -406,7 +423,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.postalCode}
+                    disabled={!!form.getValues("postalCode")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -425,7 +442,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.country}
+                    disabled={!!form.getValues("country")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -441,11 +458,10 @@ export const AdmissionBookForm = () => {
                 <FormLabel className=" font-bold">Phone</FormLabel>
                 <FormControl>
                   <Input
-                    className="border border-gray-500"
                     type="tel"
                     placeholder="Phone number"
                     {...field}
-                    disabled={admissionBook?.phone}
+                    disabled={!!form.getValues("phone")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -462,7 +478,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.streetAddress}
+                    disabled={!!form.getValues("streetAddress")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -481,7 +497,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Input
                     {...field}
-                    disabled={admissionBook?.age}
+                    disabled={!!form.getValues("age")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -499,7 +515,7 @@ export const AdmissionBookForm = () => {
                   <Input
                     type="datetime-local"
                     {...field}
-                    disabled={admissionBook?.admittedDate}
+                    disabled={!!form.getValues("admittedDate")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -518,7 +534,7 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Textarea
                     {...field}
-                    disabled={admissionBook?.reason}
+                    disabled={!!form.getValues("reason")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -542,7 +558,7 @@ export const AdmissionBookForm = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => field.onChange([...field.value, ""])}
-                        disabled={admissionBook?.allergies}
+                        disabled={!!form.getValues("allergies")}
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Allergy
@@ -558,10 +574,10 @@ export const AdmissionBookForm = () => {
                             field.onChange(newAllergies);
                           }}
                           className="w-40"
-                          disabled={admissionBook?.allergies}
+                          disabled={!!form.getValues("allergies")}
                         />
                         <Button
-                          disabled={admissionBook?.allergies}
+                          disabled={!!form.getValues("allergies")}
                           type="button"
                           variant="destructive"
                           size="icon"
@@ -593,7 +609,7 @@ export const AdmissionBookForm = () => {
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={admissionBook?.transferCategory}
+                  disabled={!!form.getValues("transferCategory")}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -624,7 +640,7 @@ export const AdmissionBookForm = () => {
                   <Input
                     type="datetime-local"
                     {...field}
-                    disabled={admissionBook?.dischargeDate}
+                    disabled={!!form.getValues("dischargeDate")}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -637,7 +653,7 @@ export const AdmissionBookForm = () => {
           <Button
             type="submit"
             className="px-12 bg-blue-600 hover:bg-blue-700"
-            disabled={isLoading || admissionBook?.dischargeDate}
+            disabled={!!form.getValues("admittedDate")}
           >
             {isLoading ? "Submitting..." : "Submit"}
           </Button>

@@ -52,9 +52,8 @@ export function InputNicFormForOutPatientView({
         },
       });
       if (response.status === 200) {
-        console.log("response", response.data.outPatient);
         setOutPatient(response.data.outPatient);
-        navigate("/individual-outpatientViewForms-page");
+        navigate(`/individual-outpatientViewForms-page/${nic}`);
 
         setIsLoading(false);
       }
@@ -62,7 +61,7 @@ export function InputNicFormForOutPatientView({
       if (err.response?.status === 404) {
         toast.error("Patient not found, please register the Outpatient");
         const timeOut = setTimeout(() => {
-          navigate("/admission-outpatient-register-page/:id?");
+          navigate(`/admission-outpatient-register-page/${nic}`);
         }, 5000);
         return () => clearTimeout(timeOut);
       } else {

@@ -3,7 +3,7 @@ import { BedDouble, Search, UserCheck, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { usePatientStore } from "@/stores/usePatientStore";
@@ -29,27 +29,27 @@ export default function Statistics({
   const [isSearcing, setIsSearching] = useState(false);
   const navigate = useNavigate();
   const { setPatient, setOutPatient } = usePatientStore((state) => state);
-  const patientProfileHandler = async () => {
-    try {
-      setIsSearching(true);
-      const response = await axios.get(`/api/patient/${nic}`);
-      if (response.status === 200) {
-        setPatient(response.data.Patient);
-        setIsSearching(false);
-        toast.success("Patient found successfully");
-        navigate(`/patient-profile-page`);
-      }
-    } catch (error: any) {
-      if (error.status === 500) {
-        setIsSearching(false);
-        toast.error("Patient not found");
-        return;
-      } else {
-        setIsSearching(false);
-        console.log("Error fetching patient", error);
-      }
-    }
-  };
+  // const patientProfileHandler = async () => {
+  //   try {
+  //     setIsSearching(true);
+  //     const response = await axios.get(`/api/patient/${nic}`);
+  //     if (response.status === 200) {
+  //       setPatient(response.data.Patient);
+  //       setIsSearching(false);
+  //       toast.success("Patient found successfully");
+  //       navigate(`/patient-profile-page`);
+  //     }
+  //   } catch (error: any) {
+  //     if (error.status === 500) {
+  //       setIsSearching(false);
+  //       toast.error("Patient not found");
+  //       return;
+  //     } else {
+  //       setIsSearching(false);
+  //       console.log("Error fetching patient", error);
+  //     }
+  //   }
+  // };
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -66,7 +66,13 @@ export default function Statistics({
               value={nic}
               onChange={(e) => setNic(e.target.value)}
             />
-            <Button onClick={patientProfileHandler}>Search</Button>
+            <Link to={`/patient-profile-page/${nic}`}>
+              <Button
+              // onClick={patientProfileHandler}
+              >
+                Search
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

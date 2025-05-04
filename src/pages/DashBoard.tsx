@@ -10,8 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useAuthStore } from "@/stores/useAuth";
-import { usePatientStore } from "@/stores/usePatientStore";
 import { useStaffStore } from "@/stores/useStaffStore";
 import axios from "axios";
 import {
@@ -28,8 +26,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 import {
   Bar,
   BarChart,
@@ -51,38 +48,36 @@ export default function Dashboard() {
   }
 
   const [wardBedStatus, setWardBedStatus] = useState<WardBedStatus[]>([]);
-  const token = useAuthStore((state) => state.token);
-  const { setPatient } = usePatientStore((state) => state);
+
   const [nic, setNic] = useState<string>("");
   const { staffCount } = useStaffStore((state) => state);
 
-  const navigate = useNavigate();
-  const patientProfileHandler = async () => {
-    try {
-      // setIsSearching(true);
-      const response = await axios.get(`/api/patient/${nic}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.status === 200) {
-        console.log("response", response.data.Patient);
-        setPatient(response.data.Patient);
-        // setIsSearching(false);
-        toast.success("Patient found successfully");
-        navigate(`/patient-profile-page`);
-      }
-    } catch (error: any) {
-      if (error.status === 500) {
-        // setIsSearching(false);
-        toast.error("Patient not found");
-        return;
-      } else {
-        // setIsSearching(false);
-        console.log("Error fetching patient", error);
-      }
-    }
-  };
+  // const patientProfileHandler = async () => {
+  //   try {
+  //     // setIsSearching(true);
+  //     const response = await axios.get(`/api/patient/${nic}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     if (response.status === 200) {
+  //       console.log("response", response.data.Patient);
+  //       setPatient(response.data.Patient);
+  //       // setIsSearching(false);
+  //       toast.success("Patient found successfully");
+  //       navigate(`/patient-profile-page`);
+  //     }
+  //   } catch (error: any) {
+  //     if (error.status === 500) {
+  //       // setIsSearching(false);
+  //       toast.error("Patient not found");
+  //       return;
+  //     } else {
+  //       // setIsSearching(false);
+  //       console.log("Error fetching patient", error);
+  //     }
+  //   }
+  // };
   const getNoOfOutPatients = async () => {
     try {
       const response = await axios.get("/api/outPatient//outpatientscount");
@@ -191,14 +186,16 @@ export default function Dashboard() {
                   className="h-8 text-sm"
                   value={nic}
                   onChange={(e) => setNic(e.target.value)}
-                />
-                <Button
-                  size="sm"
-                  className="h-8"
-                  onClick={patientProfileHandler}
-                >
-                  Find
-                </Button>
+                />{" "}
+                <Link to={`/patient-profile-page/${nic}`}>
+                  <Button
+                    size="sm"
+                    className="h-8"
+                    // onClick={patientProfileHandler}
+                  >
+                    Find
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

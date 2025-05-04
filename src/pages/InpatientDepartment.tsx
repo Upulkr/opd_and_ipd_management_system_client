@@ -13,17 +13,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuthStore } from "@/stores/useAuth";
 import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useAuthStore } from "@/stores/useAuth";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import { useWardTableInpatient } from "@/stores/useWardTableInpatient";
 import axios from "axios";
 import { BedIcon, BookIcon, FileTextIcon, SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
 
 export default function InpatientDepartment() {
   const { setEnableUpdating } = useFrontendComponentsStore((state) => state);
@@ -37,39 +36,38 @@ export default function InpatientDepartment() {
     useState(false);
   const [isShowBHTForAdmissionBook, setIsShowBHTForAdmissionBook] =
     useState(false);
-  const { setPatientNic, setPatient } = usePatientStore((state) => state);
+  const { setPatientNic } = usePatientStore((state) => state);
   const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
   const { noOfTotalBeds, noOfFreeBeds, setNoOfFreeBeds, setNoOfTotalBeds } =
     useWardTableInpatient((state) => state);
   const token = useAuthStore((state) => state.token);
 
-  const navigate = useNavigate();
-  const patientProfileHandler = async () => {
-    try {
-      // setIsSearching(true);
-      const response = await axios.get(`/api/patient/${nic}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.status === 200) {
-        console.log("response", response.data.Patient);
-        setPatient(response.data.Patient);
-        // setIsSearching(false);
-        toast.success("Patient found successfully");
-        navigate(`/patient-profile-page`);
-      }
-    } catch (error: any) {
-      if (error.status === 500) {
-        // setIsSearching(false);
-        toast.error("Patient not found");
-        return;
-      } else {
-        // setIsSearching(false);
-        console.log("Error fetching patient", error);
-      }
-    }
-  };
+  // const patientProfileHandler = async () => {
+  //   try {
+  //     // setIsSearching(true);
+  //     const response = await axios.get(`/api/patient/${nic}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     if (response.status === 200) {
+  //       console.log("response", response.data.Patient);
+  //       setPatient(response.data.Patient);
+  //       // setIsSearching(false);
+  //       toast.success("Patient found successfully");
+  //       navigate(`/patient-profile-page`);
+  //     }
+  //   } catch (error: any) {
+  //     if (error.status === 500) {
+  //       // setIsSearching(false);
+  //       toast.error("Patient not found");
+  //       return;
+  //     } else {
+  //       // setIsSearching(false);
+  //       console.log("Error fetching patient", error);
+  //     }
+  //   }
+  // };
 
   const fetchTableData = async () => {
     try {
@@ -117,7 +115,7 @@ export default function InpatientDepartment() {
           onClick={() => setIsShowBHTForAdmissionBook(false)} // Close when clicking outside
         >
           <InputBHTFormForAdmissionBookSearch
-            onClose={() => setIsShowBHTForAdmissionBook(false)}
+          // onClose={() => setIsShowBHTForAdmissionBook(false)}
           />
         </div>
       ) : (
@@ -127,7 +125,7 @@ export default function InpatientDepartment() {
             onClick={() => setIsShowBHTForAdmissionSheet(false)} // Close when clicking outside
           >
             <InputBHTFormFrAdmissionSheet
-              onClose={() => setIsShowBHTForAdmissionSheet(false)}
+            // onClose={() => setIsShowBHTForAdmissionSheet(false)}
             />
           </div>
         )
@@ -153,9 +151,15 @@ export default function InpatientDepartment() {
                   placeholder="Enter patients' NIC"
                   onChange={(e) => setNic(e.target.value)}
                 />
-                <Button size="icon" onClick={patientProfileHandler}>
-                  <SearchIcon className="h-4 w-4" />
-                </Button>
+                <Link to={`/patient-profile-page/${nic}`}>
+                  {" "}
+                  <Button
+                    size="icon"
+                    //  onClick={patientProfileHandler}
+                  >
+                    <SearchIcon className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

@@ -49,7 +49,9 @@ const formSchema = z.object({
 export default function NewClinicForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [customClinicName, setCustomClinicName] = useState<string | null>(null);
-  const [predefinedClinics, setPrediufinedClinicsName] = useState([]);
+  const [predefinedClinics, setPrediufinedClinicsName] = useState<
+    { name: string }[]
+  >([]);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -125,14 +127,16 @@ export default function NewClinicForm() {
                           field.onChange(value);
                           setCustomClinicName(""); // Clear custom input when dropdown is used
                         }}
-                        disabled={customClinicName?.length > 0} // Disable dropdown if custom name is entered
+                        disabled={
+                          !!customClinicName && customClinicName.length > 0
+                        } // Disable dropdown if custom name is entered
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select a clinic name" />
                         </SelectTrigger>
                         <SelectContent>
                           {predefinedClinics?.map((clinic) => (
-                            <SelectItem key={clinic} value={clinic.name}>
+                            <SelectItem key={clinic.name} value={clinic.name}>
                               {clinic.name}
                             </SelectItem>
                           ))}
@@ -140,7 +144,7 @@ export default function NewClinicForm() {
                       </Select>
                       <Input
                         placeholder="Or enter a custom clinic name"
-                        value={customClinicName}
+                        value={customClinicName || ""}
                         onChange={(e) => {
                           const value = e.target.value;
                           setCustomClinicName(value);

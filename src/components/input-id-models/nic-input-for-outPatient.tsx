@@ -2,7 +2,7 @@ import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
@@ -101,14 +101,17 @@ export function InputNicFormForOutPatient({
         </InputOTPGroup>
       </InputOTP>
       <div className="flex justify-center p-3">
-        <Button
-          onClick={handleSubmit}
-          type="submit"
-          disabled={isLoading}
-          className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
-        >
-          {isLoading ? "Submitting..." : "Submit"}
-        </Button>
+        <Link to={`/admission-outpatient-register-page/${nic}`}>
+          {" "}
+          <Button
+            // onClick={handleSubmit}
+            type="submit"
+            disabled={isLoading}
+            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoading ? "Submitting..." : "Submit"}
+          </Button>
+        </Link>
       </div>
       {/* <div className="text-center text-md">
         {value === "" ? <>Enter Patient NIC.</> : <>You entered: {value}</>}

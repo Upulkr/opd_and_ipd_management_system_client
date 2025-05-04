@@ -11,7 +11,6 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Form,
@@ -37,14 +36,13 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { usePatientStore } from "@/stores/usePatientStore";
+import { useAuthStore } from "@/stores/useAuth";
 import axios from "axios";
 import { format } from "date-fns";
 import { CalendarIcon, Plus, X } from "lucide-react";
-import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuthStore } from "@/stores/useAuth";
+import { toast, ToastContainer } from "react-toastify";
 
 const prescriptionSchema = z.object({
   medicationName: z.string().min(2, {
@@ -92,32 +90,29 @@ const formSchema = z.object({
 export function AddOutpatientForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { patient, setPatient } = usePatientStore((state) => state);
+  // const { patient, setPatient } = usePatientStore((state) => state);
   const token = useAuthStore((state) => state.token);
-  const { id } = useParams();
-  console.log("id", id);
-  const { outPatients } = usePatientStore((state) => state);
-  console.log("outPatients", outPatients);
-  const outPatient = outPatients?.filter(
-    (patient) => patient.id.toString() === id
-  );
-  console.log("outPatient", outPatient[0]);
+  const { id, view, outPatientdescription } = useParams();
+
+  // const { outPatients } = usePatientStore((state) => state);
+  // console.log("outPatients", outPatients);
+  // const outPatient = outPatients?.filter(
+  //   (patient) => patient.id.toString() === id
+  // );
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nic: patient?.nic || outPatient[0]?.nic || "",
-      name: patient?.name || outPatient[0]?.name || "",
-      age: patient?.age || outPatient[0]?.age || "",
-      phone: patient?.phone || outPatient[0]?.phone || "",
-      streetAddress:
-        patient?.streetAddress || outPatient[0]?.streetAddress || "",
-      city: patient?.city || outPatient[0]?.city || "",
-      stateProvince:
-        patient?.stateProvince || outPatient[0]?.stateProvince || "",
-      postalCode: patient?.postalCode || outPatient[0]?.postalCode || "",
-      description: patient?.description || outPatient[0]?.description || "",
-      prescriptions:
-        patient?.prescriptions || outPatient[0]?.prescriptions || [],
+      nic: "",
+      name: "",
+      age: "",
+      phone: "",
+      streetAddress: "",
+      city: "",
+      stateProvince: "",
+      postalCode: "",
+      description: "",
+      prescriptions: [],
     },
   });
 
@@ -125,6 +120,45 @@ export function AddOutpatientForm() {
     control: form.control,
     name: "prescriptions",
   });
+
+  const getGeneralPatientDetailsByNic = async () => {
+    try {
+      const response = await axios.get(`/api/patient/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        const data = response.data.Patient;
+        form.setValue("nic", data.nic);
+        form.setValue("name", data.name);
+        form.setValue("age", data.age);
+        form.setValue("phone", data.phone);
+        form.setValue("streetAddress", data.streetAddress);
+        form.setValue("city", data.city);
+        form.setValue("stateProvince", data.stateProvince);
+        form.setValue("postalCode", data.postalCode);
+        form.setValue(
+          "description",
+          data.description || outPatientdescription === undefined
+            ? "Not Provided"
+            : outPatientdescription
+        );
+
+        form.setValue("prescriptions", data.prescriptions);
+      } else {
+        console.warn("No patient data found");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    if (id) {
+      getGeneralPatientDetailsByNic();
+    }
+  }, []);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -134,7 +168,7 @@ export function AddOutpatientForm() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: JSON.stringify(values),
+        data: values,
       });
 
       if (response.status === 201) {
@@ -143,7 +177,6 @@ export function AddOutpatientForm() {
         );
         setIsLoading(false);
         form.reset();
-        setPatient([]);
 
         // Delay navigation to allow the toast to display
         setTimeout(() => {
@@ -155,7 +188,6 @@ export function AddOutpatientForm() {
       if (error.status === 400) {
         toast.error(" Error. Please try again later.");
       }
-      setPatient([]);
     }
   }
 
@@ -163,11 +195,11 @@ export function AddOutpatientForm() {
     <Card className="w-full  ">
       <ToastContainer />
       <CardHeader>
-        <CardTitle>
+        {/* <CardTitle>
           {outPatient.length > 0
-            ? `OutPatient details NIC: ${outPatient[0].nic}`
+            ? `OutPatient details NIC: ${}`
             : "Add Outpatient"}
-        </CardTitle>
+        </CardTitle> */}
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -467,14 +499,16 @@ export function AddOutpatientForm() {
         </Form>
       </CardContent>
       <CardFooter className="flex gap-4">
-        <Button
-          type="submit"
-          className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white mx-auto "
-          onClick={form.handleSubmit(onSubmit)}
-          disabled={isLoading || outPatient.length > 0}
-        >
-          {isLoading ? "Adding..." : "Add Outpatient"}
-        </Button>
+        {!view && (
+          <Button
+            type="submit"
+            className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white mx-auto "
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={isLoading}
+          >
+            {isLoading ? "Adding..." : "Add Outpatient"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

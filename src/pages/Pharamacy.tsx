@@ -9,9 +9,20 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
+// Define or import the Drug type
+interface Drug {
+  drugId: number;
+  drugName: string;
+  unit: string;
+  totalQuantity: number;
+  usedQuantity: number;
+  remainingQuantity: number;
+  expiryDate: Date;
+}
+
 function Pharamacy() {
   const { drugs, setDrugs } = useDrugsStore((state) => state);
-  const [searchedDrug, setSearchedDrug] = useState([]);
+  const [searchedDrug, setSearchedDrug] = useState<Drug[]>([]);
   const token = useAuthStore((state) => state.token);
   const fethingAllDrugs = async () => {
     try {

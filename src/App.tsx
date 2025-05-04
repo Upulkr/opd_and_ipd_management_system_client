@@ -41,6 +41,7 @@ import ViewInMapPage from "./pages/ViewInMapPage";
 import EmailVerificationPage from "./pages/EmailVerificationPage";
 import Header from "./components/Header/Header";
 import UserProfile from "./pages/UserProfile";
+import SheduledSurgeryForm from "./pages/SheduledSurgeryForm";
 
 function App() {
   const Departments = [
@@ -126,6 +127,8 @@ function App() {
             path="/inpatient-department"
             element={<InpatientDepartment />}
           />
+          <Route path="/sheduled-surgery" element={<SheduledSurgeryForm />} />
+          <Route path="/view-surgery/:id" element={<SheduledSurgeryForm />} />
           <Route path="/icu" element={<IntensiveCareUnit />} />
           <Route path="/clinic" element={<ClinicNotifier />} />
           <Route path="/pharmacy" element={<Pharamacy />} />
@@ -142,17 +145,20 @@ function App() {
             path="/admission-sheet-register-page"
             element={<AdmissionSheetRegisterPage />}
           />
-          <Route path="/admission-book-page" element={<AdmissionBookPage />} />
           <Route
-            path="/patient-profile-page"
+            path="/admission-book-page/:bht?"
+            element={<AdmissionBookPage />}
+          />
+          <Route
+            path="/patient-profile-page/:nic?"
             element={<PatientProfilePage />}
           />
           <Route
-            path="/admission-outpatient-register-page/:id?"
+            path="/admission-outpatient-register-page/:id?/:view?/:outPatientdescription?"
             element={<AddOutPatientForm />}
           />
           <Route
-            path="/individual-outpatientViewForms-page"
+            path="/individual-outpatientViewForms-page/:id?"
             element={<IndividuslOutPatientForms />}
           />
           <Route

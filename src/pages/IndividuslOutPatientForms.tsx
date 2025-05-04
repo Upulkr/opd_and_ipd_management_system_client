@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePatientStore } from "@/stores/usePatientStore";
 import { Eye } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export default function OutPatientCard() {
-  const navigate = useNavigate();
+  const { id } = useParams();
+
   const { outPatients } = usePatientStore((state) => state);
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat("en-US", {
@@ -17,16 +18,16 @@ export default function OutPatientCard() {
     }).format(new Date(dateString));
   };
 
-  const getOutPatientsHandler = async (id: string) => {
-    const filterOutPatient = outPatients?.filter(
-      (outPatient) => outPatient.id === id
-    );
-    if (filterOutPatient.length > 0) {
-      navigate(`/admission-outpatient-register-page/${filterOutPatient[0].id}`);
-    } else {
-      console.error("No matching outpatient found");
-    }
-  };
+  // const getOutPatientsHandler = async (id: string) => {
+  //   const filterOutPatient = outPatients?.filter(
+  //     (outPatient) => outPatient.id === id
+  //   );
+  //   if (filterOutPatient.length > 0) {
+  //     navigate(`/admission-outpatient-register-page/${filterOutPatient[0].id}`);
+  //   } else {
+  //     console.error("No matching outpatient found");
+  //   }
+  // };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -38,7 +39,7 @@ export default function OutPatientCard() {
           <Card key={outPatient.id} className="w-full">
             <CardHeader>
               <CardTitle className="text-lg">
-                Date: {formatDate(outPatient.createdAt)}
+                {/* Date: {formatDate(outPatient.createdAt)} */}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -49,15 +50,27 @@ export default function OutPatientCard() {
                 </div>
                 <div>
                   <dt className="font-medium">Date:</dt>
-                  {/* <dd>{formatDate(outPatient.createdAt)}</dd> */}
+                  <dd>
+                    {formatDate(
+                      typeof outPatient.createdAt === "string"
+                        ? outPatient.createdAt
+                        : outPatient.createdAt?.toISOString() ?? ""
+                    )}
+                  </dd>
                 </div>
               </dl>
-              <Button
-                className="w-full mt-4"
-                onClick={() => getOutPatientsHandler(outPatient.id ?? "")}
+              <Link
+                to={`/admission-outpatient-register-page/${id}/${true}/${
+                  outPatient.description
+                }`}
               >
-                <Eye className="mr-2 h-4 w-4" /> View Details
-              </Button>
+                <Button
+                  className="w-full mt-4"
+                  // onClick={() => getOutPatientsHandler(outPatient.id ?? "")}
+                >
+                  <Eye className="mr-2 h-4 w-4" /> View Details
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ))}

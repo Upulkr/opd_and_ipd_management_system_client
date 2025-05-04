@@ -10,6 +10,7 @@ interface Patient {
   phone: string;
   address?: string;
   createdAt?: Date;
+  description?: string;
 }
 
 export type State = {
