@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/table";
 import { useAuthStore } from "@/stores/useAuth";
 import axios from "axios";
-import { FileImage, FileIcon as FilePdf, FileText } from "lucide-react";
+import { FileText, Pill, Skull } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import FileUploadPopup from "./fileUpload";
 
 // const currentPatientData = {
 //   name: "John Doe",
@@ -46,11 +47,42 @@ const admissionData = [
 ];
 
 const reportsAndDocuments = [
-  { name: "Blood Test Results", type: "pdf", date: "2023-09-15" },
-  { name: "X-Ray Image", type: "image", date: "2023-09-16" },
-  { name: "Doctor's Notes", type: "text", date: "2023-09-17" },
-  { name: "MRI Scan", type: "image", date: "2023-09-18" },
-  { name: "Prescription", type: "pdf", date: "2023-09-19" },
+  {
+    name: "Blood Test Results",
+    type: "blood-test",
+    date: "2023-09-15",
+    redirect: `blood-tests`,
+  },
+  {
+    name: "X-Ray Image",
+    type: "x-ray",
+    date: "2023-09-16",
+    redirect: `x-ray-images`,
+  },
+  {
+    name: "Doctor's Notes",
+    type: "doctor-notes",
+    date: "2023-09-17",
+    redirect: `doctor-notes`,
+  },
+  {
+    name: "MRI Scan",
+    type: "mri-scan",
+    date: "2023-09-18",
+    redirect: `mri`,
+  },
+  {
+    name: "Prescription",
+    type: "prescription",
+    date: "2023-09-19",
+    redirect: `prescription`,
+  },
+  {
+    name: "others",
+    type: "other",
+    date: "2023-09-19",
+    redirect: `others`,
+  },
 ];
 
 type CurrentPatient = {
@@ -196,34 +228,41 @@ export default function CurrentPatientProfile() {
               </CardContent>
             </Card>
             <Card className="bg-white shadow-md rounded-lg">
-              <CardHeader className="border-b border-gray-200">
-                <CardTitle className="text-xl font-semibold text-gray-800">
-                  Reports and Documents
-                </CardTitle>
-              </CardHeader>
+              <div className="flex items-center justify-items-center p-4 border-b border-gray-200">
+                <CardHeader className="border-b border-gray-200 ">
+                  <CardTitle className="text-xl font-semibold text-gray-800">
+                    Reports and Documents
+                  </CardTitle>
+                </CardHeader>
+                <FileUploadPopup patientNic={nic} />
+              </div>
+
               <CardContent>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {reportsAndDocuments.map((doc, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-                    >
-                      {doc.type === "pdf" && (
-                        <FilePdf className="mr-3 text-red-500" />
-                      )}
-                      {doc.type === "image" && (
-                        <FileImage className="mr-3 text-blue-500" />
-                      )}
-                      {doc.type === "text" && (
-                        <FileText className="mr-3 text-green-500" />
-                      )}
-                      <div>
-                        <p className="font-semibold text-gray-800">
-                          {doc.name}
-                        </p>
-                        <p className="text-sm text-gray-600">{doc.date}</p>
+                    <Link to={`/patient-profile/${doc.redirect}/${nic}`}>
+                      {" "}
+                      <div
+                        key={index}
+                        className="flex items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                      >
+                        {doc.type === "x-ray" && (
+                          <Skull className="mr-3 text-red-500" />
+                        )}
+                        {doc.type === "blood-test" && (
+                          <Pill className="mr-3 text-blue-500" />
+                        )}
+                        {doc.type === "text" && (
+                          <FileText className="mr-3 text-green-500" />
+                        )}
+                        <div>
+                          <p className="font-semibold text-gray-800">
+                            {doc.name}
+                          </p>
+                          <p className="text-sm text-gray-600">{doc.date}</p>
+                        </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </CardContent>

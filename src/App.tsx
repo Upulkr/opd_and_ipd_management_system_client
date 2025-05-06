@@ -42,6 +42,7 @@ import EmailVerificationPage from "./pages/EmailVerificationPage";
 import Header from "./components/Header/Header";
 import UserProfile from "./pages/UserProfile";
 import SheduledSurgeryForm from "./pages/SheduledSurgeryForm";
+import PatientReports from "./pages/PatientReports";
 
 function App() {
   const Departments = [
@@ -113,7 +114,7 @@ function App() {
   return (
     <BrowserRouter>
       <SidebarProvider>
-        <Header />
+        {/* <Header /> */}
         <SidebarComponent Departments={Departments} />
 
         <Routes>
@@ -164,6 +165,10 @@ function App() {
           <Route
             path="/add-new-drug-page/:drugId?"
             element={<AddNewDrugFormpage />}
+          />
+          <Route
+            path="/patient-profile/:doctype?/:nic?"
+            element={<PatientReports />}
           />
           <Route
             path="/drug-allocating-to-wards"
