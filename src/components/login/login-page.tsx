@@ -68,7 +68,7 @@ export default function LoginPage() {
       });
 
       if (response.status === 200) {
-        setToken(response.data.token);
+        setToken(response.data.token, response.data.user.role);
         setUserProfileData(response.data.user);
         console.log("token", response.data.token);
         toast.success("Login successful");

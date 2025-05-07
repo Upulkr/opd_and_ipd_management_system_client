@@ -24,27 +24,12 @@ import FileUploadPopup from "./fileUpload";
 //   contactNumber: "+1 (555) 123-4567",
 //   emergencyContact: "Jane Doe: +1 (555) 987-6543",
 // };
-
-const admissionData = [
-  {
-    date: "2023-05-15",
-    bht: "BHT001",
-    admissionSheet: "AS001",
-    admissionBook: "AB001",
-  },
-  {
-    date: "2023-07-22",
-    bht: "BHT002",
-    admissionSheet: "AS002",
-    admissionBook: "AB002",
-  },
-  {
-    date: "2023-09-10",
-    bht: "BHT003",
-    admissionSheet: "AS003",
-    admissionBook: "AB003",
-  },
-];
+interface genralData {
+  date?: Date;
+  bht?: number;
+  admissionSheetId?: number;
+  admissionBookId?: number;
+}
 
 const reportsAndDocuments = [
   {
@@ -104,6 +89,7 @@ export default function CurrentPatientProfile() {
   const [currentPatient, setCurrentPatient] = useState<CurrentPatient | null>(
     null
   );
+  const [admissionData, setAdmissionData] = useState<genralData[]>([]);
   const token = useAuthStore((state) => state.token);
   const { nic } = useParams<{ nic: string }>();
   const fetchCurrentPatient = async () => {
@@ -123,9 +109,29 @@ export default function CurrentPatientProfile() {
       console.error("Error fetching currentPatient data:", error);
     }
   };
+
+  const getAdmiitedDetails = async () => {
+    try {
+      const reponse = await axios.get(
+        `/api/generaladmission/generaldetails/${nic}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (reponse.status === 200) {
+        setAdmissionData(reponse.data.combinedAdmissionData || []);
+      }
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     if (nic) {
       fetchCurrentPatient();
+      getAdmiitedDetails();
     }
   }, [nic, token]);
 
@@ -280,17 +286,31 @@ export default function CurrentPatientProfile() {
                   <TableRow>
                     <TableHead>Date</TableHead>
                     <TableHead>BHT</TableHead>
-                    <TableHead>Admission Sheet</TableHead>
-                    <TableHead>Admission Book</TableHead>
+                    <TableHead>Admission Sheet Id</TableHead>
+                    <TableHead>Admission Book Id</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {admissionData.map((admission, index) => (
                     <TableRow key={index}>
-                      <TableCell>{admission.date}</TableCell>
+                      <TableCell>
+                        {admission.date
+                          ? new Date(admission.date).toLocaleDateString()
+                          : "N/A"}
+                      </TableCell>
                       <TableCell>{admission.bht}</TableCell>
-                      <TableCell>{admission.admissionSheet}</TableCell>
-                      <TableCell>{admission.admissionBook}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p> Id: {admission.admissionSheetId} </p>
+                          <p>click to view</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p> Id: {admission.admissionBookId} </p>
+                          <p>click to view</p>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

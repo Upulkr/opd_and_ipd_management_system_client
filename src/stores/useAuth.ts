@@ -1,21 +1,23 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface state {
+interface State {
   token: string | null;
+  role: string | null;
 }
 
-interface actions {
-  setToken: (token: string | null) => void;
-  resetToken: () => void;
+interface Actions {
+  setToken: (token: string, role: string) => void;
+  resetAuth: () => void;
 }
 
-export const useAuthStore = create<state & actions>()(
+export const useAuthStore = create<State & Actions>()(
   persist(
     (set) => ({
       token: null,
-      setToken: (token) => set({ token: token }),
-      resetToken: () => set({ token: null }),
+      role: null,
+      setToken: (token, role) => set({ token, role }),
+      resetAuth: () => set({ token: null, role: null }),
     }),
     {
       name: "auth-storage",

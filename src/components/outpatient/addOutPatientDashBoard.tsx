@@ -92,13 +92,7 @@ export function AddOutpatientForm() {
   const navigate = useNavigate();
   // const { patient, setPatient } = usePatientStore((state) => state);
   const token = useAuthStore((state) => state.token);
-  const { id, view, outPatientdescription } = useParams();
-
-  // const { outPatients } = usePatientStore((state) => state);
-  // console.log("outPatients", outPatients);
-  // const outPatient = outPatients?.filter(
-  //   (patient) => patient.id.toString() === id
-  // );
+  const { id: nic, view, outPatientdescription } = useParams();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -123,7 +117,7 @@ export function AddOutpatientForm() {
 
   const getGeneralPatientDetailsByNic = async () => {
     try {
-      const response = await axios.get(`/api/patient/${id}`, {
+      const response = await axios.get(`/api/patient/${nic}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
