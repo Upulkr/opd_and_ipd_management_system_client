@@ -17,13 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
 
-import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
+import { useAuthStore } from "@/stores/useAuth";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { format } from "date-fns";
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -31,7 +29,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as z from "zod";
 import { Textarea } from "../ui/textarea";
-import { useAuthStore } from "@/stores/useAuth";
 const formSchema = z.object({
   bht: z.string().min(1, "BHT is required"),
   nic: z.string().min(1, "NIC is required"),
@@ -61,19 +58,19 @@ export const AdmissionBookForm = () => {
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
-  const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  // const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const [noOfAdmissionSheetsperDay, setNoOfAdmissionSheetsperDay] = useState(0);
   const [noOfAdmissionSheetsperYear, setNoOfAdmissionSheetsperYear] =
     useState(0);
 
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
-  const { admissionBook } = useAdmissionBookByBHT((state) => state);
-  function formatDateForInput(dateStr: string) {
-    const date = new Date(dateStr);
-    console.log("date", date);
-    console.log("dateStr", date.toISOString().slice(0, 16));
-    return date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
-  }
+  // const { admissionBook } = useAdmissionBookByBHT((state) => state);
+  // function formatDateForInput(dateStr: string) {
+  //   const date = new Date(dateStr);
+
+  //   console.log("dateStr", date.toISOString().slice(0, 16));
+  //   return date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
+  // }
   const getAdmissionBookByBHT = async () => {
     try {
       const reponse = await axios.get(`/api/admissionbook/bht?bht=${bht}`, {
@@ -83,42 +80,14 @@ export const AdmissionBookForm = () => {
       });
 
       if (reponse.status === 200) {
-        console.log("reponse", reponse.data.admissionBook.admittedDate);
-        form.setValue("bht", reponse.data.admissionBook.bht);
-        form.setValue("nic", reponse.data.admissionBook.nic);
-        form.setValue("name", reponse.data.admissionBook.name);
-        form.setValue("dailyno", reponse.data.admissionBook.dailyno);
-        form.setValue("yearlyno", reponse.data.admissionBook.yearlyno);
-        form.setValue("city", reponse.data.admissionBook.city);
-        form.setValue(
-          "stateProvince",
-          reponse.data.admissionBook.stateProvince
-        );
-        form.setValue("postalCode", reponse.data.admissionBook.postalCode);
-        form.setValue("country", reponse.data.admissionBook.country);
-        form.setValue(
-          "streetAddress",
-          reponse.data.admissionBook.streetAddress
-        );
-        form.setValue("phone", reponse.data.admissionBook.phone);
-        form.setValue("age", reponse.data.admissionBook.age);
-        form.setValue(
-          "admittedDate",
-          formatDateForInput(reponse.data.admissionBook.admittedDate)
-        );
-
-        form.setValue("reason", reponse.data.admissionBook.reason);
-        form.setValue("allergies", reponse.data.admissionBook.allergies);
-        form.setValue("wardNo", reponse.data.admissionBook.wardNo);
-        form.setValue(
-          "transferCategory",
-          reponse.data.admissionBook.transferCategory
-        );
-        form.setValue(
-          "dischargeDate",
-          reponse.data.admissionBook.dischargeDate
-        );
-        form.setValue("livingStatus", reponse.data.admissionBook.livingStatus);
+        for (const [key, value] of Object.entries(reponse.data.admissionBook)) {
+          if (key in formSchema.shape) {
+            form.setValue(
+              key as keyof typeof formSchema.shape,
+              value as string
+            );
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching admission book by BHT", error);
@@ -653,9 +622,16 @@ export const AdmissionBookForm = () => {
           <Button
             type="submit"
             className="px-12 bg-blue-600 hover:bg-blue-700"
-            disabled={!!form.getValues("admittedDate")}
+            disabled={
+              !!form.getValues("admittedDate") &&
+              !form.getValues("dischargeDate")
+            }
           >
-            {isLoading ? "Submitting..." : "Submit"}
+            {isLoading
+              ? "Submitting..."
+              : form.getValues("dischargeDate")
+              ? "Discharge"
+              : "Submit"}
           </Button>
         </div>
       </form>

@@ -8,11 +8,11 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useAuthStore } from "@/stores/useAuth";
 
-export function InputBHTForm({ onClose }: { onClose: () => void }) {
+export function InputBHTForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
-  const { setPatientBHT, setPatient } = usePatientStore((state) => state);
+  const { setPatientBHT } = usePatientStore((state) => state);
 
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const token = useAuthStore((state) => state.token);

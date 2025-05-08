@@ -13,8 +13,9 @@ import { useAuthStore } from "@/stores/useAuth";
 import axios from "axios";
 import { FileText, Pill, Skull } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import FileUploadPopup from "./fileUpload";
+import { toast, ToastContainer } from "react-toastify";
 
 // const currentPatientData = {
 //   name: "John Doe",
@@ -86,6 +87,7 @@ type CurrentPatient = {
   streetAddress: string;
 };
 export default function CurrentPatientProfile() {
+  const navigate = useNavigate();
   const [currentPatient, setCurrentPatient] = useState<CurrentPatient | null>(
     null
   );
@@ -125,6 +127,10 @@ export default function CurrentPatientProfile() {
         setAdmissionData(reponse.data.combinedAdmissionData || []);
       }
     } catch (error: any) {
+      if (error.status === 401) {
+        toast.error("Pleas Log first");
+        navigate("/log-in");
+      }
       console.log(error);
     }
   };
@@ -137,6 +143,7 @@ export default function CurrentPatientProfile() {
 
   return (
     <div className="container mx-auto p-6 space-y-8 bg-gray-50">
+      <ToastContainer />
       <h1 className="text-4xl font-bold text-gray-800">
         currentPatient Profile
       </h1>
@@ -302,13 +309,24 @@ export default function CurrentPatientProfile() {
                       <TableCell>
                         <div>
                           <p> Id: {admission.admissionSheetId} </p>
-                          <p>click to view</p>
+                          <Link
+                            to={`/admission-sheet-register-page/${
+                              admission.bht
+                            }/${true}`}
+                          >
+                            {" "}
+                            <p>click to view</p>
+                          </Link>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
                           <p> Id: {admission.admissionBookId} </p>
-                          <p>click to view</p>
+                          <Link
+                            to={`/admission-book-page/${admission.bht}/${true}`}
+                          >
+                            <p>click to view</p>
+                          </Link>
                         </div>
                       </TableCell>
                     </TableRow>

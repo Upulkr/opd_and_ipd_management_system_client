@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -19,9 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search } from "lucide-react";
 import { useDrugsStore } from "@/stores/useDrugsStore";
 import axios from "axios";
+import { useState } from "react";
 
 const wards = [
   "Pediatric Ward",

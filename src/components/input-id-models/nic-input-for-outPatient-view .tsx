@@ -9,7 +9,6 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 
 export function InputNicFormForOutPatientView({
   onClose,
-  setActiveTab,
 }: {
   onClose: () => void;
 }) {

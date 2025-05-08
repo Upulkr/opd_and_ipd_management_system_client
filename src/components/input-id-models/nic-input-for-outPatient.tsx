@@ -1,23 +1,15 @@
-import { useAuthStore } from "@/stores/useAuth";
-import { usePatientStore } from "@/stores/usePatientStore";
-import axios from "axios";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 
-export function InputNicFormForOutPatient({
-  onClose,
-  setActiveTab,
-}: {
-  onClose: () => void;
-}) {
-  const token = useAuthStore((state) => state.token);
+export function InputNicFormForOutPatient() {
+  // const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");
-  const { setPatient, setPatientNic } = usePatientStore((state) => state);
+  // const { setPatient, setPatientNic } = usePatientStore((state) => state);
 
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -35,45 +27,45 @@ export function InputNicFormForOutPatient({
   //   enabled: false,
   // });
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
+  // const handleSubmit = async () => {
+  //   setIsLoading(true);
 
-    console.log("NIC:", nic);
-    if (!nic) {
-      setPatientNic(nic);
-      toast.error("NIC is required");
-      setIsLoading(false);
-      return;
-    } else {
-      setPatientNic(nic);
-    }
+  //   console.log("NIC:", nic);
+  //   if (!nic) {
+  //     setPatientNic(nic);
+  //     toast.error("NIC is required");
+  //     setIsLoading(false);
+  //     return;
+  //   } else {
+  //     setPatientNic(nic);
+  //   }
 
-    try {
-      const response = await axios.get(`/api/patient/${nic}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.status === 200) {
-        setPatient(response.data.Patient);
-        navigate("/admission-outpatient-register-page");
+  //   try {
+  //     const response = await axios.get(`/api/patient/${nic}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     if (response.status === 200) {
+  //       setPatient(response.data.Patient);
+  //       navigate("/admission-outpatient-register-page");
 
-        setIsLoading(false);
-      }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        toast.error("Patient not found, please register the patient");
-        const timeout = setTimeout(() => {
-          navigate("/patient-register-form");
-        }, 5000);
-        return () => clearTimeout(timeout);
-      } else {
-        console.error("Error fetching patient", err);
-        toast.error(err.message || "Error fetching patient");
-      }
-      setIsLoading(false);
-    }
-  };
+  //       setIsLoading(false);
+  //     }
+  //   } catch (err: any) {
+  //     if (err.response?.status === 404) {
+  //       toast.error("Patient not found, please register the patient");
+  //       const timeout = setTimeout(() => {
+  //         navigate("/patient-register-form");
+  //       }, 5000);
+  //       return () => clearTimeout(timeout);
+  //     } else {
+  //       console.error("Error fetching patient", err);
+  //       toast.error(err.message || "Error fetching patient");
+  //     }
+  //     setIsLoading(false);
+  //   }
+  // };
   return (
     <div
       className="bg-white p-6 rounded-lg shadow-lg"

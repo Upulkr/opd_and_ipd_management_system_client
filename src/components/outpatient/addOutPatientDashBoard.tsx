@@ -149,7 +149,7 @@ export function AddOutpatientForm() {
     }
   };
   useEffect(() => {
-    if (id) {
+    if (nic) {
       getGeneralPatientDetailsByNic();
     }
   }, []);

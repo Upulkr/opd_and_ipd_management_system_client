@@ -1,10 +1,3 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import DashBoard from "./pages/DashBoard";
-import DiseasePrediction from "./pages/DiseasePrediction";
-import Employee from "./pages/Employee";
-import InpatientDepartment from "./pages/InpatientDepartment";
-import OutpatientDepartment from "./pages/OutpatientDepartment";
-import Wards, { SurgeriesList } from "./pages/SurgeriesList";
 import {
   Ambulance,
   ArrowLeftToLine,
@@ -13,9 +6,10 @@ import {
   HeartPulseIcon,
   LayoutDashboard,
   Pill,
-  SquareActivity,
   Users,
 } from "lucide-react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import RoleProtectedRoute from "./components/RouteGuards/RoleProtectedRoute";
 import SidebarComponent from "./components/SideBar/SidebarComponent";
 import { SidebarProvider } from "./components/ui/sidebar";
 import AddClininicFormpage from "./pages/AddClininicFormpage";
@@ -26,21 +20,25 @@ import AdmissionSheet from "./pages/AdmissionSheet";
 import AdmissionSheetRegisterPage from "./pages/AdmissionSheetRegisterPage";
 import ClinicNotifier from "./pages/ClinicNotifier";
 import ClinincAssignPAge from "./pages/ClinincAssignPAge";
+import DashBoard from "./pages/DashBoard";
+import DiseasePrediction from "./pages/DiseasePrediction";
 import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
+import EmailVerificationPage from "./pages/EmailVerificationPage";
+import Employee from "./pages/Employee";
 import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
-import IntensiveCareUnit from "./pages/IntensiceCareUnit";
+import InpatientDepartment from "./pages/InpatientDepartment";
 import LogIn from "./pages/LogIn";
 import MobileClinic from "./pages/MobileClinic";
+import OutpatientDepartment from "./pages/OutpatientDepartment";
 import PatientProfilePage from "./pages/PatientProfilePage";
 import PatientRegister from "./pages/PatientRegister";
-import Pharamacy from "./pages/Pharamacy";
-import Signup from "./pages/SignUp";
-import ViewInMapPage from "./pages/ViewInMapPage";
-import EmailVerificationPage from "./pages/EmailVerificationPage";
-import UserProfile from "./pages/UserProfile";
-import SheduledSurgeryForm from "./pages/SheduledSurgeryForm";
 import PatientReports from "./pages/PatientReports";
-import RoleProtectedRoute from "./components/RouteGuards/RoleProtectedRoute";
+import Pharamacy from "./pages/Pharamacy";
+import SheduledSurgeryForm from "./pages/SheduledSurgeryForm";
+import Signup from "./pages/SignUp";
+import Wards, { SurgeriesList } from "./pages/SurgeriesList";
+import UserProfile from "./pages/UserProfile";
+import ViewInMapPage from "./pages/ViewInMapPage";
 import { useAuthStore } from "./stores/useAuth";
 
 function App() {
@@ -65,12 +63,12 @@ function App() {
       url: "/inpatient-department",
       icon: <ArrowRightFromLine />,
     },
-    {
-      id: 5,
-      name: "Intensive Care Unit",
-      url: "/icu",
-      icon: <SquareActivity />,
-    },
+    // {
+    //   id: 5,
+    //   name: "Intensive Care Unit",
+    //   url: "/icu",
+    //   icon: <SquareActivity />,
+    // },
     {
       id: 6,
       name: "Surgeries List",
@@ -175,14 +173,14 @@ function App() {
               </RoleProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/icu"
             element={
               <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
                 <IntensiveCareUnit />
               </RoleProtectedRoute>
             }
-          />
+          /> */}
           <Route
             path="/clinic"
             element={
@@ -258,7 +256,7 @@ function App() {
             }
           />
           <Route
-            path="/admission-sheet-register-page"
+            path="/admission-sheet-register-page/:bht?/:view?"
             element={
               <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
                 <AdmissionSheetRegisterPage />
@@ -266,7 +264,7 @@ function App() {
             }
           />
           <Route
-            path="/admission-book-page/:bht?"
+            path="/admission-book-page/:bht?/:view?"
             element={
               <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
                 <AdmissionBookPage />

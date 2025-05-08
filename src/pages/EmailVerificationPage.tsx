@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,14 +9,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import axios from "axios";
 import { motion } from "framer-motion";
+import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function EmailVerificationPage() {
   const { token } = useParams();
-  console.log("token", token);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
   const [message, setMessage] = useState("");

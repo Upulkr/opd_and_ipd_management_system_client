@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { X, Navigation } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
-  useJsApiLoader,
-  GoogleMap,
-  Marker,
   Autocomplete,
   DirectionsRenderer,
+  GoogleMap,
+  Marker,
+  useJsApiLoader,
 } from "@react-google-maps/api";
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const center = { lat: 48.8584, lng: 2.2945 };
@@ -22,14 +21,15 @@ function ViewInMapPage() {
     libraries: ["places"],
   });
 
-  const [map, setMap] = useState(null);
-  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+
+  const [directionsResponse, setDirectionsResponse] = useState<any>(null);
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
   const [origin, setOrigin] = useState("X3R2+PW Badulla, Sri Lanka");
   const [destination, setDestination] = useState(location || "");
   const [loading, setLoading] = useState(false);
-
+  console.log("map", map);
   useEffect(() => {
     if (isLoaded) {
       calculateRoute();
@@ -56,8 +56,8 @@ function ViewInMapPage() {
         travelMode: google.maps.TravelMode.DRIVING,
       });
       setDirectionsResponse(results);
-      setDistance(results.routes[0].legs[0].distance.text);
-      setDuration(results.routes[0].legs[0].duration.text);
+      setDistance(results.routes[0]?.legs[0]?.distance?.text || "");
+      setDuration(results.routes[0]?.legs[0]?.duration?.text || "");
     } catch (error) {
       console.error("Error calculating route", error);
     } finally {

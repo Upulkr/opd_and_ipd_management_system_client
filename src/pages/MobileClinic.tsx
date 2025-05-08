@@ -58,7 +58,9 @@ interface Suggestion {
 }
 export const MobileClinic = () => {
   const { setPatientNic } = usePatientStore((state) => state);
-  const [patients, setPatients] = useState<{ nic: string; name: string }[]>([]);
+  const [patients, setPatients] = useState<
+    { nic: string; name: string; city?: string }[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [searchNic, setSearchNic] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -400,7 +402,7 @@ export const MobileClinic = () => {
                         <SelectValue placeholder="Select from existing locations" />
                       </SelectTrigger>
                       <SelectContent>
-                        {getPAtientByNic.map(({ city }, i) => (
+                        {getPAtientByNic.map(({ city = "Unknown" }, i) => (
                           <SelectItem
                             key={i}
                             value={city ?? ""}

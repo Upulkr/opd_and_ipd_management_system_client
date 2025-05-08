@@ -16,7 +16,7 @@ import { useUserProfileData } from "@/stores/useUserProfileData";
 
 const Header = () => {
   const navigate = useNavigate();
-  const resetToken = useAuthStore((state) => state.resetToken);
+  const resetToken = useAuthStore((state) => state.resetAuth);
   const user = useUserProfileData((state) => state.user);
   const token = useAuthStore((state) => state.token);
   if (!user) {

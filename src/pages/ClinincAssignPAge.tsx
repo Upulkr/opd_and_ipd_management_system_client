@@ -19,7 +19,6 @@ import {
 import { useClinincStore } from "@/stores/useClinicStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
-import { set } from "date-fns";
 import debounce from "lodash.debounce";
 import { MessageSquare, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -63,7 +62,7 @@ export default function ClinicPage() {
   const [smsPhoneNumbers, setSmsPhoneNumbers] = useState<string[]>([]);
   const { setPatient, patient: patients } = usePatientStore((state) => state);
   const { clinincs } = useClinincStore((state) => state);
-
+  console.log("smsPhoneNumbers", smsPhoneNumbers);
   console.log("clinincs", clinincs);
   console.log("selectedClinic", selectedClinic);
   const handlegetPatientDetailsByClinicName = async (clinicName: string) => {

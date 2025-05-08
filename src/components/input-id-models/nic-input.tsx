@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { useAuthStore } from "@/stores/useAuth";
 
-export function InputNicForm({ onClose }: { onClose: () => void }) {
+export function InputNicForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [nic, setNic] = useState<string>("");

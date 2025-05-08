@@ -8,14 +8,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuthStore } from "@/stores/useAuth";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
-import { usePatientStore } from "@/stores/usePatientStore";
+import { useAuthStore } from "@/stores/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import * as z from "zod";
 import {
@@ -47,8 +46,10 @@ const formSchema = z.object({
 });
 
 export const AdmissionSheetForm = () => {
+  const { bht, view } = useParams();
+  console.log("bht", bht);
   const [isLoading, setIsLoading] = useState(false);
-  const { patient } = usePatientStore((state) => state);
+  // const { patient } = usePatientStore((state) => state);
 
   const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const token = useAuthStore((state) => state.token);
@@ -56,35 +57,48 @@ export const AdmissionSheetForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      bht:
-        String(
-          admissionSheetByBHT?.bht !== undefined ? admissionSheetByBHT?.bht : ""
-        ) ||
-        patient.bht ||
-        "",
-      nic: patient.nic || admissionSheetByBHT?.nic || " ",
-      name: patient.name || admissionSheetByBHT?.name || " ",
-      age: patient.age || admissionSheetByBHT?.age || " ",
-      gender:
-        (patient.gender as "Male" | "Female" | "Other") ||
-        admissionSheetByBHT?.gender ||
-        "Male",
-      streetAddress:
-        patient.streetAddress || admissionSheetByBHT?.streetAddress || " ",
-      city: patient.city || admissionSheetByBHT?.city || " ",
-      stateProvince:
-        patient.stateProvince || admissionSheetByBHT?.stateProvince || " ",
-      postalCode: patient.postalCode,
-      country: patient.country || admissionSheetByBHT?.country || " ",
-      phone: patient.phone || admissionSheetByBHT?.phone || " ",
-      wardNo: patient.wardNo || admissionSheetByBHT?.wardNo || "",
-      reason: patient.reason || admissionSheetByBHT?.reason || "",
-      pressure: patient.pressure || admissionSheetByBHT?.pressure || "",
-      weight: patient.weight || admissionSheetByBHT?.weight || "",
-      livingStatus:
-        patient.livingStatus || admissionSheetByBHT?.livingStatus || "",
+      bht: "",
+      nic: "",
+      name: "",
+      age: "",
+      gender: "Male",
+      streetAddress: "",
+      city: "",
+      stateProvince: "",
+      postalCode: "",
+      country: "",
+      phone: "",
+      wardNo: "",
+      reason: "",
+      pressure: "",
+      weight: "",
+      livingStatus: "",
     },
   });
+
+  const getAdmissionSheetByBHT = async () => {
+    try {
+      const reponse = await axios.get(`/api/admissionsheet/bht?bht=${bht}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (reponse.status === 200) {
+        for (const [key, value] of Object.entries(
+          reponse.data.admissionSheet
+        )) {
+          if (key in formSchema.shape) {
+            form.setValue(
+              key as keyof typeof formSchema.shape,
+              value as string
+            );
+          }
+        }
+      }
+    } catch (error: any) {
+      console.error("Error fetching admission sheet by BHT", error);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -123,7 +137,11 @@ export const AdmissionSheetForm = () => {
       }
     }
   }
-
+  useEffect(() => {
+    if (bht) {
+      getAdmissionSheetByBHT();
+    }
+  }, []);
   return (
     <>
       <ToastContainer />
@@ -143,7 +161,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="BHT Number"
-                      disabled={admissionSheetByBHT?.bht}
+                      disabled={!!form.getValues("bht")}
                       {...field}
                     />
                   </FormControl>
@@ -161,7 +179,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="NIC"
-                      disabled={admissionSheetByBHT?.nic}
+                      disabled={!!form.getValues("nic")}
                       {...field}
                     />
                   </FormControl>
@@ -179,7 +197,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Full Name"
-                      disabled={admissionSheetByBHT?.name}
+                      disabled={!!form.getValues("name")}
                       {...field}
                     />
                   </FormControl>
@@ -222,7 +240,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Age"
-                      disabled={admissionSheetByBHT?.age}
+                      disabled={!!form.getValues("age")}
                       {...field}
                     />
                   </FormControl>
@@ -239,7 +257,7 @@ export const AdmissionSheetForm = () => {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={admissionSheetByBHT?.gender}
+                    disabled={!!form.getValues("gender")}
                   >
                     <FormControl>
                       <SelectTrigger className="border border-gray-500 disabled:text-black disabled:font-bold ">
@@ -267,7 +285,7 @@ export const AdmissionSheetForm = () => {
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       type="tel"
                       placeholder="Phone number"
-                      disabled={admissionSheetByBHT?.phone}
+                      disabled={!!form.getValues("phone")}
                       {...field}
                     />
                   </FormControl>
@@ -289,7 +307,7 @@ export const AdmissionSheetForm = () => {
                       <Input
                         className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="Street Address"
-                        disabled={admissionSheetByBHT?.streetAddress}
+                        disabled={!!form.getValues("streetAddress")}
                         {...field}
                       />
                     </FormControl>
@@ -307,7 +325,7 @@ export const AdmissionSheetForm = () => {
                       <Input
                         className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="City"
-                        disabled={admissionSheetByBHT?.city}
+                        disabled={!!form.getValues("city")}
                         {...field}
                       />
                     </FormControl>
@@ -325,7 +343,7 @@ export const AdmissionSheetForm = () => {
                       <Input
                         className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="State/Province"
-                        disabled={admissionSheetByBHT?.stateProvince}
+                        disabled={!!form.getValues("stateProvince")}
                         {...field}
                       />
                     </FormControl>
@@ -343,7 +361,7 @@ export const AdmissionSheetForm = () => {
                       <Input
                         className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="Postal Code"
-                        disabled={admissionSheetByBHT?.postalCode}
+                        disabled={!!form.getValues("postalCode")}
                         {...field}
                       />
                     </FormControl>
@@ -361,7 +379,7 @@ export const AdmissionSheetForm = () => {
                       <Input
                         className="border border-gray-500 disabled:text-black disabled:font-bold "
                         placeholder="Country"
-                        disabled={admissionSheetByBHT?.country}
+                        disabled={!!form.getValues("country")}
                         {...field}
                       />
                     </FormControl>
@@ -382,7 +400,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Ward Number"
-                      disabled={admissionSheetByBHT?.wardNo}
+                      disabled={!!form.getValues("wardNo")}
                       {...field}
                     />
                   </FormControl>
@@ -400,7 +418,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Blood Pressure"
-                      disabled={admissionSheetByBHT?.pressure}
+                      disabled={!!form.getValues("pressure")}
                       {...field}
                     />
                   </FormControl>
@@ -418,7 +436,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Weight in kg"
-                      disabled={admissionSheetByBHT?.weight}
+                      disabled={!!form.getValues("weight")}
                       {...field}
                     />
                   </FormControl>
@@ -439,7 +457,7 @@ export const AdmissionSheetForm = () => {
                   <Textarea
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                     placeholder="Reason for admission"
-                    disabled={admissionSheetByBHT?.reason}
+                    disabled={!!form.getValues("reason")}
                     {...field}
                   />
                 </FormControl>
@@ -451,7 +469,9 @@ export const AdmissionSheetForm = () => {
             <Button
               type="submit"
               disabled={
-                isLoading || Object.keys(admissionSheetByBHT).length > 0
+                isLoading ||
+                Object.keys(admissionSheetByBHT).length > 0 ||
+                !!view
               }
               className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
             >
