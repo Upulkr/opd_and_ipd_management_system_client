@@ -35,66 +35,66 @@ export function InputBHTFormForAdmissionBookSearch() {
   //   enabled: false,
   // });
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
+  // const handleSubmit = async () => {
+  //   setIsLoading(true);
 
-    if (!bht) {
-      toast.error("BHT is required");
-      setIsLoading(false);
-      return;
-    } else {
-      setPatientBHT(bht);
-    }
+  //   if (!bht) {
+  //     toast.error("BHT is required");
+  //     setIsLoading(false);
+  //     return;
+  //   } else {
+  //     setPatientBHT(bht);
+  //   }
 
-    try {
-      if (!token) {
-        toast.error("No token found in localStorage");
-        return;
-      }
-      const isAdmissionBookExisting = await axios.get(
-        `/api/admissionBook/bht?bht=${bht}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //   try {
+  //     if (!token) {
+  //       toast.error("No token found in localStorage");
+  //       return;
+  //     }
+  //     const isAdmissionBookExisting = await axios.get(
+  //       `/api/admissionBook/bht?bht=${bht}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (!isAdmissionBookExisting.data.admissionBook) {
-        toast.error("BHT does not exist");
-        setIsLoading(false);
-        navigate("/inpatient-department");
-        return;
-      }
+  //     if (!isAdmissionBookExisting.data.admissionBook) {
+  //       toast.error("BHT does not exist");
+  //       setIsLoading(false);
+  //       navigate("/inpatient-department");
+  //       return;
+  //     }
 
-      const response = await axios.get(
-        enableUpdate === true
-          ? `/api/admissionbook/bht?bht=${bht}`
-          : `/api/admissionsheet/bht?bht=${bht}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (enableUpdate === true) {
-        setAdmissionBook(response.data.admissionBook);
-      } else {
-        setAdmissionSheetByBHT(response.data.admissionSheet);
-      }
+  //     const response = await axios.get(
+  //       enableUpdate === true
+  //         ? `/api/admissionbook/bht?bht=${bht}`
+  //         : `/api/admissionsheet/bht?bht=${bht}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     if (enableUpdate === true) {
+  //       setAdmissionBook(response.data.admissionBook);
+  //     } else {
+  //       setAdmissionSheetByBHT(response.data.admissionSheet);
+  //     }
 
-      navigate("/admission-book-page");
-      setIsLoading(false);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        toast.error("Patient not found");
-      } else {
-        console.error("Error fetching patient", err);
-        toast.error(err.message || "Error fetching patient");
-      }
-      setIsLoading(false);
-    }
-  };
+  //     navigate("/admission-book-page");
+  //     setIsLoading(false);
+  //   } catch (err: any) {
+  //     if (err.response?.status === 404) {
+  //       toast.error("Patient not found");
+  //     } else {
+  //       console.error("Error fetching patient", err);
+  //       toast.error(err.message || "Error fetching patient");
+  //     }
+  //     setIsLoading(false);
+  //   }
+  // };
   return (
     <div
       className="bg-white p-6 rounded-lg shadow-lg"

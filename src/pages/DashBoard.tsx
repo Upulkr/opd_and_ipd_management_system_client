@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [noOfOutPatients, setNoOfOutPatients] = useState(0);
   const [noOfInPatients, setNoOfInPatients] = useState(0);
   const [monthlyVisitData, setMonthlyVisitData] = useState([]);
+  const [dischargecount, setNoOfDischarge] = useState(0);
   interface WardBedStatus {
     wardName: string;
     noOfBeds: number;
@@ -51,6 +52,21 @@ export default function Dashboard() {
 
   const [nic, setNic] = useState<string>("");
   const { staffCount } = useStaffStore((state) => state);
+  console.log("dischargecount", dischargecount);
+  const getdischargecounts = async () => {
+    try {
+      const response = await axios.get("/api/admissionbook/getdischargecounts");
+      if (response.status === 200 && response.data.length > 0) {
+        const count = response.data[0]?._count?.dischargeDate || 0;
+        setNoOfDischarge(count);
+      } else {
+        setNoOfDischarge(0); // no discharges today
+      }
+    } catch (error) {
+      console.error(error);
+      setNoOfDischarge(0); // handle error by setting to 0
+    }
+  };
 
   // const patientProfileHandler = async () => {
   //   try {
@@ -80,7 +96,7 @@ export default function Dashboard() {
   // };
   const getNoOfOutPatients = async () => {
     try {
-      const response = await axios.get("/api/outPatient//outpatientscount");
+      const response = await axios.get("/api/outPatient/outpatientscount");
       setNoOfOutPatients(response.data);
     } catch (error) {
       console.error(error);
@@ -120,6 +136,7 @@ export default function Dashboard() {
     getNoOfInPatients();
     getMOnthlyPatientVisits();
     getWardbedstatus();
+    getdischargecounts();
   }, []);
   const noOfDoctors = staffCount?.reduce(
     (acc, curr) => acc + curr.noofdoctors,
@@ -271,7 +288,7 @@ export default function Dashboard() {
                   <UserMinus className="mr-2 h-4 w-4 text-blue-500" />
                   <span className="text-sm font-medium">Discharges:</span>
                   <span className="ml-auto text-2xl font-bold text-blue-500">
-                    15
+                    {dischargecount}
                   </span>
                 </div>
                 {/* <div className="flex items-center pt-2 border-t">

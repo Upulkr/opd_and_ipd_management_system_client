@@ -4,16 +4,21 @@ import DashboardHeader from "@/components/clinic/clininc-header";
 import PatientSearch from "@/components/clinic/patient-search";
 import PatientStatistics from "@/components/clinic/patient-statics";
 import TodaysClinics from "@/components/clinic/todays-clininc";
-import { useClinincStore } from "@/stores/useClinicStore";
+import { useAuthStore } from "@/stores/useAuth";
+import { useClinicStore } from "@/stores/useClinicStore";
 import axios from "axios";
 import { useEffect } from "react";
 
 function ClinicNotifier() {
-  const { setClinics } = useClinincStore((state) => state);
-
+  const { setClinics } = useClinicStore((state) => state);
+  const token = useAuthStore((state) => state.token);
   const fetchSheduledClinincs = async () => {
     try {
-      const response = await axios.get("/api/clinic");
+      const response = await axios.get("/api/clinic", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setClinics(response.data.clinics);
       }

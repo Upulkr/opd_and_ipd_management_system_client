@@ -7,16 +7,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useClinincStore } from "@/stores/useClinicStore";
+import { useClinicStore } from "@/stores/useClinicStore";
 
 export default function AppointmentsOverview() {
-  const { clinincs } = useClinincStore((state) => state);
-  const sheduledClinincs = clinincs.filter((clinic) => {
+  const { clinics } = useClinicStore((state) => state);
+
+  const sheduledClinincs = clinics.filter((clinic) => {
     const today = new Date().toLocaleDateString("en-CA"); // 'en-CA' ensures format 'YYYY-MM-DD'
     const clinicDate = new Date(clinic.sheduledAt).toLocaleDateString("en-CA");
     return clinicDate !== today;
   });
-
+  console.log("sheduledClinincs", sheduledClinincs);
   return (
     <Card>
       <CardHeader>

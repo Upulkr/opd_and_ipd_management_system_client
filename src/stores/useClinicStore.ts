@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-interface clininc {
+
+interface Clinic {
   id: number;
   name: string;
   doctorName: string;
@@ -9,21 +10,21 @@ interface clininc {
 }
 
 interface State {
-  clinincs: clininc[];
+  clinics: Clinic[];
 }
 
 interface Actions {
-  setClinics: (clinincs: clininc[]) => void;
+  setClinics: (clinics: Clinic[]) => void;
 }
 
-export const useClinincStore = create<State & Actions>()(
+export const useClinicStore = create<State & Actions>()(
   persist(
     (set) => ({
-      clinincs: [],
-      setClinics: (clinincs) => set({ clinincs }),
+      clinics: [],
+      setClinics: (clinics) => set({ clinics }),
     }),
     {
-      name: "clininc-store",
+      name: "clinic-store",
     }
   )
 );

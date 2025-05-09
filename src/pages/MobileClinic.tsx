@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { useClinincStore } from "@/stores/useClinicStore";
+import { useClinicStore } from "@/stores/useClinicStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import {
   Popover,
@@ -67,7 +67,7 @@ export const MobileClinic = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selectedClinic, setSelectedClinic] = useState("");
   const [predifinedCity, setPredifinedCity] = useState("");
-  const { clinincs } = useClinincStore((state) => state);
+  const { clinincs } = useClinicStore((state) => state);
   const [customCity, setCustomCity] = useState("");
   const [sheduledMobileclinics, setSheduledMobileclinics] = useState([]);
   const [date, setDate] = React.useState<Date>();
@@ -179,7 +179,7 @@ export const MobileClinic = () => {
     (patient) => patient.nic === searchNic
   );
 
-  const mobileClinincsForTable = useCallback(async () => {
+  const mobileclinincsForTable = useCallback(async () => {
     try {
       const res = await axios.get(`/api/mobileclinic/sheduled`);
       if (res.status === 200) {
@@ -201,7 +201,7 @@ export const MobileClinic = () => {
   }, []);
   useEffect(() => {
     fetchPatients();
-    mobileClinincsForTable();
+    mobileclinincsForTable();
     getCountCompletedVisits();
     getMonthlyhomevisitsForEachMonth();
     getPatientsbyAge();

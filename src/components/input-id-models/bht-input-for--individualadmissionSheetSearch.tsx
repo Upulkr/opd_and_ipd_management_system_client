@@ -1,4 +1,3 @@
-import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
@@ -14,9 +13,9 @@ export function InputBHTFormFrAdmissionSheet() {
   const [bht, setBht] = useState<string>("");
   const { setPatientBHT } = usePatientStore((state) => state);
 
-  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  // const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const token = useAuthStore((state) => state.token);
-
+  console.log("bht", bht);
   const handleSubmit = async () => {
     setIsLoading(true);
 
@@ -44,15 +43,15 @@ export function InputBHTFormFrAdmissionSheet() {
         navigate("/inpatient-department/admission-sheet");
         return;
       }
-      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`, {
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      // });
 
-      setAdmissionSheetByBHT(response.data.admissionSheet);
+      // setAdmissionSheetByBHT(response.data.admissionSheet);
 
-      navigate("/inpatient-department/admission-sheet");
+      navigate(`/admission-sheet-register-page/${bht}/${true}?`);
       setIsLoading(false);
     } catch (err: any) {
       if (err.response?.status === 404) {

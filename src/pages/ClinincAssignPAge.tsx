@@ -16,12 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useClinincStore } from "@/stores/useClinicStore";
+import { useAuthStore } from "@/stores/useAuth";
+import { useClinicStore } from "@/stores/useClinicStore";
+
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
 import debounce from "lodash.debounce";
 import { MessageSquare, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 
 interface SMSScheduleRequest {
@@ -61,15 +64,22 @@ export default function ClinicPage() {
   const [clinincPAtients, setClinincPAtients] = useState<Patient[]>([]);
   const [smsPhoneNumbers, setSmsPhoneNumbers] = useState<string[]>([]);
   const { setPatient, patient: patients } = usePatientStore((state) => state);
-  const { clinincs } = useClinincStore((state) => state);
+  const { clinics } = useClinicStore((state) => state);
+  const token = useAuthStore((state) => state.token);
   console.log("smsPhoneNumbers", smsPhoneNumbers);
-  console.log("clinincs", clinincs);
+  console.log("clinics", clinics);
   console.log("selectedClinic", selectedClinic);
+
   const handlegetPatientDetailsByClinicName = async (clinicName: string) => {
     try {
       setLoading(true);
       const response = await axios.get(
-        `/api/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`
+        `/api/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response.status === 200) {
@@ -93,12 +103,14 @@ export default function ClinicPage() {
       const response = await axios(`/api/clinicassigmnent`, {
         method: "POST",
         headers: {
+          Authorization: `Bearer ${token}`,
+
           "Content-Type": "application/json",
         },
         data: {
           nic: searchNic,
           clinicName: selectedClinic,
-          clinicId: clinincs.find((clinic) => clinic.name === selectedClinic)
+          clinicId: clinics.find((clinic) => clinic.name === selectedClinic)
             ?.id,
         },
       });
@@ -119,7 +131,12 @@ export default function ClinicPage() {
   const getAllClinicAssigmentsForTable = useCallback(async () => {
     try {
       const response = await axios.get(
-        `/api/clinicassigmnent/getAllClinicAssigmentsfortable`
+        `/api/clinicassigmnent/getAllClinicAssigmentsfortable`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.status === 200) {
         setClinicsAssign(response.data.clinicAssigments);
@@ -127,18 +144,22 @@ export default function ClinicPage() {
     } catch (error) {
       console.log("Error fetching patients", error);
     }
-  }, []);
+  }, [token]);
 
   const fetchPatients = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/patient`);
+      const response = await axios.get(`/api/patient`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setPatient(response.data.Patients);
       }
     } catch (error) {
       console.log("Error fetching patients", error);
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     fetchPatients();
@@ -191,7 +212,7 @@ export default function ClinicPage() {
         smsData,
         {
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -237,18 +258,6 @@ export default function ClinicPage() {
           `Invalid type for sheduledAt. Expected a string or Date, received: ${typeof sheduledAt}`
         );
       }
-
-      // // Ensure `sheduledAt` is a valid Date object
-      // const scheduleDate = new Date(sheduledAt);
-      // // if (isNaN(scheduleDate.getTime())) {
-      // //   throw new Error(
-      // //     `Invalid date format for sheduledAt: ${JSON.stringify(sheduledAt)}`
-      // //   );
-      // // }
-
-      // // Deduct one day from the scheduled date
-      // const adjustedScheduleTime = new Date(scheduleDate);
-      // adjustedScheduleTime.setDate(adjustedScheduleTime.getDate() - 1);
 
       const smsData = {
         phoneNumbers: ["+94720979028"],
@@ -319,7 +328,7 @@ export default function ClinicPage() {
                 <SelectValue placeholder="Select Clinic" />
               </SelectTrigger>
               <SelectContent>
-                {clinincs.map((clinic) => (
+                {clinics.map((clinic) => (
                   <SelectItem key={clinic.id} value={clinic.name}>
                     {clinic.name}
                   </SelectItem>

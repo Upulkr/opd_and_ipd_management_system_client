@@ -77,9 +77,10 @@ export default function InpatientDepartment() {
         },
       });
       if (response.status === 200) {
-        setWardData(response.data.wardData);
-        setNoOfFreeBeds(response.data.totalNoOfFreeBeds);
-        setNoOfTotalBeds(response.data.totalBeds);
+        console.log("response", response.data?.wardData);
+        setWardData(response.data?.wardData);
+        setNoOfFreeBeds(response.data?.wardData[0].noOfFreeBeds);
+        setNoOfTotalBeds(response.data?.wardData[0].noOfFreeBeds);
       }
     } catch (error: any) {
       console.log("Error fetching table data", error);
@@ -97,7 +98,7 @@ export default function InpatientDepartment() {
           className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
           onClick={() => setIsShowNicForm(false)} // Close when clicking outside
         >
-          <InputNicForm onClose={() => setIsShowNicForm(false)} />
+          <InputNicForm />
         </div>
       ) : (
         isShoBhtForm && (
@@ -105,7 +106,7 @@ export default function InpatientDepartment() {
             className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
             onClick={() => setIsShoBhtForm(false)} // Close when clicking outside
           >
-            <InputBHTForm onClose={() => setIsShowNicForm(false)} />
+            <InputBHTForm />
           </div>
         )
       )}

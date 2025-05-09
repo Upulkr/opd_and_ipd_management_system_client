@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuthStore } from "@/stores/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -52,6 +53,7 @@ export default function NewClinicForm() {
   const [predefinedClinics, setPrediufinedClinicsName] = useState<
     { name: string }[]
   >([]);
+  const token = useAuthStore((state) => state.token);
   const navigate = useNavigate();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,7 +67,11 @@ export default function NewClinicForm() {
 
   const getAllclincsName = async () => {
     try {
-      const response = await axios.get("/api/clinic");
+      const response = await axios.get("/api/clinic", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setPrediufinedClinicsName(response.data.clinics);
       }
@@ -82,9 +88,9 @@ export default function NewClinicForm() {
       const response = await axios("/api/clinic", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        data: JSON.stringify(values),
+        data: values,
       });
       if (response.status === 200) {
         setIsLoading(false);
