@@ -1,43 +1,55 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import DashBoard from "./pages/DashBoard";
-
-import SearchPatient from "./pages/SearchPatient";
-import OutpatientDepartment from "./pages/OutpatientDepartment";
-import InpatientDepartment from "./pages/InpatientDepartment";
-import EmergencyDepartment from "./pages/EmergencyDepartment";
-import DiseasePrediction from "./pages/DiseasePrediction";
-import Employee from "./pages/Employee";
-import DrugQuantity from "./pages/DrugQuantity";
-import Wards from "./pages/Wards";
-
-import SidebarComponent from "./components/SideBar/SidebarComponent";
 import {
+  Ambulance,
   ArrowLeftToLine,
   ArrowRightFromLine,
-  BellRing,
   BrainCircuit,
+  HeartPulseIcon,
   LayoutDashboard,
   Pill,
-  Search,
-  SquareActivity,
   Users,
 } from "lucide-react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import RoleProtectedRoute from "./components/RouteGuards/RoleProtectedRoute";
+import SidebarComponent from "./components/SideBar/SidebarComponent";
 import { SidebarProvider } from "./components/ui/sidebar";
+import AddClininicFormpage from "./pages/AddClininicFormpage";
+import { AddNewDrugFormpage } from "./pages/AddNewDrugFormpage";
+import AddOutPatientForm from "./pages/AddOutPatientFormPage";
+import AdmissionBookPage from "./pages/AdmiisionBookPage";
+import AdmissionSheet from "./pages/AdmissionSheet";
+import AdmissionSheetRegisterPage from "./pages/AdmissionSheetRegisterPage";
 import ClinicNotifier from "./pages/ClinicNotifier";
+import ClinincAssignPAge from "./pages/ClinincAssignPAge";
+import DashBoard from "./pages/DashBoard";
+import DiseasePrediction from "./pages/DiseasePrediction";
+import DrugsAllocatingToWardPAge from "./pages/DrugsAllocatingToWardPAge";
+import EmailVerificationPage from "./pages/EmailVerificationPage";
+import Employee from "./pages/Employee";
+import IndividuslOutPatientForms from "./pages/IndividuslOutPatientForms";
+import InpatientDepartment from "./pages/InpatientDepartment";
+import LogIn from "./pages/LogIn";
+import MobileClinic from "./pages/MobileClinic";
+import OutpatientDepartment from "./pages/OutpatientDepartment";
+import PatientProfilePage from "./pages/PatientProfilePage";
+import PatientRegister from "./pages/PatientRegister";
+import PatientReports from "./pages/PatientReports";
+import Pharamacy from "./pages/Pharamacy";
+import SheduledSurgeryForm from "./pages/SheduledSurgeryForm";
+import Signup from "./pages/SignUp";
+import Wards, { SurgeriesList } from "./pages/SurgeriesList";
+import UserProfile from "./pages/UserProfile";
+import ViewInMapPage from "./pages/ViewInMapPage";
+import { useAuthStore } from "./stores/useAuth";
 
 function App() {
+  const role = useAuthStore((state) => state.role);
+
   const Departments = [
     {
       id: 1,
       name: "Dashboard",
       url: "/",
       icon: <LayoutDashboard />,
-    },
-    {
-      id: 2,
-      name: "Search Patient",
-      url: "/search-patient",
-      icon: <Search />,
     },
     {
       id: 3,
@@ -51,32 +63,30 @@ function App() {
       url: "/inpatient-department",
       icon: <ArrowRightFromLine />,
     },
-    {
-      id: 5,
-      name: "Emergency Department",
-      url: "/emergency-department",
-      icon: <SquareActivity />,
-    },
+    // {
+    //   id: 5,
+    //   name: "Intensive Care Unit",
+    //   url: "/icu",
+    //   icon: <SquareActivity />,
+    // },
     {
       id: 6,
-      name: "Current Wards Details",
-      url: "/current-ward-details",
+      name: "Surgeries List",
+      url: "/surgeries",
       icon: <LayoutDashboard />,
     },
     {
       id: 10,
-      name: "Clinic Notifier",
-      url: "/clinic-notifier",
-      icon: <BellRing />,
+      name: "Clinic",
+      url: "/clinic",
+      icon: <HeartPulseIcon />,
     },
-
     {
       id: 7,
-      name: "Current Drugs Quantity",
-      url: "/drugs-quantity",
+      name: "Pharmacy Unit",
+      url: "/pharmacy",
       icon: <Pill />,
     },
-
     {
       id: 8,
       name: "Current Employees",
@@ -89,34 +99,250 @@ function App() {
       url: "/disease-prediction",
       icon: <BrainCircuit />,
     },
+    {
+      id: 2,
+      name: "Mobile Clinic",
+      url: "/mobile-clinic",
+      icon: <Ambulance />,
+    },
   ];
+
+  const filteredDepartments = Departments.filter((dept) => {
+    if (role === "PHARMACIST") return ["/pharmacy"].includes(dept.url);
+    if (role === "PATIENT") return dept.url === "/";
+    return true;
+  });
 
   return (
     <BrowserRouter>
       <SidebarProvider>
-        <SidebarComponent Departments={Departments} />
-
+        <SidebarComponent Departments={filteredDepartments} />
         <Routes>
+          {/* Common route for all roles */}
           <Route path="/" element={<DashBoard />} />
-          <Route path="/search-patient" element={<SearchPatient />} />
+          {/* Public Routes */}
+          <Route path="/log-in" element={<LogIn />} />
+          <Route path="/sign-up" element={<Signup />} />
+          <Route
+            path={`/auth/verify-email/:token`}
+            element={<EmailVerificationPage />}
+          />
+
+          {/* Patient-only route */}
+          <Route
+            path="/user-profile"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <UserProfile />
+              </RoleProtectedRoute>
+            }
+          />
+
+          {/* Pharmacist-only route */}
+          <Route
+            path="/pharmacy"
+            element={
+              <RoleProtectedRoute allowedRoles={["PHARMACIST", "ADMIN"]}>
+                <Pharamacy />
+              </RoleProtectedRoute>
+            }
+          />
+
+          {/* Doctor and Nurse access only */}
+          <Route
+            path="/mobile-clinic"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <MobileClinic />
+              </RoleProtectedRoute>
+            }
+          />
           <Route
             path="/outpatient-department"
-            element={<OutpatientDepartment />}
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <OutpatientDepartment />
+              </RoleProtectedRoute>
+            }
           />
           <Route
             path="/inpatient-department"
-            element={<InpatientDepartment />}
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <InpatientDepartment />
+              </RoleProtectedRoute>
+            }
+          />
+          {/* <Route
+            path="/icu"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <IntensiveCareUnit />
+              </RoleProtectedRoute>
+            }
+          /> */}
+          <Route
+            path="/clinic"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <ClinicNotifier />
+              </RoleProtectedRoute>
+            }
+          />
+
+          {/* More Role-based Routes */}
+          <Route
+            path="/employee"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <Employee />
+              </RoleProtectedRoute>
+            }
           />
           <Route
-            path="/emergency-department"
-            element={<EmergencyDepartment />}
+            path="/ward-details"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <Wards />
+              </RoleProtectedRoute>
+            }
           />
-          <Route path="/clinic-notifier" element={<ClinicNotifier />} />
-          <Route path="/emergency-department" element={<ClinicNotifier />} />
-          <Route path="/drugs-quantity" element={<DrugQuantity />} />
-          <Route path="/employee" element={<Employee />} />
-          <Route path="/ward-details" element={<Wards />} />
-          <Route path="/disease-prediction" element={<DiseasePrediction />} />
+          <Route
+            path="/disease-prediction"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <DiseasePrediction />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/surgeries"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <SurgeriesList />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/sheduled-surgery"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <SheduledSurgeryForm />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/view-surgery/:id"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <SheduledSurgeryForm />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/inpatient-department/admission-sheet"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <AdmissionSheet />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient-register-form"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <PatientRegister />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/admission-sheet-register-page/:bht?/:view?/:nic?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <AdmissionSheetRegisterPage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/admission-book-page/:bht?/:view?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <AdmissionBookPage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient-profile-page/:nic?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <PatientProfilePage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/admission-outpatient-register-page/:id?/:view?/:outPatientdescription?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <AddOutPatientForm />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/individual-outpatientViewForms-page/:id?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <IndividuslOutPatientForms />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-new-drug-page/:drugId?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <AddNewDrugFormpage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/patient-profile/:doctype?/:nic?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <PatientReports />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/drug-allocating-to-wards"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <DrugsAllocatingToWardPAge />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/create-new-clinic"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <AddClininicFormpage />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/clinic-assign"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <ClinincAssignPAge />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="/view-in-map/:location?"
+            element={
+              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+                <ViewInMapPage />
+              </RoleProtectedRoute>
+            }
+          />
         </Routes>
       </SidebarProvider>
     </BrowserRouter>
