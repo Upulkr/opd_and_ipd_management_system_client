@@ -1,24 +1,18 @@
-import { usePatientStore } from "@/stores/usePatientStore";
-import axios from "axios";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
-import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
-import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
-import { useAuthStore } from "@/stores/useAuth";
 
 export function InputBHTFormForAdmissionBookSearch() {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
-  const { setPatientBHT } = usePatientStore((state) => state);
-  const { enableUpdate } = useFrontendComponentsStore((state) => state);
-  const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
-  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
-  const token = useAuthStore((state) => state.token);
+  // const { setPatientBHT } = usePatientStore((state) => state);
+  // const { enableUpdate } = useFrontendComponentsStore((state) => state);
+  // const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
+  // const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  // const token = useAuthStore((state) => state.token);
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
@@ -115,8 +109,8 @@ export function InputBHTFormForAdmissionBookSearch() {
       <div className="flex justify-center p-3">
         <Link to={`/admission-book-page/${bht}/${true}`}>
           <Button
-            // onClick={handleSubmit}
-            type="submit"
+            onClick={() => setIsLoading(true)}
+            type="button"
             disabled={isLoading}
             className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
           >

@@ -96,7 +96,7 @@ export function InputNicFormForOutPatient() {
         <Link to={`/admission-outpatient-register-page/${nic}`}>
           {" "}
           <Button
-            // onClick={handleSubmit}
+            onClick={() => setIsLoading(true)}
             type="submit"
             disabled={isLoading}
             className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"

@@ -1,12 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BedDouble, Search, UserCheck, UserPlus } from "lucide-react";
-import { useState } from "react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
 import { usePatientStore } from "@/stores/usePatientStore";
+import { Search, UserCheck, UserPlus } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 // interface StatisticsData {
 //   totalPatients: number;
@@ -26,8 +25,8 @@ export default function Statistics({
   setShowNicInputForView,
 }: StatisticsProps) {
   const [nic, setNic] = useState<string>("");
-  const [isSearcing, setIsSearching] = useState(false);
-  const navigate = useNavigate();
+  // const [isSearcing, setIsSearching] = useState(false);
+  // const navigate = useNavigate();
   const { setPatient, setOutPatient } = usePatientStore((state) => state);
   // const patientProfileHandler = async () => {
   //   try {

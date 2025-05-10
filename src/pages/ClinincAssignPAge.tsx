@@ -24,7 +24,6 @@ import axios from "axios";
 import debounce from "lodash.debounce";
 import { MessageSquare, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 
 interface SMSScheduleRequest {
