@@ -31,6 +31,8 @@ export default function InpatientDepartment() {
   const [isShowNicForm, setIsShowNicForm] = useState(false);
   const [isShoBhtForm, setIsShoBhtForm] = useState(false);
   const [wardData, setWardData] = useState([]);
+  const [totalBeds, setTotalBeds] = useState(0);
+  const [totalFreeBeds, setTotalFreeBeds] = useState(0);
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const [isShowBHTForAdmissionSheet, setIsShowBHTForAdmissionSheet] =
     useState(false);
@@ -38,8 +40,7 @@ export default function InpatientDepartment() {
     useState(false);
   const { setPatientNic } = usePatientStore((state) => state);
   const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
-  const { noOfTotalBeds, noOfFreeBeds, setNoOfFreeBeds, setNoOfTotalBeds } =
-    useWardTableInpatient((state) => state);
+  const { noOfFreeBeds } = useWardTableInpatient((state) => state);
   const token = useAuthStore((state) => state.token);
 
   // const patientProfileHandler = async () => {
@@ -77,10 +78,9 @@ export default function InpatientDepartment() {
         },
       });
       if (response.status === 200) {
-        console.log("response", response.data?.wardData);
         setWardData(response.data?.wardData);
-        setNoOfFreeBeds(response.data?.wardData[0].noOfFreeBeds);
-        setNoOfTotalBeds(response.data?.wardData[0].noOfFreeBeds);
+        setTotalBeds(response.data?.totalBeds);
+        setTotalFreeBeds(response.data.totalNoOfFreeBeds);
       }
     } catch (error: any) {
       console.log("Error fetching table data", error);
@@ -90,6 +90,7 @@ export default function InpatientDepartment() {
   useEffect(() => {
     fetchTableData();
   }, []);
+  console.log("wardData", wardData);
   console.log("noOfFreeBeds", noOfFreeBeds);
   return (
     <div className="relative">
@@ -173,7 +174,8 @@ export default function InpatientDepartment() {
             <CardContent>
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-2xl font-bold">{`${noOfFreeBeds}/ ${noOfTotalBeds}`}</p>
+                  <p className="text-2xl font-bold">{`${totalFreeBeds} / ${totalBeds}`}</p>
+
                   <p className="text-sm text-muted-foreground">
                     Available Beds
                   </p>

@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -6,15 +8,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Eye } from "lucide-react";
 import axios from "axios";
-import { usePatientStore } from "@/stores/usePatientStore";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Eye } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import { Button } from "../ui/button";
+import { useAuthStore } from "@/stores/useAuth";
 interface Patient {
   name: string;
   phone: string;
@@ -36,24 +36,25 @@ interface PatientTableProps {
 }
 
 export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
+  const token = useAuthStore((state) => state.token);
   const [selectedRows, setSelectedRows] = useState<
     { nic: string; id: string }[]
   >([]);
   const [loading, setloading] = useState(false);
-  const navigate = useNavigate();
-  const { setPatient } = usePatientStore((state) => state);
+  // const navigate = useNavigate();
+  // const { setPatient } = usePatientStore((state) => state);
 
-  const getPatientProfile = async (nic: string) => {
-    try {
-      setPatient([]);
-      const response = await axios.get(`/api/patient/${nic}`);
+  // const getPatientProfile = async (nic: string) => {
+  //   try {
+  //     setPatient([]);
+  //     const response = await axios.get(`/api/patient/${nic}`);
 
-      setPatient(response.data.Patient);
-      navigate(`/patient-profile-page`);
-    } catch (error: any) {
-      console.log("Error fetching patient", error);
-    }
-  };
+  //     setPatient(response.data.Patient);
+  //     navigate(`/patient-profile-page`);
+  //   } catch (error: any) {
+  //     console.log("Error fetching patient", error);
+  //   }
+  // };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -77,11 +78,10 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
 
   const handleMarkAsComplete = async () => {
     try {
-      console.log("selectedRows", selectedRows);
       setloading(true);
       const response = await axios("/api/mobileclinic/markascompleted", {
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         method: "PUT",
         data: { selectedRows },
@@ -186,14 +186,17 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Button
-                    onClick={() => {
-                      getPatientProfile(patient.nic);
-                    }}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Profile
-                  </Button>
+                  <Link to={`/patient-profile-page/${patient.nic}`}>
+                    {" "}
+                    <Button
+                    // onClick={() => {
+                    //   getPatientProfile(patient.nic);
+                    // }}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      View Profile
+                    </Button>
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}

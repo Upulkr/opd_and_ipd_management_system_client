@@ -256,7 +256,7 @@ function App() {
             }
           />
           <Route
-            path="/admission-sheet-register-page/:bht?/:view?"
+            path="/admission-sheet-register-page/:bht?/:view?/:nic?"
             element={
               <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
                 <AdmissionSheetRegisterPage />

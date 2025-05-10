@@ -25,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import { NetworkIcon } from "lucide-react";
 
 const formSchema = z.object({
   bht: z.string(),
@@ -46,8 +47,8 @@ const formSchema = z.object({
 });
 
 export const AdmissionSheetForm = () => {
-  const { bht, view } = useParams();
-  console.log("bht", bht);
+  const { bht = "", view = "", nic = "" } = useParams();
+
   const [isLoading, setIsLoading] = useState(false);
   // const { patient } = usePatientStore((state) => state);
 
@@ -75,6 +76,29 @@ export const AdmissionSheetForm = () => {
       livingStatus: "",
     },
   });
+  const getPatientDataByNIC = async () => {
+    try {
+      const response = await axios.get(`/api/patient/${nic}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        form.setValue("nic", response.data.Patient.nic);
+        form.setValue("name", response.data.Patient.name);
+        form.setValue("age", response.data.Patient.age);
+        form.setValue("gender", response.data.Patient.gender);
+        form.setValue("streetAddress", response.data.Patient.streetAddress);
+        form.setValue("city", response.data.Patient.city);
+        form.setValue("stateProvince", response.data.Patient.stateProvince);
+        form.setValue("postalCode", response.data.Patient.postalCode);
+        form.setValue("country", response.data.Patient.country);
+        form.setValue("phone", response.data.Patient.phone);
+      }
+    } catch (erro: any) {
+      console.error("Error fetching patient data by NIC", erro);
+    }
+  };
 
   const getAdmissionSheetByBHT = async () => {
     try {
@@ -138,8 +162,11 @@ export const AdmissionSheetForm = () => {
     }
   }
   useEffect(() => {
-    if (bht) {
+    if (bht !== "" && bht !== "undefined" && bht !== "null") {
       getAdmissionSheetByBHT();
+    }
+    if (nic !== "") {
+      getPatientDataByNIC();
     }
   }, []);
   return (
@@ -161,7 +188,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="BHT Number"
-                      disabled={!!form.getValues("bht")}
+                      disabled={!!form.getValues("bht") && !nic}
                       {...field}
                     />
                   </FormControl>
@@ -457,7 +484,7 @@ export const AdmissionSheetForm = () => {
                   <Textarea
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                     placeholder="Reason for admission"
-                    disabled={!!form.getValues("reason")}
+                    disabled={!!form.getValues("reason") && !nic}
                     {...field}
                   />
                 </FormControl>
@@ -471,7 +498,7 @@ export const AdmissionSheetForm = () => {
               disabled={
                 isLoading ||
                 Object.keys(admissionSheetByBHT).length > 0 ||
-                !!view
+                view === "true"
               }
               className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
             >

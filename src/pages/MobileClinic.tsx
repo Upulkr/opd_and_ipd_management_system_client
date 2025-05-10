@@ -49,6 +49,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useAuthStore } from "@/stores/useAuth";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -61,13 +62,14 @@ export const MobileClinic = () => {
   const [patients, setPatients] = useState<
     { nic: string; name: string; city?: string }[]
   >([]);
+
   const [loading, setLoading] = useState(false);
   const [searchNic, setSearchNic] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selectedClinic, setSelectedClinic] = useState("");
   const [predifinedCity, setPredifinedCity] = useState("");
-  const { clinincs } = useClinicStore((state) => state);
+  const { clinics } = useClinicStore((state) => state);
   const [customCity, setCustomCity] = useState("");
   const [sheduledMobileclinics, setSheduledMobileclinics] = useState([]);
   const [date, setDate] = React.useState<Date>();
@@ -79,6 +81,7 @@ export const MobileClinic = () => {
   const [completedClinincCountFor30days, setCompletedClinincCountFor30days] =
     useState(0);
   const [totalCompletedVisits, setTotalCompletedVisits] = useState(0);
+  const token = useAuthStore((state) => state.token);
   const navigate = useNavigate();
   const clearSearch = () => {
     setSearchNic("");
@@ -129,9 +132,12 @@ export const MobileClinic = () => {
 
   const getPatientsbyAge = async () => {
     try {
-      const response = await axios.get(`/api/mobileclinic/getpatientsbyage`);
+      const response = await axios.get(`/api/mobileclinic/getpatientsbyage`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
-        setPatients(response.data.ageGroupCounts);
         setClinincAgeGroups(response.data.ageGroupCounts);
       }
     } catch (error: any) {
@@ -141,7 +147,11 @@ export const MobileClinic = () => {
 
   const getMonthlyhomevisitsForEachMonth = async () => {
     try {
-      const response = await axios.get(`/api/mobileclinic/monthlyhomevisits`);
+      const response = await axios.get(`/api/mobileclinic/monthlyhomevisits`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setMonthlyHomeVisits(response.data.monthlyhomevisits);
       }
@@ -153,7 +163,12 @@ export const MobileClinic = () => {
   const getCountCompletedVisits = async () => {
     try {
       const res = await axios.get(
-        `/api/mobileclinic/getcountofcompletedmobileclinincs`
+        `/api/mobileclinic/getcountofcompletedmobileclinincs`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (res.status === 200) {
         setCompletedClinincCountFor30days(res.data.completedMobileClinics);
@@ -166,7 +181,11 @@ export const MobileClinic = () => {
 
   const fetchPatients = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/patient`);
+      const response = await axios.get(`/api/patient`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.status === 200) {
         setPatients(response.data.Patients);
       }
@@ -178,10 +197,14 @@ export const MobileClinic = () => {
   const getPAtientByNic = patients.filter(
     (patient) => patient.nic === searchNic
   );
-
+  console.log("patient", patients);
   const mobileclinincsForTable = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/mobileclinic/sheduled`);
+      const res = await axios.get(`/api/mobileclinic/sheduled`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (res.status === 200) {
         const mobileclinicAssigments = res.data.mobileclinicAssigments;
         if (mobileclinicAssigments) {
@@ -215,7 +238,7 @@ export const MobileClinic = () => {
       if (nic) {
         const filtered = patients
           .filter((patient) =>
-            patient.nic.toLowerCase().includes(nic.toLowerCase())
+            patient.nic?.toLowerCase().includes(nic.toLowerCase())
           )
           .map((patient) => ({
             nic: patient.nic,
@@ -247,13 +270,13 @@ export const MobileClinic = () => {
       const response = await axios(`/api/mobileclinic`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         data: {
           nic: searchNic,
           sheduledAt: date,
           clinicName: selectedClinic,
-          clinicId: clinincs.find((clinic) => clinic.name === selectedClinic)
+          clinicId: clinics.find((clinic) => clinic.name === selectedClinic)
             ?.id,
           location:
             customCity !== ""
@@ -284,7 +307,7 @@ export const MobileClinic = () => {
       }
     }
   };
-  console.log("ClinincAgeGroups", clinincAgeGroups);
+  console.log("suggestions", suggestions);
   return (
     <div className="min-h-screen bg-gray-50 p-6 w-full">
       <ToastContainer />
@@ -449,7 +472,7 @@ export const MobileClinic = () => {
                       <SelectValue placeholder="Select a clinic" />
                     </SelectTrigger>
                     <SelectContent>
-                      {clinincs.map((clinic) => (
+                      {clinics?.map((clinic) => (
                         <SelectItem key={clinic.id} value={clinic.name}>
                           {clinic.name}
                         </SelectItem>

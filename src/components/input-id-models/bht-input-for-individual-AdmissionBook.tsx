@@ -113,7 +113,7 @@ export function InputBHTFormForAdmissionBookSearch() {
         </InputOTPGroup>
       </InputOTP>
       <div className="flex justify-center p-3">
-        <Link to={`/admission-book-page/${bht}`}>
+        <Link to={`/admission-book-page/${bht}/${true}`}>
           <Button
             // onClick={handleSubmit}
             type="submit"

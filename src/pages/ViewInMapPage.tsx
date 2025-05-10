@@ -17,7 +17,7 @@ function ViewInMapPage() {
   const { location } = useParams();
 
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AlzaSyUQfDbkNR-3rhiHcZ9NJaeVDRu5aEsktJf",
+    googleMapsApiKey: "AlzaSyNHaGT1jk3_6_BEQWJUVgsY6m8dUCYcJmk",
     libraries: ["places"],
   });
 
@@ -162,3 +162,150 @@ function ViewInMapPage() {
 }
 
 export default ViewInMapPage;
+// import { Button } from "@/components/ui/button";
+// import { Card } from "@/components/ui/card";
+// import { Input } from "@/components/ui/input";
+// import axios from "axios";
+// import { useState } from "react";
+// import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
+
+// const sriLankaCenter = { lat: 7.8731, lng: 80.7718 };
+
+// function ViewInMapPage() {
+//   const [origin, setOrigin] = useState("Badulla, Sri Lanka");
+//   const [destination, setDestination] = useState("Pattiyakumbura, Sri Lanka");
+//   const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
+//   const [distance, setDistance] = useState("");
+//   const [duration, setDuration] = useState("");
+//   const [loading, setLoading] = useState(false);
+
+//   // Function to geocode location name (using OpenCage API)
+//   async function geocodeLocation(location: string) {
+//     const response = await axios.get(
+//       `https://api.opencagedata.com/geocode/v1/json`,
+//       {
+//         params: {
+//           q: location,
+//           key: import.meta.env.VITE_OPENCAGE_API_KEY, // Make sure to set the OpenCage API key in your .env file
+//         },
+//       }
+//     );
+//     const { lat, lng } = response.data.results[0].geometry;
+//     return { lat, lng };
+//   }
+
+//   // Function to calculate the route using OpenRouteService
+//   async function calculateRoute() {
+//     if (!origin || !destination) return;
+//     setLoading(true);
+//     try {
+//       // Geocode the origin and destination locations
+//       const originCoords = await geocodeLocation(origin);
+//       const destinationCoords = await geocodeLocation(destination);
+
+//       // Call OpenRouteService API to get the route
+//       const response = await axios.get(
+//         "https://api.openrouteservice.org/v2/directions/driving-car",
+//         {
+//           params: {
+//             api_key: import.meta.env.VITE_ORS_API_KEY, // Use the key here
+//             start: `${originCoords.lng},${originCoords.lat}`, // Correct start format
+//             end: `${destinationCoords.lng},${destinationCoords.lat}`, // Correct end format
+//           },
+//           headers: {
+//             Accept: "application/json",
+//           },
+//         }
+//       );
+
+//       // Process the route data
+//       const coords = response.data.features[0].geometry.coordinates;
+//       const latLngs: [number, number][] = coords.map(
+//         ([lng, lat]: [number, number]) => [lat, lng]
+//       );
+
+//       // Extract summary information
+//       const summary = response.data.features[0].properties.summary;
+//       setDistance((summary.distance / 1000).toFixed(2) + " km");
+//       setDuration((summary.duration / 60).toFixed(0) + " mins");
+
+//       // Set the route coordinates to display on the map
+//       setRouteCoords(latLngs);
+//     } catch (error) {
+//       console.error("Route error", error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   }
+
+//   // Function to clear the route
+//   function clearRoute() {
+//     setRouteCoords([]);
+//     setDistance("");
+//     setDuration("");
+//   }
+
+//   return (
+//     <div className="relative flex flex-col items-center h-screen w-screen">
+//       <MapContainer
+//         center={sriLankaCenter}
+//         zoom={8}
+//         style={{ height: "100%", width: "100%" }}
+//       >
+//         <TileLayer
+//           attribution='&copy; <a href="https://osm.org/copyright">OSM</a>'
+//           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+//         />
+//         {routeCoords.length > 0 && (
+//           <Polyline positions={routeCoords} color="blue" />
+//         )}
+//         {routeCoords.length > 0 && (
+//           <>
+//             <Marker position={routeCoords[0]} />
+//             <Marker position={routeCoords[routeCoords.length - 1]} />
+//           </>
+//         )}
+//       </MapContainer>
+
+//       <Card className="p-6 rounded-lg m-4 bg-white shadow-lg w-full max-w-lg z-10 absolute top-5">
+//         <div className="flex flex-col gap-4">
+//           <div className="flex gap-2">
+//             <Input
+//               value={origin}
+//               onChange={(e) => setOrigin(e.target.value)}
+//               placeholder="Origin"
+//               className="w-full"
+//             />
+//             <Input
+//               value={destination}
+//               onChange={(e) => setDestination(e.target.value)}
+//               placeholder="Destination"
+//               className="w-full"
+//             />
+//           </div>
+//           <div className="flex gap-2 justify-between">
+//             <Button
+//               onClick={calculateRoute}
+//               className="bg-blue-500 text-white w-full"
+//               disabled={loading}
+//             >
+//               {loading ? "Calculating..." : "Calculate Route"}
+//             </Button>
+//             <Button
+//               onClick={clearRoute}
+//               className="bg-red-500 text-white w-full"
+//             >
+//               Clear
+//             </Button>
+//           </div>
+//           <div className="mt-2 text-gray-800">
+//             <p>Distance: {distance || "N/A"}</p>
+//             <p>Duration: {duration || "N/A"}</p>
+//           </div>
+//         </div>
+//       </Card>
+//     </div>
+//   );
+// }
+
+// export default ViewInMapPage;

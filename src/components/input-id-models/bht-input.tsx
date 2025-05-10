@@ -1,21 +1,18 @@
-import { usePatientStore } from "@/stores/usePatientStore";
-import axios from "axios";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
-import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
-import { useAuthStore } from "@/stores/useAuth";
 
 export function InputBHTForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
-  const { setPatientBHT } = usePatientStore((state) => state);
+  // const { setPatientBHT } = usePatientStore((state) => state);
 
-  const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
-  const token = useAuthStore((state) => state.token);
+  // const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  // const token = useAuthStore((state) => state.token);
+
   // const [isLoadingButton, setIsLoadingButton] = useState(false);
   //   const handleKeyDown = (e: React.KeyboardEvent) => {
   //     if (e.key === "Enter") {
@@ -32,54 +29,54 @@ export function InputBHTForm() {
   //   enabled: false,
   // });
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
+  // const handleSubmit = async () => {
+  //   setIsLoading(true);
 
-    if (!bht) {
-      toast.error("BHT is required");
-      setIsLoading(false);
-      return;
-    } else {
-      setPatientBHT(bht);
-    }
+  //   if (!bht) {
+  //     toast.error("BHT is required");
+  //     setIsLoading(false);
+  //     return;
+  //   } else {
+  //     setPatientBHT(bht);
+  //   }
 
-    try {
-      const isAdmissionBookExisting = await axios.get(
-        `/api/admissionbook/bht?bht=${bht}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //   try {
+  //     const isAdmissionBookExisting = await axios.get(
+  //       `/api/admissionbook/bht?bht=${bht}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      if (isAdmissionBookExisting.data.admissionBook) {
-        toast.error("BHT already exists");
-        setIsLoading(false);
+  //     if (isAdmissionBookExisting.data.admissionBook) {
+  //       toast.error("BHT already exists");
+  //       setIsLoading(false);
 
-        return;
-      }
-      const response = await axios.get(`/api/admissionsheet/bht?bht=${bht}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("response", response);
-      setAdmissionSheetByBHT(response.data.admissionSheet);
-      navigate("/admission-book-page");
-      setIsLoading(false);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        toast.error("Patient not found, please register the patient");
+  //       return;
+  //     }
+  //     const response = await axios.get(`/api/admissionsheet/bht?bht=${bht}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     console.log("response", response);
+  //     setAdmissionSheetByBHT(response.data.admissionSheet);
+  //     navigate("/admission-book-page");
+  //     setIsLoading(false);
+  //   } catch (err: any) {
+  //     if (err.response?.status === 404) {
+  //       toast.error("Patient not found, please register the patient");
 
-        navigate("/patient-register-form");
-      } else {
-        console.error("Error fetching patient", err);
-        toast.error(err.message || "Error fetching patient");
-      }
-      setIsLoading(false);
-    }
-  };
+  //       navigate("/patient-register-form");
+  //     } else {
+  //       console.error("Error fetching patient", err);
+  //       toast.error(err.message || "Error fetching patient");
+  //     }
+  //     setIsLoading(false);
+  //   }
+  // };
   return (
     <div
       className="bg-white p-6 rounded-lg shadow-lg"
@@ -98,14 +95,16 @@ export function InputBHTForm() {
         </InputOTPGroup>
       </InputOTP>
       <div className="flex justify-center p-3">
-        <Button
-          onClick={handleSubmit}
-          type="submit"
-          disabled={isLoading}
-          className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
-        >
-          {isLoading ? "Submitting..." : "Submit"}
-        </Button>
+        <Link to={`/admission-book-page/${bht}/${false}?`}>
+          <Button
+            onClick={() => setIsLoading(true)}
+            type="button"
+            disabled={isLoading}
+            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"
+          >
+            {isLoading ? "Submitting..." : "Submit"}
+          </Button>
+        </Link>
       </div>
       {/* <div className="text-center text-md">
         {value === "" ? <>Enter Patient NIC.</> : <>You entered: {value}</>}

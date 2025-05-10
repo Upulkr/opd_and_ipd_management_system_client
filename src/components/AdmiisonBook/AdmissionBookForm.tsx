@@ -26,7 +26,7 @@ import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import * as z from "zod";
 import { Textarea } from "../ui/textarea";
 const formSchema = z.object({
@@ -53,7 +53,7 @@ const formSchema = z.object({
 });
 
 export const AdmissionBookForm = () => {
-  const { bht } = useParams();
+  const { bht, view } = useParams();
 
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
@@ -64,35 +64,7 @@ export const AdmissionBookForm = () => {
     useState(0);
 
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
-  // const { admissionBook } = useAdmissionBookByBHT((state) => state);
-  // function formatDateForInput(dateStr: string) {
-  //   const date = new Date(dateStr);
 
-  //   console.log("dateStr", date.toISOString().slice(0, 16));
-  //   return date.toISOString().slice(0, 16); // "YYYY-MM-DDTHH:MM"
-  // }
-  const getAdmissionBookByBHT = async () => {
-    try {
-      const reponse = await axios.get(`/api/admissionbook/bht?bht=${bht}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (reponse.status === 200) {
-        for (const [key, value] of Object.entries(reponse.data.admissionBook)) {
-          if (key in formSchema.shape) {
-            form.setValue(
-              key as keyof typeof formSchema.shape,
-              value as string
-            );
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching admission book by BHT", error);
-    }
-  };
   const fetchingNoOfAdmissionSheetsperDay = async () => {
     try {
       if (enableUpdate === true) {
@@ -140,8 +112,12 @@ export const AdmissionBookForm = () => {
       fetchingNoOfAdmissionSheetsperDay();
       fetchingNoOfAdmissionSheetsperYear();
     }
-    if (bht) {
+    if (bht && view !== "false") {
       getAdmissionBookByBHT();
+    } else if (bht) {
+      getAdmissionSheetDataBYBHT();
+    } else {
+      form.reset();
     }
   }, []);
 
@@ -165,13 +141,16 @@ export const AdmissionBookForm = () => {
       transferCategory: "ward",
       dischargeDate: undefined,
       phone: "",
-      wardNo: "", // Set default value from admissionSheetByBHT
-      livingStatus: "ward", // Default value for life status
+      wardNo: "",
+      livingStatus: "",
     },
   });
   const { setValue } = form; // Access setValue function
 
   useEffect(() => {
+    if (view === "false") {
+      checkIfAdmissionBookExists();
+    }
     // After state change, update the form values
     if (noOfAdmissionSheetsperDay > 0) {
       setValue("dailyno", noOfAdmissionSheetsperDay);
@@ -195,17 +174,143 @@ export const AdmissionBookForm = () => {
       if (response.status === 201) {
         toast.success("Admission book submitted successfully");
       }
+
       setIsLoading(false);
       navigate("/inpatient-department");
     } catch (error: any) {
-      if (error.response?.status === 500) {
-        toast.error("Error submitting admission book");
+      if (error.status === 500) {
+        toast.error("BHT already exists");
+        setIsLoading(false);
+        const delay = 2000;
+        setTimeout(() => {
+          navigate("/inpatient-department");
+        }, delay);
+
+        return clearTimeout(delay);
       }
     }
   }
 
+  const checkIfAdmissionBookExists = async () => {
+    if (!bht) {
+      toast.error("BHT is required");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const isAdmissionBookExisting = await axios.get(
+        `/api/admissionbook/bht?bht=${bht}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (isAdmissionBookExisting.data.admissionBook) {
+        toast.error("BHT already exists");
+        setIsLoading(false);
+        const delay = 5000;
+        setTimeout(() => {
+          navigate("/inpatient-department");
+        }, delay);
+        return;
+      }
+    } catch (error: any) {
+      console.log(error);
+    }
+  };
+  const getAdmissionSheetDataBYBHT = async () => {
+    try {
+      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        form.setValue("bht", String(response.data.admissionSheet.bht));
+        form.setValue("nic", response.data.admissionSheet.nic);
+        form.setValue("name", response.data.admissionSheet.name);
+        form.setValue("age", response.data.admissionSheet.age);
+
+        form.setValue(
+          "streetAddress",
+          response.data.admissionSheet.streetAddress
+        );
+        form.setValue("city", response.data.admissionSheet.city);
+        form.setValue(
+          "stateProvince",
+          response.data.admissionSheet.stateProvince
+        );
+        form.setValue(
+          "admittedDate",
+          new Date(response.data.admissionSheet.createdAt)
+            .toISOString()
+            .slice(0, 16)
+        );
+        form.setValue("postalCode", response.data.admissionSheet.postalCode);
+        form.setValue("country", response.data.admissionSheet.country);
+        form.setValue("phone", response.data.admissionSheet.phone);
+        form.setValue("reason", response.data.admissionSheet.reason);
+        form.setValue("wardNo", response.data.admissionSheet.wardNo);
+        form.setValue("wardNo", response.data.admissionSheet.wardNo);
+      }
+    } catch (error) {
+      console.error("Error fetching admission sheet by BHT", error);
+    }
+  };
+
+  const getAdmissionBookByBHT = async () => {
+    try {
+      const reponse = await axios.get(`/api/admissionbook/bht?bht=${bht}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(reponse.data);
+      if (reponse.status === 200) {
+        form.setValue("bht", String(reponse.data.admissionBook.bht));
+        form.setValue("nic", reponse.data.admissionBook.nic);
+        form.setValue("name", reponse.data.admissionBook.name);
+        form.setValue("age", reponse.data.admissionBook.age);
+        form.setValue(
+          "streetAddress",
+          reponse.data.admissionBook.streetAddress
+        );
+        form.setValue("city", reponse.data.admissionBook.city);
+        form.setValue(
+          "stateProvince",
+          reponse.data.admissionBook.stateProvince
+        );
+        form.setValue(
+          "admittedDate",
+          new Date(reponse.data.admissionBook.admittedDate)
+            .toISOString()
+            .slice(0, 16)
+        );
+        form.setValue("postalCode", reponse.data.admissionBook.postalCode);
+        form.setValue("country", reponse.data.admissionBook.country);
+        form.setValue("phone", reponse.data.admissionBook.phone);
+        form.setValue("reason", reponse.data.admissionBook.reason);
+        form.setValue("wardNo", reponse.data.admissionBook.wardNo);
+        form.setValue("allergies", reponse.data.admissionBook.allergies);
+        form.setValue("dailyno", reponse.data.admissionBook.dailyno);
+        form.setValue("yearlyno", reponse.data.admissionBook.yearlyno);
+        form.setValue(
+          "transferCategory",
+          reponse.data.admissionBook.transferCategory
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching admission book by BHT", error);
+    }
+  };
+
   return (
     <Form {...form}>
+      <ToastContainer />
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -503,7 +608,9 @@ export const AdmissionBookForm = () => {
                 <FormControl>
                   <Textarea
                     {...field}
-                    disabled={!!form.getValues("reason")}
+                    disabled={
+                      !!form.getValues("reason") && view === "fale" && false
+                    }
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -527,7 +634,9 @@ export const AdmissionBookForm = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => field.onChange([...field.value, ""])}
-                        disabled={!!form.getValues("allergies")}
+                        disabled={
+                          !!form.getValues("allergies") && view === "true"
+                        }
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Allergy
@@ -543,10 +652,14 @@ export const AdmissionBookForm = () => {
                             field.onChange(newAllergies);
                           }}
                           className="w-40"
-                          disabled={!!form.getValues("allergies")}
+                          disabled={
+                            !!form.getValues("allergies") && view === "true"
+                          }
                         />
                         <Button
-                          disabled={!!form.getValues("allergies")}
+                          disabled={
+                            !!form.getValues("allergies") && view === "true"
+                          }
                           type="button"
                           variant="destructive"
                           size="icon"
@@ -578,7 +691,9 @@ export const AdmissionBookForm = () => {
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={!!form.getValues("transferCategory")}
+                  disabled={
+                    !!form.getValues("transferCategory") && view === "true"
+                  }
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -598,7 +713,7 @@ export const AdmissionBookForm = () => {
             )}
           />
         </div>
-        <div className="col-span-full md:col-span-1 space-y-4">
+        {/* <div className={`col-span-full md:col-span-1 space-y-4`}>
           <FormField
             control={form.control}
             name="dischargeDate"
@@ -609,7 +724,7 @@ export const AdmissionBookForm = () => {
                   <Input
                     type="datetime-local"
                     {...field}
-                    disabled={!!form.getValues("dischargeDate")}
+                    disabled={view === "true" ? false : true}
                     className="border border-gray-500 disabled:text-black disabled:font-bold "
                   />
                 </FormControl>
@@ -617,21 +732,14 @@ export const AdmissionBookForm = () => {
               </FormItem>
             )}
           />
-        </div>
+        </div> */}
         <div className="col-span-full flex justify-center">
           <Button
             type="submit"
             className="px-12 bg-blue-600 hover:bg-blue-700"
-            disabled={
-              !!form.getValues("admittedDate") &&
-              !form.getValues("dischargeDate")
-            }
+            disabled={isLoading || view === "true"}
           >
-            {isLoading
-              ? "Submitting..."
-              : form.getValues("dischargeDate")
-              ? "Discharge"
-              : "Submit"}
+            {isLoading ? "Submitting..." : "Submit"}
           </Button>
         </div>
       </form>
