@@ -25,7 +25,6 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { NetworkIcon } from "lucide-react";
 
 const formSchema = z.object({
   bht: z.string(),

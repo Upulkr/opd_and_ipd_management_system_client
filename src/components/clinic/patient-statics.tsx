@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuthStore } from "@/stores/useAuth";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -21,12 +22,19 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function PatientStatistics() {
-  const [weeklyVisits, setWeeklyVisits] = useState([]);
-
+  const [weeklyVisits, setWeeklyVisits] = useState<
+    { day: string; total: number }[]
+  >([]);
+  const token = useAuthStore((state) => state.token);
   const getWeeklyPatientVisits = useCallback(async () => {
     try {
       const response = await axios.get(
-        "/api/clinicassigmnent/getWeeklyclinincvisits"
+        "/api/clinicassigmnent/getWeeklyclinincvisits",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.status === 200) {
         const data = response.data.weeklyData;

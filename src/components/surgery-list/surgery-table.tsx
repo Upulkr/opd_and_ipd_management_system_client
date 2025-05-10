@@ -1,5 +1,13 @@
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -16,27 +24,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { useAuthStore } from "@/stores/useAuth";
 import axios from "axios";
 import {
+  AlertCircle,
   ChevronLeft,
   ChevronRight,
   MoreHorizontal,
-  PlusCircle,
-  AlertCircle,
   Search,
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import { useAuthStore } from "@/stores/useAuth";
 
 interface Surgery {
   id: string;
