@@ -51,10 +51,10 @@ function OutpatientDepartment() {
           }} // Close when clicking outside
         >
           <InputNicFormForOutPatient
-            onClose={() => {
-              setActiveTab("overview");
-              setShowNicInput(false);
-            }}
+          // onClose={() => {
+          //   setActiveTab("overview");
+          //   setShowNicInput(false);
+          // }}
           />
         </div>
       )}

@@ -126,6 +126,7 @@ export default function Dashboard() {
   const getWardbedstatus = async () => {
     try {
       const response = await axios.get("/api/getwardbedstatus");
+      if (response.data.length === 0) setWardBedStatus([]);
       if (response.data) setWardBedStatus(response.data);
     } catch (error) {
       console.error(error);
@@ -244,24 +245,25 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  {wardBedStatus.map((ward) => (
-                    <div key={ward.wardName}>
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="font-medium">
-                          {ward.wardName} -- total beds {ward.noOfBeds}
+                  {Array.isArray(wardBedStatus) &&
+                    wardBedStatus.map((ward) => (
+                      <div key={ward.wardName}>
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="font-medium">
+                            {ward.wardName} -- total beds {ward.noOfBeds}
+                          </div>
+                          <div className="text-muted-foreground">
+                            {ward.percentage}% Occupied
+                          </div>
                         </div>
-                        <div className="text-muted-foreground">
-                          {ward.percentage}% Occupied
+                        <div className="h-2 w-full rounded-full bg-gray-300 relative overflow-hidden">
+                          <div
+                            className="h-full bg-red-500 rounded-full"
+                            style={{ width: `${ward.percentage}%` }}
+                          ></div>
                         </div>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-gray-300 relative overflow-hidden">
-                        <div
-                          className="h-full bg-red-500 rounded-full"
-                          style={{ width: `${ward.percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             </CardContent>
