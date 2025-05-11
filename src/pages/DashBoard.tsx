@@ -244,7 +244,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  {wardBedStatus.map((ward) => (
+                  {wardBedStatus?.map((ward) => (
                     <div key={ward.wardName}>
                       <div className="flex items-center justify-between text-sm">
                         <div className="font-medium">
