@@ -126,6 +126,7 @@ export default function Dashboard() {
   const getWardbedstatus = async () => {
     try {
       const response = await axios.get("/api/getwardbedstatus");
+      if (response.data.length === 0) setWardBedStatus([]);
       if (response.data) setWardBedStatus(response.data);
     } catch (error) {
       console.error(error);
