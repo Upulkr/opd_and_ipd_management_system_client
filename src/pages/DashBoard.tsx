@@ -52,7 +52,7 @@ export default function Dashboard() {
 
   const [nic, setNic] = useState<string>("");
   const { staffCount } = useStaffStore((state) => state);
-  console.log("dischargecount", dischargecount);
+
   const getdischargecounts = async () => {
     try {
       const response = await axios.get("/api/admissionbook/getdischargecounts");
@@ -225,7 +225,9 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyVisitData}>
+                <BarChart
+                  data={Array.isArray(monthlyVisitData) ? monthlyVisitData : []}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month_year" />
                   <YAxis />
@@ -246,7 +248,8 @@ export default function Dashboard() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   {Array.isArray(wardBedStatus) &&
-                    wardBedStatus.map((ward) => (
+                    wardBedStatus?.length > 0 &&
+                    wardBedStatus.map((ward: WardBedStatus) => (
                       <div key={ward.wardName}>
                         <div className="flex items-center justify-between text-sm">
                           <div className="font-medium">

@@ -41,7 +41,7 @@ export default function PatientStatistics() {
 
         // Ensure all 7 days exist in order
         const filledData = DAYS_OF_WEEK.map((day) => {
-          const match = data.find((item: any) => item.day === day);
+          const match = data?.find((item: any) => item.day === day);
           return {
             day,
             total: match ? match.count : 0,
@@ -66,7 +66,7 @@ export default function PatientStatistics() {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={weeklyVisits}>
+          <BarChart data={Array.isArray(weeklyVisits) ? weeklyVisits : []}>
             <XAxis
               dataKey="day"
               stroke="#888888"
