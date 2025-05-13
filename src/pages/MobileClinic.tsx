@@ -236,14 +236,16 @@ export const MobileClinic = () => {
   const debouncedSearchNic = useCallback(
     debounce((nic: string) => {
       if (nic) {
-        const filtered = patients
-          .filter((patient) =>
-            patient.nic?.toLowerCase().includes(nic.toLowerCase())
-          )
-          .map((patient) => ({
-            nic: patient.nic,
-            name: patient.name,
-          }));
+        const filtered = Array.isArray(patients)
+          ? patients
+              .filter((patient) =>
+                patient.nic?.toLowerCase().includes(nic.toLowerCase())
+              )
+              .map((patient) => ({
+                nic: patient.nic,
+                name: patient.name,
+              }))
+          : [];
         setSuggestions(filtered);
         setShowSuggestions(true);
       } else {

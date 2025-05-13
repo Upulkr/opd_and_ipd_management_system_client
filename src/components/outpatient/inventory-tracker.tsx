@@ -79,7 +79,7 @@ export const InventoryTracker = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {inventory.map((item) => (
+          {inventory?.map((item) => (
             <TableRow key={item.id}>
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.quantity}</TableCell>

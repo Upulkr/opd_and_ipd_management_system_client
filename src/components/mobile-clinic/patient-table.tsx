@@ -59,10 +59,12 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedRows(
-        sheduledMobileclinics.map((patient) => ({
-          nic: patient.nic,
-          id: patient.id,
-        }))
+        Array.isArray(sheduledMobileclinics)
+          ? sheduledMobileclinics.map((patient) => ({
+              nic: patient.nic,
+              id: patient.id,
+            }))
+          : []
       );
     } else {
       setSelectedRows([]);

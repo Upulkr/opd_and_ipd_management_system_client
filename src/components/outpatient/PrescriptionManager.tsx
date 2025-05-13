@@ -107,7 +107,7 @@ export function PrescriptionManager() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {prescriptions.map((prescription) => (
+          {prescriptions?.map((prescription) => (
             <TableRow key={prescription.id}>
               <TableCell>{prescription.patientName}</TableCell>
               <TableCell>{prescription.medication}</TableCell>
