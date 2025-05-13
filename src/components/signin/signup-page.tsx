@@ -97,11 +97,14 @@ export default function SignupPage() {
     setError("");
 
     try {
-      const response = await axios("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        data: values,
-      });
+      const response = await axios(
+        "https://hv8mlav8d6.execute-api.eu-north-1.amazonaws.com/prod/auth/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          data: values,
+        }
+      );
 
       if (response.status === 200) {
         setIsLoading(false);
