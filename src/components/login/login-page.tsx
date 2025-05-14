@@ -63,7 +63,7 @@ export default function LoginPage() {
     try {
       const response = await axios("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "x-api-key": import.meta.env.VITE_X_API_KEY },
         data: values,
       });
 
