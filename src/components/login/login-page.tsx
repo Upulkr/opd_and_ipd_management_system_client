@@ -61,10 +61,10 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await axios("/api/auth/login", {
-        method: "POST",
-        headers: { "x-api-key": import.meta.env.VITE_X_API_KEY },
-        data: values,
+      const response = await axios.post("/api/auth/login", values, {
+        headers: {
+          "x-api-key": import.meta.env.VITE_X_API_KEY,
+        },
       });
 
       if (response.status === 200) {
