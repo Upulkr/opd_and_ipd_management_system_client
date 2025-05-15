@@ -75,7 +75,6 @@ export const PatientRegisterForm = () => {
       const createPatient = await apiClient.post("/patient", values, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       });
 
