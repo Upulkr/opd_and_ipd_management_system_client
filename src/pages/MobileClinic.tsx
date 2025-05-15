@@ -32,6 +32,8 @@ import {
   PopoverTrigger,
 } from "@radix-ui/react-popover";
 
+import apiClient from "@/lib/apiClient";
+import { useAuthStore } from "@/stores/useAuth";
 import { format } from "date-fns";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -49,8 +51,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useAuthStore } from "@/stores/useAuth";
-import apiClient from "@/lib/apiClient";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -270,23 +270,22 @@ export const MobileClinic = () => {
     }
     try {
       setLoading(true);
-      const response = await axios(`/mobileclinic`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        data: {
+      const response = await apiClient.post(
+        `/mobileclinic`,
+        {
           nic: searchNic,
           sheduledAt: date,
           clinicName: selectedClinic,
           clinicId: clinics.find((clinic) => clinic.name === selectedClinic)
             ?.id,
-          location:
-            customCity !== ""
-              ? customCity
-              : predifinedCity !== "" && predifinedCity,
+          location: customCity || predifinedCity,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (response.status === 200) {
         toast.success("Patient assigned successfully");
         const timeOut = setTimeout(() => {

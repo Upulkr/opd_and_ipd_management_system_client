@@ -219,7 +219,7 @@ export default function ClinicPage() {
       );
 
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       if (apiClient.isAxiosError(error)) {
         // Handle Axios specific errors
         if (error.response) {
