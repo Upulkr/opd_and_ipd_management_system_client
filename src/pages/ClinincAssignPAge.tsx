@@ -21,6 +21,7 @@ import { useAuthStore } from "@/stores/useAuth";
 import { useClinicStore } from "@/stores/useClinicStore";
 
 import { usePatientStore } from "@/stores/usePatientStore";
+import axios from "axios";
 
 import debounce from "lodash.debounce";
 import { MessageSquare, Search, X } from "lucide-react";
@@ -220,7 +221,7 @@ export default function ClinicPage() {
 
       return response.data;
     } catch (error: any) {
-      if (apiClient.isAxiosError(error)) {
+      if (axios.isAxiosError(error)) {
         // Handle Axios specific errors
         if (error.response) {
           // The request was made and the server responded with a status code
