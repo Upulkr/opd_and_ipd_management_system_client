@@ -1,11 +1,12 @@
 import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
-import axios from "axios";
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
+import apiClient from "@/lib/apiClient";
 
 export function InputBHTFormFrAdmissionSheet() {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,8 +29,8 @@ export function InputBHTFormFrAdmissionSheet() {
     }
 
     try {
-      const isAdmissionSheetExisting = await axios.get(
-        `/api/admissionSheet/bht?bht=${bht}`,
+      const isAdmissionSheetExisting = await apiClient.get(
+        `/admissionSheet/bht?bht=${bht}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +44,7 @@ export function InputBHTFormFrAdmissionSheet() {
         navigate("/inpatient-department/admission-sheet");
         return;
       }
-      // const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`, {
+      // const response = await apiClient.get(`/admissionSheet/bht?bht=${bht}`, {
       //   headers: {
       //     Authorization: `Bearer ${token}`,
       //   },

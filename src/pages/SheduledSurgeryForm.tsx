@@ -22,10 +22,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
+import apiClient from "@/lib/apiClient";
 type Doctor = {
   id: string;
   username: string;
@@ -76,8 +77,8 @@ export default function SheduledSurgeryForm() {
   });
   const editSurgery = async (surgeryId: string, data: SurgeryFormValues) => {
     try {
-      const response = await axios.put(
-        `/api/surgery/updatesurgeryschedule/${surgeryId}`,
+      const response = await apiClient.put(
+        `/surgery/updatesurgeryschedule/${surgeryId}`,
         data,
         {
           headers: {
@@ -98,7 +99,7 @@ export default function SheduledSurgeryForm() {
   };
   const getSurgeryById = async () => {
     try {
-      const response = await axios.get(`/api/surgery/getsurgerybyid/${id}`, {
+      const response = await apiClient.get(`/surgery/getsurgerybyid/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -118,7 +119,7 @@ export default function SheduledSurgeryForm() {
   };
   const getAlldoctors = async () => {
     try {
-      const response = await axios.get("/api/getusers/getalldoctors", {
+      const response = await apiClient.get("/getusers/getalldoctors", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -145,8 +146,8 @@ export default function SheduledSurgeryForm() {
       navigate("/surgeries");
     } else {
       try {
-        const response = await axios.post(
-          "/api/surgery/createsurgeryschedule",
+        const response = await apiClient.post(
+          "/surgery/createsurgeryschedule",
           data,
           {
             headers: {

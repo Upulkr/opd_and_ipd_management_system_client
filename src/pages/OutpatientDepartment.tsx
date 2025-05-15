@@ -6,8 +6,8 @@ import { StaffDutyCard } from "@/components/outpatient/staff-duty-card";
 import Statistics from "@/components/outpatient/statisticsForOutPAtientDashboard";
 import { TodaysPatients } from "@/components/outpatient/todays-patients";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
 import { useEffect, useState } from "react";
 function OutpatientDepartment() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -18,7 +18,7 @@ function OutpatientDepartment() {
   const token = useAuthStore((state) => state.token);
   const fetchTodayOutPatients = async () => {
     try {
-      const response = await axios.get("/api/outPatient", {
+      const response = await apiClient.get("/outPatient", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

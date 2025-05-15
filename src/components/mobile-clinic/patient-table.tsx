@@ -8,13 +8,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import axios from "axios";
+
 import { Eye } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { useAuthStore } from "@/stores/useAuth";
+import apiClient from "@/lib/apiClient";
 interface Patient {
   name: string;
   phone: string;
@@ -47,7 +48,7 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
   // const getPatientProfile = async (nic: string) => {
   //   try {
   //     setPatient([]);
-  //     const response = await axios.get(`/api/patient/${nic}`);
+  //     const response = await apiClient.get(`/patient/${nic}`);
 
   //     setPatient(response.data.Patient);
   //     navigate(`/patient-profile-page`);
@@ -81,13 +82,15 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
   const handleMarkAsComplete = async () => {
     try {
       setloading(true);
-      const response = await axios("/api/mobileclinic/markascompleted", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        method: "PUT",
-        data: { selectedRows },
-      });
+      const response = await apiClient.put(
+        "/mobileclinic/markascompleted",
+        { selectedRows },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (response.status === 200) {
         toast.success("Marked as complete");
         setloading(false);

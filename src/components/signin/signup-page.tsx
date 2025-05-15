@@ -1,8 +1,9 @@
-import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -28,11 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import apiClient from "@/lib/apiClient";
 import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
 
 // Define the Role enum to match your Prisma model
 enum Role {
@@ -97,14 +97,7 @@ export default function SignupPage() {
     setError("");
 
     try {
-      const response = await axios(
-        "https://hv8mlav8d6.execute-api.eu-north-1.amazonaws.com/prod/auth/signup",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          data: values,
-        }
-      );
+      const response = await apiClient.post("/auth/signup", values);
 
       if (response.status === 200) {
         setIsLoading(false);

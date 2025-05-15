@@ -35,9 +35,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import apiClient from "@/lib/apiClient";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
 import { format } from "date-fns";
 import { CalendarIcon, Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -117,7 +117,7 @@ export function AddOutpatientForm() {
 
   const getGeneralPatientDetailsByNic = async () => {
     try {
-      const response = await axios.get(`/api/patient/${nic}`, {
+      const response = await apiClient.get(`/patient/${nic}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -157,12 +157,10 @@ export function AddOutpatientForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await axios("/api/outPatient", {
-        method: "POST",
+      const response = await apiClient.post("/outPatient", values, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: values,
       });
 
       if (response.status === 201) {

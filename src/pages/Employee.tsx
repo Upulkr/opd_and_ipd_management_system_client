@@ -27,9 +27,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { useStaffStore } from "@/stores/useStaffStore";
-import axios from "axios";
+
 import {
   ChevronDown,
   Edit,
@@ -78,7 +79,7 @@ export default function AdminDashboard() {
   const fetchStaff = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("/api/staffwardassignment", {
+      const response = await apiClient.get("/staffwardassignment", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -94,8 +95,8 @@ export default function AdminDashboard() {
   };
   const getstaffCount = async () => {
     try {
-      const response = await axios.get(
-        "/api/staffwardassignment/getstaffcount",
+      const response = await apiClient.get(
+        "/staffwardassignment/getstaffcount",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -132,13 +133,16 @@ export default function AdminDashboard() {
 
   const assignToWard = async (staffId: string, ward: string) => {
     try {
-      const response = await axios(`/api/staffwardassignment/${staffId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: { ward },
-      });
+      const response = await apiClient.put(
+        `/staffwardassignment/${staffId}`,
+        { ward },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (response.status === 200) {
         toast.success("Staff assigned successfully");
       }
@@ -150,8 +154,8 @@ export default function AdminDashboard() {
   const deleteStaffMember = async (staffId: number) => {
     try {
       setLoading(true);
-      const response = await axios.delete(
-        `/api/staffwardassignment/${staffId}`
+      const response = await apiClient.delete(
+        `/staffwardassignment/${staffId}`
       );
       if (response.status === 200) {
         setLoading(false);
@@ -387,18 +391,19 @@ export default function AdminDashboard() {
         return;
       }
 
-      const response = await axios("/api/staffwardassignment", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: {
+      const response = await apiClient.post(
+        "/staffwardassignment",
+        {
           registrationId,
-
           ward,
           role,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (response.status === 200) {
         toast.success("Staff assigned successfully");
       }

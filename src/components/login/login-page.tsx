@@ -23,11 +23,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
+
 import { AlertCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { useUserProfileData } from "@/stores/useUserProfileData";
+import apiClient from "@/lib/apiClient";
 
 // Define the form schema with Zod
 const loginFormSchema = z.object({
@@ -61,15 +62,7 @@ export default function LoginPage() {
     setError("");
 
     try {
-      const response = await axios.post(
-        "https://r73yvq2y4d.execute-api.ap-south-1.amazonaws.com/auth/login",
-        values,
-        {
-          headers: {
-            "x-api-key": import.meta.env.VITE_X_API_KEY,
-          },
-        }
-      );
+      const response = await apiClient.post("/auth/login", values);
 
       if (response.status === 200) {
         setToken(response.data.token, response.data.user.role);

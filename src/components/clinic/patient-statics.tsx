@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
+
 import { useCallback, useEffect, useState } from "react";
 import {
   Bar,
@@ -28,8 +29,8 @@ export default function PatientStatistics() {
   const token = useAuthStore((state) => state.token);
   const getWeeklyPatientVisits = useCallback(async () => {
     try {
-      const response = await axios.get(
-        "/api/clinicassigmnent/getWeeklyclinincvisits",
+      const response = await apiClient.get(
+        "/clinicassigmnent/getWeeklyclinincvisits",
         {
           headers: {
             Authorization: `Bearer ${token}`,

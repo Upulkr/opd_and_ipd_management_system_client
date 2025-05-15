@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useAuthStore } from "@/stores/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
@@ -25,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+import apiClient from "@/lib/apiClient";
 
 const formSchema = z.object({
   bht: z.string(),
@@ -77,7 +78,7 @@ export const AdmissionSheetForm = () => {
   });
   const getPatientDataByNIC = async () => {
     try {
-      const response = await axios.get(`/api/patient/${nic}`, {
+      const response = await apiClient.get(`/patient/${nic}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -101,7 +102,7 @@ export const AdmissionSheetForm = () => {
 
   const getAdmissionSheetByBHT = async () => {
     try {
-      const reponse = await axios.get(`/api/admissionsheet/bht?bht=${bht}`, {
+      const reponse = await apiClient.get(`/admissionsheet/bht?bht=${bht}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -126,20 +127,18 @@ export const AdmissionSheetForm = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await axios(`/api/admissionSheet`, {
-        method: "POST",
+      const response = await apiClient.post(`/admissionSheet`, values, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        data: JSON.stringify(values),
       });
       if (response.status === 201) {
         setIsLoading(false);
         toast.success("Admission Sheet Created");
         // form.reset();
         setIsLoading(false);
-        await axios.put(`/api/wardbedscontroller/${values.wardNo}`, undefined, {
+        await apiClient.put(`/wardbedscontroller/${values.wardNo}`, undefined, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

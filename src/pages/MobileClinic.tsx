@@ -31,7 +31,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
-import axios from "axios";
+
 import { format } from "date-fns";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -50,6 +50,7 @@ import {
   YAxis,
 } from "recharts";
 import { useAuthStore } from "@/stores/useAuth";
+import apiClient from "@/lib/apiClient";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -104,7 +105,7 @@ export const MobileClinic = () => {
   //   }
   //   try {
   //     setLoading(true);
-  //     const response = await axios(`/api/clinicassigmnent`, {
+  //     const response = await axios(`/clinicassigmnent`, {
   //       method: "POST",
   //       headers: {
   //         "Content-Type": "application/json",
@@ -132,7 +133,7 @@ export const MobileClinic = () => {
 
   const getPatientsbyAge = async () => {
     try {
-      const response = await axios.get(`/api/mobileclinic/getpatientsbyage`, {
+      const response = await apiClient.get(`/mobileclinic/getpatientsbyage`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -147,7 +148,7 @@ export const MobileClinic = () => {
 
   const getMonthlyhomevisitsForEachMonth = async () => {
     try {
-      const response = await axios.get(`/api/mobileclinic/monthlyhomevisits`, {
+      const response = await apiClient.get(`/mobileclinic/monthlyhomevisits`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -162,8 +163,8 @@ export const MobileClinic = () => {
 
   const getCountCompletedVisits = async () => {
     try {
-      const res = await axios.get(
-        `/api/mobileclinic/getcountofcompletedmobileclinincs`,
+      const res = await apiClient.get(
+        `/mobileclinic/getcountofcompletedmobileclinincs`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -181,7 +182,7 @@ export const MobileClinic = () => {
 
   const fetchPatients = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/patient`, {
+      const response = await apiClient.get(`/patient`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -200,7 +201,7 @@ export const MobileClinic = () => {
   console.log("patient", patients);
   const mobileclinincsForTable = useCallback(async () => {
     try {
-      const res = await axios.get(`/api/mobileclinic/sheduled`, {
+      const res = await apiClient.get(`/mobileclinic/sheduled`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -269,7 +270,7 @@ export const MobileClinic = () => {
     }
     try {
       setLoading(true);
-      const response = await axios(`/api/mobileclinic`, {
+      const response = await axios(`/mobileclinic`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -1,7 +1,7 @@
 import { DashboardStats } from "@/components/surgery-list/dashboard-stats";
 import { SurgeryTable } from "@/components/surgery-list/surgery-table";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
 import { Suspense, useEffect, useState } from "react";
 
 export const SurgeriesList = () => {
@@ -9,7 +9,7 @@ export const SurgeriesList = () => {
   const [surgeries, setSurgeries] = useState([]);
   const getSurgeries = async () => {
     try {
-      const response = await axios.get("/api/surgery/getallsurgeryschedule", {
+      const response = await apiClient.get("/surgery/getallsurgeryschedule", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

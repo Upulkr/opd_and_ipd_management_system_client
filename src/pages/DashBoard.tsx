@@ -10,8 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import apiClient from "@/lib/apiClient";
 import { useStaffStore } from "@/stores/useStaffStore";
-import axios from "axios";
 import {
   BedDouble,
   Calendar,
@@ -55,7 +55,7 @@ export default function Dashboard() {
 
   const getdischargecounts = async () => {
     try {
-      const response = await axios.get("/api/admissionbook/getdischargecounts");
+      const response = await apiClient.get("/admissionbook/getdischargecounts");
       if (response.status === 200 && response.data.length > 0) {
         const count = response.data[0]?._count?.dischargeDate || 0;
         setNoOfDischarge(count);
@@ -71,7 +71,7 @@ export default function Dashboard() {
   // const patientProfileHandler = async () => {
   //   try {
   //     // setIsSearching(true);
-  //     const response = await axios.get(`/api/patient/${nic}`, {
+  //     const response = await apiClient.get(`/patient/${nic}`, {
   //       headers: {
   //         Authorization: `Bearer ${token}`,
   //       },
@@ -96,7 +96,7 @@ export default function Dashboard() {
   // };
   const getNoOfOutPatients = async () => {
     try {
-      const response = await axios.get("/api/outPatient/outpatientscount");
+      const response = await apiClient.get("/outPatient/outpatientscount");
       setNoOfOutPatients(response.data);
     } catch (error) {
       console.error(error);
@@ -105,8 +105,8 @@ export default function Dashboard() {
 
   const getNoOfInPatients = async () => {
     try {
-      const response = await axios.get(
-        "/api/admissionbook/noofadmissionbookstoday"
+      const response = await apiClient.get(
+        "/admissionbook/noofadmissionbookstoday"
       );
       if (response.data) setNoOfInPatients(response.data);
     } catch (error) {
@@ -116,7 +116,7 @@ export default function Dashboard() {
 
   const getMOnthlyPatientVisits = async () => {
     try {
-      const response = await axios.get("/api/getmonthlypatientvisit");
+      const response = await apiClient.get("/getmonthlypatientvisit");
       if (response.data) setMonthlyVisitData(response.data);
     } catch (error) {
       console.error(error);
@@ -125,7 +125,7 @@ export default function Dashboard() {
 
   const getWardbedstatus = async () => {
     try {
-      const response = await axios.get("/api/getwardbedstatus");
+      const response = await apiClient.get("/getwardbedstatus");
       if (response.data.length === 0) setWardBedStatus([]);
       if (response.data) setWardBedStatus(response.data);
     } catch (error) {
