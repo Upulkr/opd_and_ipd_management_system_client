@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 
 import {
