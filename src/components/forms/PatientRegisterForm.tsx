@@ -72,13 +72,11 @@ export const PatientRegisterForm = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const createPatient = await apiClient.post("/patient", {
-        method: "POST",
+      const createPatient = await apiClient.post("/patient", values, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        data: JSON.stringify(values),
       });
 
       if (createPatient.status === 200) {
