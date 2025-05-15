@@ -63,12 +63,7 @@ export default function LoginPage() {
     try {
       const response = await axios.post(
         "https://r73yvq2y4d.execute-api.ap-south-1.amazonaws.com/auth/login",
-        values,
-        {
-          headers: {
-            "x-api-key": import.meta.env.VITE_X_API_KEY,
-          },
-        }
+        values
       );
 
       if (response.status === 200) {
