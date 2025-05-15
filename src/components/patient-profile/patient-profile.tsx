@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import FileUploadPopup from "./fileUpload";
 import { toast, ToastContainer } from "react-toastify";
+import apiClient from "@/lib/apiClient";
 
 // const currentPatientData = {
 //   name: "John Doe",
