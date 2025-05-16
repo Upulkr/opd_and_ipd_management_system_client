@@ -25,7 +25,7 @@ export function InputBHTForm() {
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -41,8 +41,8 @@ export function InputBHTForm() {
   //   }
 
   //   try {
-  //     const isAdmissionBookExisting = await axios.get(
-  //       `/api/admissionbook/bht?bht=${bht}`,
+  //     const isAdmissionBookExisting = await apiClient.get(
+  //       `/admissionbook/bht?bht=${bht}`,
   //       {
   //         headers: {
   //           Authorization: `Bearer ${token}`,
@@ -56,7 +56,7 @@ export function InputBHTForm() {
 
   //       return;
   //     }
-  //     const response = await axios.get(`/api/admissionsheet/bht?bht=${bht}`, {
+  //     const response = await apiClient.get(`/admissionsheet/bht?bht=${bht}`, {
   //       headers: {
   //         Authorization: `Bearer ${token}`,
   //       },

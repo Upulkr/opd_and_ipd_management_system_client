@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import axios from "axios";
+
+import apiClient from "@/lib/apiClient";
 
 interface StaffMember {
   id: number;
@@ -23,7 +24,7 @@ export function StaffDutyCard() {
 
   const fetchStaffMembers = async () => {
     try {
-      const response = await axios.get("/api/outPatient/getstaff");
+      const response = await apiClient.get("/outPatient/getstaff");
       if (response.status === 200) {
         setStaffMembers(response.data.staffOutPatient);
       }

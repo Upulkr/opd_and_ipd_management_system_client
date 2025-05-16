@@ -18,8 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import apiClient from "@/lib/apiClient";
 import { useDrugsStore } from "@/stores/useDrugsStore";
-import axios from "axios";
 import { useState } from "react";
 
 const wards = [
@@ -81,7 +81,7 @@ export default function DrugAllocation() {
       const drug = drugs.find((d) => d.drugId.toString() === selectedDrug);
       if (drug) {
         try {
-          await axios.post("/api/drugs/createdrugallocation", {
+          await apiClient.post("/drugs/createdrugallocation", {
             drugId: drug.drugId,
             drugName: drug.drugName,
             totalQuantity: quantity,
@@ -103,8 +103,8 @@ export default function DrugAllocation() {
 
   const getAllocationByWard = async (wardName: string) => {
     try {
-      const response = await axios.get(
-        `/api/drugs/getdrugallocationbywardname/${wardName}`
+      const response = await apiClient.get(
+        `/drugs/getdrugallocationbywardname/${wardName}`
       );
 
       setAllocations(response.data.allocations);

@@ -13,13 +13,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import apiClient from "@/lib/apiClient";
 import { useAdmissionBookByBHT } from "@/stores/useAdmissionBook";
 import { useAdmissionSheetByBHT } from "@/stores/useAdmissionSheet";
 import { useAuthStore } from "@/stores/useAuth";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import { useWardTableInpatient } from "@/stores/useWardTableInpatient";
-import axios from "axios";
+
 import { BedIcon, BookIcon, FileTextIcon, SearchIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -46,7 +47,7 @@ export default function InpatientDepartment() {
   // const patientProfileHandler = async () => {
   //   try {
   //     // setIsSearching(true);
-  //     const response = await axios.get(`/api/patient/${nic}`, {
+  //     const response = await apiClient.get(`/patient/${nic}`, {
   //       headers: {
   //         Authorization: `Bearer ${token}`,
   //       },
@@ -72,7 +73,7 @@ export default function InpatientDepartment() {
 
   const fetchTableData = async () => {
     try {
-      const response = await axios.get(`/api/warddetails`, {
+      const response = await apiClient.get(`/warddetails`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

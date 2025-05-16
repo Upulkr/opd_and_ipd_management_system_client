@@ -26,9 +26,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
@@ -67,7 +67,7 @@ export default function NewClinicForm() {
 
   const getAllclincsName = async () => {
     try {
-      const response = await axios.get("/api/clinic", {
+      const response = await apiClient.get("/clinic", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -85,12 +85,10 @@ export default function NewClinicForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await axios("/api/clinic", {
-        method: "POST",
+      const response = await apiClient.post("/clinic", values, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: values,
       });
       if (response.status === 200) {
         setIsLoading(false);

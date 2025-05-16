@@ -31,7 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
+
 import { CalendarIcon } from "lucide-react";
 import {
   Popover,
@@ -43,6 +43,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDrugsStore } from "@/stores/useDrugsStore";
+import apiClient from "@/lib/apiClient";
 const formSchema = z.object({
   drugName: z.string().min(2, {
     message: "Drug name must be at least 2 characters.",
@@ -110,8 +111,8 @@ export function AddNewDrugFormpage() {
       console.log(values);
       setIsLoading(true);
       if (drugTobeUpdate[0]?.drugId) {
-        const response = await axios.put(
-          `/api/drugs/${drugTobeUpdate[0].drugId}`,
+        const response = await apiClient.put(
+          `/drugs/${drugTobeUpdate[0].drugId}`,
           values
         );
         if (response.status === 200) {
@@ -128,13 +129,7 @@ export function AddNewDrugFormpage() {
           toast.error(`Failed to update ${values.drugName}`);
         }
       } else {
-        const response = await axios("/api/drugs", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: JSON.stringify(values),
-        });
+        const response = await apiClient.post("/drugs", values);
         if (response.status === 200) {
           setTimeout(() => {
             setIsLoading(false);

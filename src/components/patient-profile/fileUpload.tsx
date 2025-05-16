@@ -18,8 +18,8 @@ import {
 import { createClient } from "@supabase/supabase-js";
 import React, { useState } from "react";
 
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
 import { Loader2, Upload } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 
@@ -87,8 +87,8 @@ export default function FileUploadPopup({ patientNic }: FileUploadPopupProps) {
         .getPublicUrl(filePath);
 
       // Save the file URL to your medicalreport model in the database
-      await axios.post(
-        "/api/medicalreports",
+      await apiClient.post(
+        "/medicalreports",
         {
           PatientNic: patientNic,
           reportType: reportType,

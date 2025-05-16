@@ -165,7 +165,7 @@ export default ViewInMapPage;
 // import { Button } from "@/components/ui/button";
 // import { Card } from "@/components/ui/card";
 // import { Input } from "@/components/ui/input";
-// import axios from "axios";
+//
 // import { useState } from "react";
 // import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
 
@@ -181,7 +181,7 @@ export default ViewInMapPage;
 
 //   // Function to geocode location name (using OpenCage API)
 //   async function geocodeLocation(location: string) {
-//     const response = await axios.get(
+//     const response = await apiClient.get(
 //       `https://api.opencagedata.com/geocode/v1/json`,
 //       {
 //         params: {
@@ -204,7 +204,7 @@ export default ViewInMapPage;
 //       const destinationCoords = await geocodeLocation(destination);
 
 //       // Call OpenRouteService API to get the route
-//       const response = await axios.get(
+//       const response = await apiClient.get(
 //         "https://api.openrouteservice.org/v2/directions/driving-car",
 //         {
 //           params: {

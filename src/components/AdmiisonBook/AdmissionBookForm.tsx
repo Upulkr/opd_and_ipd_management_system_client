@@ -21,7 +21,7 @@ import {
 import { useAuthStore } from "@/stores/useAuth";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+
 import { Plus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -29,6 +29,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import * as z from "zod";
 import { Textarea } from "../ui/textarea";
+import apiClient from "@/lib/apiClient";
 const formSchema = z.object({
   bht: z.string().min(1, "BHT is required"),
   nic: z.string().min(1, "NIC is required"),
@@ -70,8 +71,8 @@ export const AdmissionBookForm = () => {
       if (enableUpdate === true) {
         return;
       }
-      const fetchAdmissionSheetperDay = await axios.get(
-        `/api/admissionSheet/noOfAdmissionSheetsperday`,
+      const fetchAdmissionSheetperDay = await apiClient.get(
+        `/admissionSheet/noOfAdmissionSheetsperday`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -91,8 +92,8 @@ export const AdmissionBookForm = () => {
       if (enableUpdate === true) {
         return;
       }
-      const fetchAdmissionSheetperYear = await axios.get(
-        `/api/admissionSheet/noOfAdmissionSheetsperyear`,
+      const fetchAdmissionSheetperYear = await apiClient.get(
+        `/admissionSheet/noOfAdmissionSheetsperyear`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -164,12 +165,10 @@ export const AdmissionBookForm = () => {
     try {
       setIsLoading(true);
 
-      const response = await axios(`/api/admissionbook`, {
-        method: "POST",
+      const response = await apiClient.post(`/admissionbook`, values, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: values,
       });
       if (response.status === 201) {
         toast.success("Admission book submitted successfully");
@@ -199,8 +198,8 @@ export const AdmissionBookForm = () => {
     }
 
     try {
-      const isAdmissionBookExisting = await axios.get(
-        `/api/admissionbook/bht?bht=${bht}`,
+      const isAdmissionBookExisting = await apiClient.get(
+        `/admissionbook/bht?bht=${bht}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -223,7 +222,7 @@ export const AdmissionBookForm = () => {
   };
   const getAdmissionSheetDataBYBHT = async () => {
     try {
-      const response = await axios.get(`/api/admissionSheet/bht?bht=${bht}`, {
+      const response = await apiClient.get(`/admissionSheet/bht?bht=${bht}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -264,7 +263,7 @@ export const AdmissionBookForm = () => {
 
   const getAdmissionBookByBHT = async () => {
     try {
-      const reponse = await axios.get(`/api/admissionbook/bht?bht=${bht}`, {
+      const reponse = await apiClient.get(`/admissionbook/bht?bht=${bht}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -10,12 +10,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
+
 import { FileText, Pill, Skull } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import FileUploadPopup from "./fileUpload";
 import { toast, ToastContainer } from "react-toastify";
+import apiClient from "@/lib/apiClient";
 
 // const currentPatientData = {
 //   name: "John Doe",
@@ -96,7 +97,7 @@ export default function CurrentPatientProfile() {
   const { nic } = useParams<{ nic: string }>();
   const fetchCurrentPatient = async () => {
     try {
-      const response = await axios.get(`/api/patient/${nic}`, {
+      const response = await apiClient.get(`/patient/${nic}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -114,8 +115,8 @@ export default function CurrentPatientProfile() {
 
   const getAdmiitedDetails = async () => {
     try {
-      const reponse = await axios.get(
-        `/api/generaladmission/generaldetails/${nic}`,
+      const reponse = await apiClient.get(
+        `/generaladmission/generaldetails/${nic}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

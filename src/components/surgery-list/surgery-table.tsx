@@ -24,8 +24,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
-import axios from "axios";
+
 import {
   AlertCircle,
   ChevronLeft,
@@ -72,8 +73,8 @@ export function SurgeryTable({ surgeries }: { surgeries: Surgery[] }) {
     if (!surgeryToDelete) return;
 
     try {
-      const response = await axios.delete(
-        `/api/surgery/deletesurgeryschedule/${surgeryToDelete}`,
+      const response = await apiClient.delete(
+        `/surgery/deletesurgeryschedule/${surgeryToDelete}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

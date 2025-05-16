@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import axios from "axios";
+import apiClient from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -25,7 +25,7 @@ export default function EmailVerificationPage() {
 
   const verifyEmail = async () => {
     try {
-      const response = await axios.get(`/api/auth/verify-email/${token}`);
+      const response = await apiClient.get(`/auth/verify-email/${token}`);
       if (response.status === 200) {
         setMessage(response.data.message);
         setIsVerified(true);

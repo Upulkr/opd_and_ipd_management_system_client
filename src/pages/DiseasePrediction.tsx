@@ -25,16 +25,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import apiClient from "@/lib/apiClient";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { usePatientStore } from "@/stores/usePatientStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+
 import { Activity, Heart, Stethoscope } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import * as z from "zod";
+import axios from "axios";
 
 const testTypes = [
   {
@@ -513,8 +515,8 @@ export default function DiseasePrediction() {
   const savePrediction = async () => {
     if (patientNic === "") return;
     try {
-      const isPatientExist = await axios.get(
-        `/api/patient/isPatientexist/${patientNic}`
+      const isPatientExist = await apiClient.get(
+        `/patient/isPatientexist/${patientNic}`
       );
 
       if (isPatientExist.data.patientExist === false) {
@@ -522,7 +524,7 @@ export default function DiseasePrediction() {
         toast.error("Patient not found, please register the patient");
         navigate("/patient-register-form");
       }
-      const response = await axios("/api/diseaseprediction", {
+      const response = await apiClient.post("/diseaseprediction", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

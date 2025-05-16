@@ -21,7 +21,7 @@ export function InputNicForm() {
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -39,7 +39,7 @@ export function InputNicForm() {
   //   }
   //   console.log("token", token);
   //   try {
-  //     const response = await axios.get(`/api/patient/${nic}`, {
+  //     const response = await apiClient.get(`/patient/${nic}`, {
   //       headers: {
   //         Authorization: `Bearer ${token}`,
   //       },

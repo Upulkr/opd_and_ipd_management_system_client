@@ -16,11 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { useClinicStore } from "@/stores/useClinicStore";
 
 import { usePatientStore } from "@/stores/usePatientStore";
 import axios from "axios";
+
 import debounce from "lodash.debounce";
 import { MessageSquare, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -72,8 +74,8 @@ export default function ClinicPage() {
   const handlegetPatientDetailsByClinicName = async (clinicName: string) => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `/api/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`,
+      const response = await apiClient.get(
+        `/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -99,20 +101,21 @@ export default function ClinicPage() {
     }
     try {
       setLoading(true);
-      const response = await axios(`/api/clinicassigmnent`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-
-          "Content-Type": "application/json",
-        },
-        data: {
+      const response = await apiClient.post(
+        `/clinicassigmnent`,
+        {
           nic: searchNic,
           clinicName: selectedClinic,
           clinicId: clinics.find((clinic) => clinic.name === selectedClinic)
             ?.id,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (response.status === 200) {
         toast.success("Patient assigned successfully");
       }
@@ -129,8 +132,8 @@ export default function ClinicPage() {
 
   const getAllClinicAssigmentsForTable = useCallback(async () => {
     try {
-      const response = await axios.get(
-        `/api/clinicassigmnent/getAllClinicAssigmentsfortable`,
+      const response = await apiClient.get(
+        `/clinicassigmnent/getAllClinicAssigmentsfortable`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -147,7 +150,7 @@ export default function ClinicPage() {
 
   const fetchPatients = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/patient`, {
+      const response = await apiClient.get(`/patient`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -206,8 +209,8 @@ export default function ClinicPage() {
 
   const scheduleNewSMS = async (smsData: SMSScheduleRequest) => {
     try {
-      const response = await axios.post<SMSScheduleResponse>(
-        "/api/sendsms/schedule-sms",
+      const response = await apiClient.post<SMSScheduleResponse>(
+        "/sendsms/schedule-sms",
         smsData,
         {
           headers: {
@@ -217,7 +220,7 @@ export default function ClinicPage() {
       );
 
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       if (axios.isAxiosError(error)) {
         // Handle Axios specific errors
         if (error.response) {

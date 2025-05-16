@@ -31,7 +31,7 @@ export default function Statistics({
   // const patientProfileHandler = async () => {
   //   try {
   //     setIsSearching(true);
-  //     const response = await axios.get(`/api/patient/${nic}`);
+  //     const response = await apiClient.get(`/patient/${nic}`);
   //     if (response.status === 200) {
   //       setPatient(response.data.Patient);
   //       setIsSearching(false);

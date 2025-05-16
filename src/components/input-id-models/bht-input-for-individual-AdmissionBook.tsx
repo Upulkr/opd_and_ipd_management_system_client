@@ -25,7 +25,7 @@ export function InputBHTFormForAdmissionBookSearch() {
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -45,8 +45,8 @@ export function InputBHTFormForAdmissionBookSearch() {
   //       toast.error("No token found in localStorage");
   //       return;
   //     }
-  //     const isAdmissionBookExisting = await axios.get(
-  //       `/api/admissionBook/bht?bht=${bht}`,
+  //     const isAdmissionBookExisting = await apiClient.get(
+  //       `/admissionBook/bht?bht=${bht}`,
   //       {
   //         headers: {
   //           Authorization: `Bearer ${token}`,
@@ -61,10 +61,10 @@ export function InputBHTFormForAdmissionBookSearch() {
   //       return;
   //     }
 
-  //     const response = await axios.get(
+  //     const response = await apiClient.get(
   //       enableUpdate === true
-  //         ? `/api/admissionbook/bht?bht=${bht}`
-  //         : `/api/admissionsheet/bht?bht=${bht}`,
+  //         ? `/admissionbook/bht?bht=${bht}`
+  //         : `/admissionsheet/bht?bht=${bht}`,
   //       {
   //         headers: {
   //           Authorization: `Bearer ${token}`,

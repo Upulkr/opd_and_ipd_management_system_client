@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import axios from "axios";
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
@@ -25,6 +25,7 @@ import { usePatientStore } from "@/stores/usePatientStore";
 import { useNavigate } from "react-router-dom";
 import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore";
 import { useAuthStore } from "@/stores/useAuth";
+import apiClient from "@/lib/apiClient";
 
 const formSchema = z.object({
   nic: z.string(),
@@ -71,13 +72,10 @@ export const PatientRegisterForm = () => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const createPatient = await axios("/api/patient", {
-        method: "POST",
+      const createPatient = await apiClient.post("/patient", values, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        data: JSON.stringify(values),
       });
 
       if (createPatient.status === 200) {

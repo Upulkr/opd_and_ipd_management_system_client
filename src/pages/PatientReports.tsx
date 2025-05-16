@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import {
-  FileText,
+  Download,
+  Eye,
   FileImage,
   FilePen,
   FileScan,
+  FileText,
   Pill,
-  Download,
-  Eye,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,16 +22,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import axios from "axios";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { toast } from "react-toastify";
 
@@ -66,8 +66,8 @@ const PatientReports = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(
-        `/api/medicalreports/getbynicandtype/${nic}/${doctype}`,
+      const response = await apiClient.get(
+        `/medicalreports/getbynicandtype/${nic}/${doctype}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

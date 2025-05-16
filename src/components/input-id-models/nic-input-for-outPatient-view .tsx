@@ -1,11 +1,12 @@
 import { useAuthStore } from "@/stores/useAuth";
 import { usePatientStore } from "@/stores/usePatientStore";
-import axios from "axios";
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Button } from "../ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
+import apiClient from "@/lib/apiClient";
 
 export function InputNicFormForOutPatientView({
   onClose,
@@ -30,7 +31,7 @@ export function InputNicFormForOutPatientView({
   // const { data, error, isLoading, refetch } = useQuery({
   //   queryKey: ["patient"],
   //   queryFn: () =>
-  //     fetch(`/api/patient/${nic}`).then((res) => res.json()),
+  //     fetch(`/patient/${nic}`).then((res) => res.json()),
   //   enabled: false,
   // });
 
@@ -45,7 +46,7 @@ export function InputNicFormForOutPatientView({
     }
 
     try {
-      const response = await axios.get(`/api/outPatient/${nic}`, {
+      const response = await apiClient.get(`/outPatient/${nic}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
