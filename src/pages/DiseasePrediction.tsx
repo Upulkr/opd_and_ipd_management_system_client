@@ -571,7 +571,7 @@ export default function DiseasePrediction() {
     try {
       setLoading(true);
       const response = await axios.post(
-        `http://localhost:5000/predict/${selectedTest}`,
+        `https://diseasepredictionapi-production.up.railway.app/predict/${selectedTest}`,
         data
       );
       if (response.status === 200) {
