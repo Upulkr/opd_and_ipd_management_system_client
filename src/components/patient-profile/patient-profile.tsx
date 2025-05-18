@@ -44,7 +44,7 @@ const reportsAndDocuments = [
     name: "X-Ray Image",
     type: "x-ray",
     date: "2023-09-16",
-    redirect: `x-ray-images`,
+    redirect: `x-ray`,
   },
   {
     name: "Doctor's Notes",
@@ -102,7 +102,7 @@ export default function CurrentPatientProfile() {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("response", response.data.Patient);
+
       if (response.status === 200 && response.data.Patient) {
         setCurrentPatient(response.data.Patient);
       } else {

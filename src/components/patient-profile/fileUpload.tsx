@@ -71,7 +71,7 @@ export default function FileUploadPopup({ patientNic }: FileUploadPopupProps) {
 
       // Upload file to Supabase Storage
       const { error: uploadError } = await supabase.storage
-        .from("medical-files") // Make sure this bucket exists in your Supabase project
+        .from("medicalreports") // Make sure this bucket exists in your Supabase project
         .upload(filePath, file, {
           cacheControl: "3600",
           upsert: false,
@@ -83,9 +83,12 @@ export default function FileUploadPopup({ patientNic }: FileUploadPopupProps) {
 
       // Get public URL for the uploaded file
       const { data: urlData } = supabase.storage
-        .from("medical-files")
+        .from("medicalreports")
         .getPublicUrl(filePath);
-
+      if (!urlData.publicUrl) {
+        throw new Error("Failed to get public URL for uploaded file.");
+        toast.error("Failed to get URL for uploaded file.");
+      }
       // Save the file URL to your medicalreport model in the database
       await apiClient.post(
         "/medicalreports",
