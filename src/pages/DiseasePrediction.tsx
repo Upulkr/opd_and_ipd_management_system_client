@@ -491,7 +491,7 @@ const testFields = {
     },
   ],
 };
-
+const api_url_prediction = import.meta.env.VITE_DISEASE_PREDICT_API;
 export default function DiseasePrediction() {
   const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
     useFrontendComponentsStore((state) => state);
@@ -571,7 +571,7 @@ export default function DiseasePrediction() {
     try {
       setLoading(true);
       const response = await axios.post(
-        `https://diseasepredictionapi-production.up.railway.app/predict/${selectedTest}`,
+        `${api_url_prediction}/predict/${selectedTest}`,
         data
       );
       if (response.status === 200) {
