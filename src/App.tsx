@@ -40,6 +40,7 @@ import Wards, { SurgeriesList } from "./pages/SurgeriesList";
 import UserProfile from "./pages/UserProfile";
 import ViewInMapPage from "./pages/ViewInMapPage";
 import { useAuthStore } from "./stores/useAuth";
+import Header from "./components/Header/Header";
 
 function App() {
   const role = useAuthStore((state) => state.role);
@@ -115,6 +116,10 @@ function App() {
 
   return (
     <BrowserRouter>
+      {" "}
+      <div className="mb-20">
+        <Header />
+      </div>
       <SidebarProvider>
         <SidebarComponent Departments={filteredDepartments} />
         <Routes>

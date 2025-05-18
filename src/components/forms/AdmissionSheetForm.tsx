@@ -48,7 +48,7 @@ const formSchema = z.object({
 
 export const AdmissionSheetForm = () => {
   const { bht = "", view = "", nic = "" } = useParams();
-
+  console.log("nic", nic);
   const [isLoading, setIsLoading] = useState(false);
   // const { patient } = usePatientStore((state) => state);
 
@@ -76,6 +76,7 @@ export const AdmissionSheetForm = () => {
       livingStatus: "",
     },
   });
+
   const getPatientDataByNIC = async () => {
     try {
       const response = await apiClient.get(`/patient/${nic}`, {
@@ -96,6 +97,10 @@ export const AdmissionSheetForm = () => {
         form.setValue("phone", response.data.Patient.phone);
       }
     } catch (erro: any) {
+      if (erro.status === 404) {
+        toast.error("Patient not found");
+      }
+      // navigate("/patient-register-form");
       console.error("Error fetching patient data by NIC", erro);
     }
   };

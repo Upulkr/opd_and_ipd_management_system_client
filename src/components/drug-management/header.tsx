@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 export function Header() {
   return (
-    <header className="bg-white border-b">
+    <header className="bg-white border-b ">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="text-2xl font-bold text-primary">
           Hospital Drug Management
