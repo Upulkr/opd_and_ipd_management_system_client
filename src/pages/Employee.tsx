@@ -9,6 +9,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -30,6 +38,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { useStaffStore } from "@/stores/useStaffStore";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { set } from "date-fns";
 
 import {
   ChevronDown,
@@ -39,46 +49,44 @@ import {
   UserCircle,
 } from "lucide-react";
 import * as React from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-
+import * as z from "zod";
 type StaffMember = {
   id: number;
   registrationId: string;
-  role: "doctor" | "nurse" | "pharmacist";
+  role: string;
   ward?: string;
   nic?: string;
 };
 
 type Ward = {
-  id: number;
-  name: string;
+  wardName: string;
 };
 
 // Simulated database of wards
-const WARDS: Ward[] = [
-  { id: 1, name: "Emergency" },
-  { id: 2, name: "ICU" },
-  { id: 3, name: "Pediatrics" },
-  { id: 4, name: "Surgery" },
-  { id: 5, name: "Cardiology" },
-  { id: 6, name: "Outpatient" },
-];
-
+const formSchema = z.object({
+  id: z.number(),
+  registrationId: z.string().min(1, "Registration ID is required"),
+  role: z.string().min(1, "Role is required").optional(),
+  ward: z.string().min(1, "Ward is required"),
+});
 export default function AdminDashboard() {
-  const [staff, setStaff] = React.useState<StaffMember[]>([]);
-  const [newStaffRegistration, setNewStaffRegistration] = React.useState("");
-  const [newStaffRole, setNewStaffRole] =
-    React.useState<StaffMember["role"]>("doctor");
-  const [newStaffWard, setNewStaffWard] = React.useState<string>("");
+  const [wardsNames, setWardNames] = React.useState<Ward[]>([]);
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState<StaffMember[]>([]);
   const [fetchedStaff, setFetchedStaff] = React.useState<StaffMember[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
   const { staffCount, setStaffCount } = useStaffStore((state) => state);
+  const [deletingId, setDeletingId] = React.useState<number | undefined>(
+    undefined
+  );
   const token = useAuthStore((state) => state.token);
   const fetchStaff = async () => {
     try {
-      setLoading(true);
+      // setLoading(true);
       const response = await apiClient.get("/staffwardassignment", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -111,28 +119,30 @@ export default function AdminDashboard() {
       console.error("Error fetching staff counts:", error);
     }
   };
+
+  const getWardNames = async () => {
+    try {
+      const response = await apiClient.get("/warddetails/wardnames", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        setWardNames(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching staff counts:", error);
+    }
+  };
   React.useEffect(() => {
     fetchStaff();
     getstaffCount();
+    getWardNames();
   }, []);
-
-  const assignStaffMember = () => {
-    if (newStaffRegistration && newStaffRole) {
-      const newStaff: StaffMember = {
-        id: Date.now(),
-        registrationId: newStaffRegistration,
-        role: newStaffRole,
-        ward: newStaffWard || undefined,
-      };
-      setStaff([newStaff]);
-      setNewStaffRegistration("");
-      setNewStaffRole("doctor");
-      setNewStaffWard("");
-    }
-  };
 
   const assignToWard = async (staffId: string, ward: string) => {
     try {
+      setLoading(true);
       const response = await apiClient.put(
         `/staffwardassignment/${staffId}`,
         { ward },
@@ -153,13 +163,19 @@ export default function AdminDashboard() {
 
   const deleteStaffMember = async (staffId: number) => {
     try {
-      setLoading(true);
+      setDeletingId(staffId);
       const response = await apiClient.delete(
-        `/staffwardassignment/${staffId}`
+        `/staffwardassignment/${staffId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (response.status === 200) {
         setLoading(false);
         toast.success("Staff deleted successfully");
+        setDeletingId(undefined);
       }
     } catch (error: any) {
       setLoading(false);
@@ -283,9 +299,9 @@ export default function AdminDashboard() {
                                 <SelectValue placeholder="Select a ward" />
                               </SelectTrigger>
                               <SelectContent>
-                                {WARDS.map((ward) => (
-                                  <SelectItem key={ward.id} value={ward.name}>
-                                    {ward.name}
+                                {wardsNames.map((ward, index) => (
+                                  <SelectItem key={index} value={ward.wardName}>
+                                    {ward.wardName}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -298,10 +314,10 @@ export default function AdminDashboard() {
                         variant="destructive"
                         size="sm"
                         onClick={() => deleteStaffMember(s.id)}
-                        disabled={loading}
+                        disabled={deletingId === s.id}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
-                        {loading ? "Deleting..." : "Delete"}
+                        {deletingId === s.id ? "Deleting..." : "Delete"}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -334,89 +350,70 @@ export default function AdminDashboard() {
       <span className="text-2xl font-bold">{count}</span>
     </div>
   );
+  const navigate = useNavigate();
 
-  // const SearchComponent = () => (
-  //   <div className="mb-6">
-  //     <h2 className="text-lg font-semibold mb-2">Search Assignment</h2>
-  //     <div className="flex space-x-2">
-  //       <Input
-  //         type="text"
-  //         placeholder="Enter registration number"
-  //         value={searchQuery}
-  //         onChange={(e) => setSearchQuery(e.target.value)}
-  //       />
-  //       <Button onClick={searchStaff}>
-  //         <Search className="h-4 w-4 mr-2" />
-  //         Search
-  //       </Button>
-  //     </div>
-  //     {searchResults.length > 0 && (
-  //       <div className="mt-4">
-  //         <h3 className="text-md font-semibold mb-2">Search Results:</h3>
-  //         <Table>
-  //           <TableHeader>
-  //             <TableRow>
-  //               <TableHead>Registration Number</TableHead>
-  //               <TableHead>Role</TableHead>
-  //               <TableHead>Ward</TableHead>
-  //             </TableRow>
-  //           </TableHeader>
-  //           <TableBody>
-  //             {searchResults.map((s) => (
-  //               <TableRow key={s.id}>
-  //                 <TableCell>{s.registrationId}</TableCell>
-  //                 <TableCell>{s.role}</TableCell>
-  //                 <TableCell>{s.ward || "Not assigned"}</TableCell>
-  //               </TableRow>
-  //             ))}
-  //           </TableBody>
-  //         </Table>
-  //       </div>
-  //     )}
-  //   </div>
-  // );
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      id: Date.now(),
+      registrationId: "",
+      role: undefined,
+      ward: "", // ✅ same for ward if it's a <Select>
+    },
+  });
 
-  async function handleAssignStaff() {
+  async function handleAssignStaff(values: z.infer<typeof formSchema>) {
+    // Prevent duplicate submissions
+    if (loading) return;
+
+    setLoading(true);
+
     try {
-      assignStaffMember();
-      if (staff.length === 0) {
-        toast.error("Please select a staff member to assign");
-        return;
+      // Make sure all values are present and valid
+      if (!values.role || !values.ward || !values.registrationId) {
+        throw new Error("Please fill all required fields");
       }
 
-      const { registrationId, ward, role } = staff[0];
-
-      if (!registrationId || !ward || !role) {
-        toast.error("Please fill all the fields");
-        return;
-      }
-
-      const response = await apiClient.post(
-        "/staffwardassignment",
-        {
-          registrationId,
-          ward,
-          role,
+      const response = await apiClient.post("/staffwardassignment", values, {
+        headers: {
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      });
+
       if (response.status === 200) {
         toast.success("Staff assigned successfully");
+
+        // Clear form and reset states
+        form.reset({
+          id: Date.now(), // Generate a new ID for the next submission
+          registrationId: "",
+          role: undefined,
+          ward: "",
+        });
+        navigate(0);
+        // Important: Reset the submitted state to avoid validation messages showing up incorrectly
       }
     } catch (error: any) {
-      console.log("Error assigning staff", error);
-      toast.error(
+      console.error("Error assigning staff:", error);
+
+      const errorMessage =
         error.response?.status === 500
           ? "Error saving Assignment"
-          : `${error.response?.data.error}`
-      );
+          : error.response?.data?.error ||
+            error.message ||
+            "An unknown error occurred";
+
+      toast.error(errorMessage);
+
+      // Don't reset the form on validation errors so user can correct them
+      if (error.response?.status !== 400) {
+        // For server errors (not validation errors), keep the values but allow resubmission
+        form.clearErrors();
+      }
+    } finally {
+      setLoading(false);
     }
   }
-
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Hospital Admin Dashboard</h1>
@@ -475,75 +472,158 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle>Assign Staff Member</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleAssignStaff();
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <Label htmlFor="registrationId">Registration Number</Label>
-                <Input
-                  id="registrationId"
-                  value={newStaffRegistration}
-                  onChange={(e) => setNewStaffRegistration(e.target.value)}
-                  placeholder="Enter registration number"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="role">Role</Label>
-                <Select
-                  value={newStaffRole}
-                  onValueChange={(value: StaffMember["role"]) =>
-                    setNewStaffRole(value)
+          <CardContent className="pt-6">
+            <Form {...form}>
+              <form
+                onSubmit={(e) => {
+                  // Check if form is already being processed
+                  if (loading) {
+                    e.preventDefault();
+                    return;
                   }
-                >
-                  <SelectTrigger id="role">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="doctor">Doctor</SelectItem>
-                    <SelectItem value="nurse">Nurse</SelectItem>
-                    <SelectItem value="pharmacist">Pharmacist</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="ward">Ward </Label>
-                <Select value={newStaffWard} onValueChange={setNewStaffWard}>
-                  <SelectTrigger id="ward">
-                    <SelectValue placeholder="Select ward" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="No Ward">No Ward</SelectItem>
-                    {WARDS.map((ward) => (
-                      <SelectItem key={ward.id} value={ward.name}>
-                        {ward.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={
-                  loading ||
-                  !newStaffRegistration ||
-                  !newStaffRole! ||
-                  !newStaffWard
-                }
+
+                  // Let react-hook-form handle the submission
+                  form.handleSubmit(handleAssignStaff)(e);
+                }}
+                className="space-y-4"
               >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                {loading ? "Assigning Staff" : "  Assign Staff"}
-              </Button>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="registrationId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Registration Number</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          disabled={loading}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (e.target.value) {
+                              form.clearErrors("registrationId");
+                            }
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="role"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Role</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Clear any error on this field when user selects a value
+                          form.clearErrors("role");
+                        }}
+                        value={field.value}
+                        disabled={loading}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className={
+                              field.value ? "" : "text-muted-foreground"
+                            }
+                          >
+                            <SelectValue placeholder="Select a role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="doctor">Doctor</SelectItem>
+                          <SelectItem value="nurse">Nurse</SelectItem>
+                          <SelectItem value="pharmacist">Pharmacist</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="ward"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ward</FormLabel>
+                      <Select
+                        onValueChange={(value) => {
+                          field.onChange(value);
+                          // Clear any error on this field when user selects a value
+                          form.clearErrors("ward");
+                        }}
+                        value={field.value}
+                        disabled={loading}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className={
+                              field.value ? "" : "text-muted-foreground"
+                            }
+                          >
+                            <SelectValue placeholder="Select a Ward" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {wardsNames && wardsNames.length > 0 ? (
+                            wardsNames.map((ward, i) => (
+                              <SelectItem key={i} value={ward.wardName}>
+                                {ward.wardName}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="no-wards" disabled>
+                              No wards available
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    !loading &&
+                    !form.formState.isSubmitting &&
+                    !form.formState.isValid
+                  }
+                  onClick={() => {
+                    // If there are validation errors and we're not loading, prevent default and show errors
+                    const formState = form.getValues();
+
+                    if (
+                      !formState.registrationId ||
+                      !formState.role ||
+                      !formState.ward
+                    ) {
+                      form.trigger(); // Trigger validation to show errors
+                      // No need to prevent default as we want the form validation to run
+                    }
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <span className="mr-2">⏳</span>
+                      Assigning Staff...
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle className="h-4 w-4 mr-2" />
+                      Assign Staff
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>
