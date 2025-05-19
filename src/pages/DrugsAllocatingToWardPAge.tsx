@@ -19,16 +19,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import apiClient from "@/lib/apiClient";
+import { useAuthStore } from "@/stores/useAuth";
 import { useDrugsStore } from "@/stores/useDrugsStore";
-import { useState } from "react";
-
-const wards = [
-  "Pediatric Ward",
-  "Surgical Ward",
-  "Maternity Ward",
-  "Intensive Care Unit",
-  "General Ward",
-];
+import { useEffect, useState } from "react";
 
 const units = [
   "ml",
@@ -60,8 +53,12 @@ type Allocation = {
   usedQuantity: number;
   createdAt: Date;
 };
-
+type Ward = {
+  wardName: string;
+};
 export default function DrugAllocation() {
+  const token = useAuthStore((state) => state.token);
+  const [wardsNames, setWardNames] = useState<Ward[]>([]);
   const { drugs } = useDrugsStore((state) => state);
   const [allocations, setAllocations] = useState<Allocation[]>([]);
   const [selectedDrug, setSelectedDrug] = useState<string>("");
@@ -81,14 +78,22 @@ export default function DrugAllocation() {
       const drug = drugs.find((d) => d.drugId.toString() === selectedDrug);
       if (drug) {
         try {
-          await apiClient.post("/drugs/createdrugallocation", {
-            drugId: drug.drugId,
-            drugName: drug.drugName,
-            totalQuantity: quantity,
-            usedQuantity: 0,
-            wardName: selectedWard,
-            unit: selectedUnit,
-          });
+          await apiClient.post(
+            "/drugs/createdrugallocation",
+            {
+              drugId: drug.drugId,
+              drugName: drug.drugName,
+              totalQuantity: quantity,
+              usedQuantity: 0,
+              wardName: selectedWard,
+              unit: selectedUnit,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
         } catch (error) {
           console.error("Error allocating drug:", error);
         }
@@ -104,7 +109,12 @@ export default function DrugAllocation() {
   const getAllocationByWard = async (wardName: string) => {
     try {
       const response = await apiClient.get(
-        `/drugs/getdrugallocationbywardname/${wardName}`
+        `/drugs/getdrugallocationbywardname/${wardName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       setAllocations(response.data.allocations);
@@ -112,7 +122,19 @@ export default function DrugAllocation() {
       console.error("Error fetching allocations:", error);
     }
   };
-
+  const getWardNames = async () => {
+    try {
+      const response = await apiClient.get("/warddetails/wardnames");
+      if (response.status === 200) {
+        setWardNames(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching staff counts:", error);
+    }
+  };
+  useEffect(() => {
+    getWardNames();
+  }, []);
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Drug Allocation</h1>
@@ -144,9 +166,9 @@ export default function DrugAllocation() {
             <SelectValue placeholder="Select a ward" />
           </SelectTrigger>
           <SelectContent>
-            {wards.map((ward) => (
-              <SelectItem key={ward} value={ward}>
-                {ward}
+            {wardsNames?.map((ward, i) => (
+              <SelectItem key={i} value={ward.wardName}>
+                {ward.wardName}
               </SelectItem>
             ))}
           </SelectContent>
@@ -177,19 +199,19 @@ export default function DrugAllocation() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
-        {wards.map((ward) => (
+        {wardsNames.map((ward, i) => (
           <Card
-            key={ward}
+            key={i}
             className={`cursor-pointer hover:shadow-lg transition-shadow ${
-              selectedWardForDetails === ward ? "bg-blue-100" : ""
+              selectedWardForDetails === ward.wardName ? "bg-blue-100" : ""
             }`}
             onClick={() => {
-              setSelectedWardForDetails(ward);
-              getAllocationByWard(ward);
+              setSelectedWardForDetails(ward.wardName);
+              getAllocationByWard(ward.wardName);
             }}
           >
             <CardHeader>
-              <CardTitle>{ward}</CardTitle>
+              <CardTitle>{ward.wardName}</CardTitle>
             </CardHeader>
             {/* <CardContent>
               <p>

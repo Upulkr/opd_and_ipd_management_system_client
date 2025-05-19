@@ -229,7 +229,9 @@ export default function SignupPage() {
                           <SelectItem value={Role.NURSE}>Nurse</SelectItem>
                           <SelectItem value={Role.DOCTOR}>Doctor</SelectItem>
                           <SelectItem value={Role.ADMIN}>Admin</SelectItem>
-                          <SelectItem value={Role.PHARMACIST}>Admin</SelectItem>
+                          <SelectItem value={Role.PHARMACIST}>
+                            Pharmacist
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -32,18 +32,18 @@ import {
 } from "@/components/ui/select";
 import { toast, ToastContainer } from "react-toastify";
 
-import { CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import apiClient from "@/lib/apiClient";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/stores/useAuth";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@radix-ui/react-popover";
-import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDrugsStore } from "@/stores/useDrugsStore";
-import apiClient from "@/lib/apiClient";
 const formSchema = z.object({
   drugName: z.string().min(2, {
     message: "Drug name must be at least 2 characters.",
@@ -82,79 +82,81 @@ const formSchema = z.object({
 });
 
 export function AddNewDrugFormpage() {
+  const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
-  const { drugs, setDrugs } = useDrugsStore((state) => state);
-  const { drugId } = useParams();
-  console.log("drugId", typeof drugId);
-  const navigate = useNavigate();
 
-  const drugTobeUpdate = drugs.filter(
-    (drug) => drug.drugId.toString() === drugId
-  );
+  const { drugId } = useParams();
+
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      drugName: drugTobeUpdate[0]?.drugName || "",
-      unit: drugTobeUpdate[0]?.unit as
-        | z.infer<typeof formSchema>["unit"]
-        | undefined,
-      totalQuantity: drugTobeUpdate[0]?.totalQuantity || undefined,
-      usedQuantity: drugTobeUpdate[0]?.usedQuantity || 0,
-      remainingQuantity: drugTobeUpdate[0]?.remainingQuantity || 0,
-      expiryDate: drugTobeUpdate[0]?.expiryDate || undefined,
+      drugName: "",
+      unit: undefined,
+      totalQuantity: 0,
+
+      expiryDate: undefined,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      console.log(values);
       setIsLoading(true);
-      if (drugTobeUpdate[0]?.drugId) {
-        const response = await apiClient.put(
-          `/drugs/${drugTobeUpdate[0].drugId}`,
-          values
-        );
-        if (response.status === 200) {
-          setDrugs([]);
-          setTimeout(() => {
-            setIsLoading(false);
-
-            toast.success(`Successfully updated ${values.drugName}`);
-            form.reset();
-          }, 5000);
-
-          navigate("/pharmacy");
-        } else {
-          toast.error(`Failed to update ${values.drugName}`);
-        }
-      } else {
-        const response = await apiClient.post("/drugs", values);
-        if (response.status === 200) {
-          setTimeout(() => {
-            setIsLoading(false);
-
-            toast.success(`Successfully added ${values.drugName}`);
-            form.reset();
-          }, 5000);
-
-          navigate("/pharmacy");
-        }
+      const reponse = await apiClient.post("/drugs", values, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (reponse.status === 200) {
+        setIsLoading(false);
+        toast.success("Drug added successfully");
+        navigate("/drugs");
       }
     } catch (error: any) {
       setIsLoading(false);
-
-      if (error.status === 400) {
-        toast.error(`Failed to add ${values.drugName} already exists`);
-        return;
-      } else if (error.status === 500) {
-        toast.error(`Failed to add ${values.drugName}`);
-        return;
-      }
+      toast.error("Error adding drug");
       console.log(error.message);
     }
   }
+  const getdrugsDetail = async () => {
+    try {
+      const reponse = await apiClient.get(`/drugs/getdrugbyid/${drugId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (reponse.status === 200) {
+        form.setValue("drugName", reponse.data.drugName);
+        form.setValue("unit", reponse.data.unit);
+        form.setValue("totalQuantity", reponse.data.totalQuantity);
+        form.setValue("expiryDate", new Date(reponse.data.expiryDate));
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  };
 
+  const updateDrug = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const reponse = await apiClient.put(`/drugs/${drugId}`, values, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (reponse.status === 200) {
+        toast.success("Drug updated successfully");
+        navigate("/drugs");
+      }
+    } catch (error: any) {
+      setIsLoading(false);
+      toast.error("Error updating drug");
+      console.log(error.message);
+    }
+  };
+  useEffect(() => {
+    getdrugsDetail();
+  }, []);
   return (
     <div className="flex justify-center items-center min-h-screen w-full">
       <ToastContainer />
@@ -167,7 +169,14 @@ export function AddNewDrugFormpage() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              onSubmit={
+                drugId
+                  ? form.handleSubmit(updateDrug)
+                  : form.handleSubmit(onSubmit)
+              }
+              className="space-y-4"
+            >
               <FormField
                 control={form.control}
                 name="drugName"
@@ -303,10 +312,10 @@ export function AddNewDrugFormpage() {
               />
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading
-                  ? drugTobeUpdate[0]
+                  ? drugId
                     ? "Updating..."
                     : "Adding..."
-                  : drugTobeUpdate[0]
+                  : drugId
                   ? "Update Drug"
                   : "Add Drug"}
               </Button>

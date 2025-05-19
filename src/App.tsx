@@ -303,7 +303,9 @@ function App() {
           <Route
             path="/add-new-drug-page/:drugId?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute
+                allowedRoles={["DOCTOR", "NURSE", "ADMIN", "PHARMACIST"]}
+              >
                 <AddNewDrugFormpage />
               </RoleProtectedRoute>
             }
@@ -319,7 +321,9 @@ function App() {
           <Route
             path="/drug-allocating-to-wards"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute
+                allowedRoles={["DOCTOR", "NURSE", "ADMIN", "PHARMACIST"]}
+              >
                 <DrugsAllocatingToWardPAge />
               </RoleProtectedRoute>
             }

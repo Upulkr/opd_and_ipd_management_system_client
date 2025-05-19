@@ -5,12 +5,11 @@ import { SearchDrugs } from "@/components/drug-management/search-drugs";
 import { Button } from "@/components/ui/button";
 import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
-import { useDrugsStore } from "@/stores/useDrugsStore";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 // Define or import the Drug type
-interface Drug {
+export interface Drug {
   drugId: number;
   drugName: string;
   unit: string;
@@ -21,7 +20,7 @@ interface Drug {
 }
 
 function Pharamacy() {
-  const { drugs, setDrugs } = useDrugsStore((state) => state);
+  const [drugs, setDrugs] = useState<Drug[]>([]);
   const [searchedDrug, setSearchedDrug] = useState<Drug[]>([]);
   const token = useAuthStore((state) => state.token);
   const fethingAllDrugs = async () => {
@@ -55,7 +54,7 @@ function Pharamacy() {
             </Link>
           </div>
         </div>
-        <DashboardMetrics />
+        <DashboardMetrics drugs={drugs} />
         <div className="flex space-x-4 items-baseline">
           <h2 className="text-2xl font-semibold mt-8 mb-4">
             Medication Inventory
