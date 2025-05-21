@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { useDrugsStore } from "@/stores/useDrugsStore";
-import { s } from "node_modules/framer-motion/dist/types.d-6pKw1mTI";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
