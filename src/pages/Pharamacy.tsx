@@ -5,6 +5,8 @@ import { SearchDrugs } from "@/components/drug-management/search-drugs";
 import { Button } from "@/components/ui/button";
 import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
+import { useDrugsStore } from "@/stores/useDrugsStore";
+import { s } from "node_modules/framer-motion/dist/types.d-6pKw1mTI";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -20,7 +22,8 @@ export interface Drug {
 }
 
 function Pharamacy() {
-  const [drugs, setDrugs] = useState<Drug[]>([]);
+  // const [drugs, setDrugs] = useState<Drug[]>([]);
+  const {setDrugs,drugs}=useDrugsStore((state)=>state)
   const [searchedDrug, setSearchedDrug] = useState<Drug[]>([]);
   const token = useAuthStore((state) => state.token);
   const fethingAllDrugs = async () => {

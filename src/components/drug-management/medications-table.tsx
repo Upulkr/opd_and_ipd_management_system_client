@@ -32,11 +32,11 @@ export function MedicationsTable({
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Unit</TableHead>
-            <TableHead>Stock</TableHead>
-            <TableHead>Used</TableHead>
-            <TableHead>Remaining</TableHead>
+            <TableHead>Current in Stock</TableHead>
+            {/* <TableHead>Used</TableHead>
+            <TableHead>Remaining</TableHead> */}
             <TableHead>Expiry Date</TableHead>
-            <TableHead>Update</TableHead>
+            {/* <TableHead>Update</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -47,12 +47,12 @@ export function MedicationsTable({
                   <TableCell className="font-medium">{drug.drugName}</TableCell>
                   <TableCell>{drug.unit}</TableCell>
                   <TableCell>{drug.totalQuantity}</TableCell>
-                  <TableCell>
+                  {/* <TableCell>
                     {drug.usedQuantity ? drug.usedQuantity : "-"}
                   </TableCell>
                   <TableCell>
                     {drug.totalQuantity - drug.usedQuantity}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell
                     className={`${
                       new Date(drug.expiryDate).getTime() - Date.now() <=
@@ -68,13 +68,13 @@ export function MedicationsTable({
                       timeZone: "Asia/Colombo",
                     })}
                   </TableCell>
-                  <Link to={`/add-new-drug-page/${drug.drugId}`}>
+                  {/* <Link to={`/add-new-drug-page/${drug.drugId}`}>
                     <TableCell>
                       <Button variant="outline" size="sm">
                         Update
                       </Button>
                     </TableCell>
-                  </Link>
+                  </Link> */}
                 </TableRow>
               )
             )

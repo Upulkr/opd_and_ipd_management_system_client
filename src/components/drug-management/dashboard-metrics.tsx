@@ -57,10 +57,9 @@ export function DashboardMetrics({ drugs }: { drugs: Drug[] }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">152</div>
-          <p className="text-xs text-muted-foreground">In the last 7 days</p>
+         
           <Button asChild className="mt-2 w-full">
-            <Link to="/drug-allocating-to-wards">View Details</Link>
+            <Link to="/drug-allocating-to-wards">Drug allocating wards</Link>
           </Button>
         </CardContent>
       </Card>
