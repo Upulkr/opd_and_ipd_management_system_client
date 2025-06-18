@@ -429,8 +429,8 @@ export const AdmissionSheetForm = () => {
                   <FormControl>
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
-                      placeholder="Ward Number"
-                      disabled={!!form.getValues("wardNo")}
+                      placeholder="Ward Number ex: 12"
+                      // disabled={!!form.getValues("wardNo")}
                       {...field}
                     />
                   </FormControl>
@@ -448,7 +448,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Blood Pressure"
-                      disabled={!!form.getValues("pressure")}
+                      // disabled={!!form.getValues("pressure")}
                       {...field}
                     />
                   </FormControl>
@@ -466,7 +466,7 @@ export const AdmissionSheetForm = () => {
                     <Input
                       className="border border-gray-500 disabled:text-black disabled:font-bold "
                       placeholder="Weight in kg"
-                      disabled={!!form.getValues("weight")}
+                      // disabled={!!form.getValues("weight")}
                       {...field}
                     />
                   </FormControl>

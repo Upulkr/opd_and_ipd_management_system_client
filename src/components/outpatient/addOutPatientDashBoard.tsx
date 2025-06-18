@@ -93,7 +93,7 @@ export function AddOutpatientForm() {
   // const { patient, setPatient } = usePatientStore((state) => state);
   const token = useAuthStore((state) => state.token);
   const { id: nic, view, outPatientdescription } = useParams();
-
+console.log("nic++++++++",nic)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -143,9 +143,15 @@ export function AddOutpatientForm() {
         form.setValue("prescriptions", data.prescriptions);
       } else {
         console.warn("No patient data found");
+       
       }
-    } catch (error) {
+    } catch (error:any) {
+
       console.error(error);
+      if(error.status === 404){
+        toast.error("Patient not found");  navigate(`/patient-register-form`)
+      }
+     
     }
   };
   useEffect(() => {
