@@ -53,7 +53,7 @@ export const PatientRegisterForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nic: (patientNic !== "" && patientNic) || " ",
+      nic: patientNic?.trim() || "",
       name: "",
       age: "",
       gender: "Male",
@@ -82,9 +82,12 @@ export const PatientRegisterForm = () => {
         setPatient(createPatient.data.newPatient);
 
         toast.success("Patient created successfully");
+
         navigateOutPatientPage(true);
         if (IsNAvigateToOutPatientPage) {
-          navigate("/admission-outpatient-register-page");
+          navigate(
+            `/admission-outpatient-register-page/${createPatient.data.newPatient.nic}`
+          );
         } else {
           navigate("/admission-sheet-register-page");
         }
