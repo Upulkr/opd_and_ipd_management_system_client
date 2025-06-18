@@ -26,6 +26,7 @@ import axios from "axios";
 import debounce from "lodash.debounce";
 import { MessageSquare, Search, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 
 interface SMSScheduleRequest {
@@ -66,6 +67,7 @@ export default function ClinicPage() {
   const [smsPhoneNumbers, setSmsPhoneNumbers] = useState<string[]>([]);
   const { setPatient, patient: patients } = usePatientStore((state) => state);
   const { clinics } = useClinicStore((state) => state);
+  const navigate=useNavigate();
   const token = useAuthStore((state) => state.token);
   console.log("smsPhoneNumbers", smsPhoneNumbers);
   console.log("clinics", clinics);
@@ -118,6 +120,7 @@ export default function ClinicPage() {
       );
       if (response.status === 200) {
         toast.success("Patient assigned successfully");
+        navigate(0);
       }
       setLoading(false);
     } catch (error: any) {
