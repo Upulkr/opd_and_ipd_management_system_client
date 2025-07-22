@@ -83,14 +83,16 @@ export const PatientRegisterForm = () => {
 
         toast.success("Patient created successfully");
 
-        navigateOutPatientPage(true);
-        if (IsNAvigateToOutPatientPage) {
-          navigate(
-            `/admission-outpatient-register-page/${createPatient.data.newPatient.nic}`
-          );
-        } else {
-          navigate("/admission-sheet-register-page");
-        }
+        setTimeout(() => {
+          navigateOutPatientPage(true);
+          if (IsNAvigateToOutPatientPage) {
+            navigate(
+              `/admission-outpatient-register-page/${createPatient.data.newPatient.nic}`
+            );
+          } else {
+            navigate("/admission-sheet-register-page");
+          }
+        }, 2500); // Wait 2.5 seconds before navigating
       } else if (createPatient.status === 400) {
         toast.error("User already exists");
       }
