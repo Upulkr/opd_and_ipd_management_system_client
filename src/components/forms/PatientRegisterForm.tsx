@@ -28,17 +28,17 @@ import { useAuthStore } from "@/stores/useAuth";
 import apiClient from "@/lib/apiClient";
 
 const formSchema = z.object({
-  nic: z.string(),
-  name: z.string(),
-  age: z.string(),
+  nic: z.string().min(9, { message: "NIC is required." }),
+  name: z.string().min(2, { message: "Name is required." }),
+  age: z.string().min(1, { message: "Age is required." }),
   gender: z.enum(["Male", "Female", "Other"]),
-  streetAddress: z.string(),
-  city: z.string(),
-  stateProvince: z.string(),
-  postalCode: z.string().min(2).max(20),
-  country: z.string(),
-  phone: z.string(),
-  livingStatus: z.string(),
+  streetAddress: z.string().min(2, { message: "Street Address is required." }),
+  city: z.string().min(2, { message: "City is required." }),
+  stateProvince: z.string().min(2, { message: "State/Province is required." }),
+  postalCode: z.string().min(2, { message: "Postal Code is required." }).max(20),
+  country: z.string().min(2, { message: "Country is required." }),
+  phone: z.string().min(9, { message: "Phone number is required." }),
+  livingStatus: z.string().min(2, { message: "Living Status is required." }),
 });
 
 export const PatientRegisterForm = () => {
