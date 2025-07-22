@@ -31,7 +31,9 @@ const formSchema = z.object({
   nic: z.string().min(9, { message: "NIC is required." }),
   name: z.string().min(2, { message: "Name is required." }),
   age: z.string().min(1, { message: "Age is required." }),
-  gender: z.enum(["Male", "Female", "Other"]),
+  gender: z.enum(["Male", "Female", "Other"], {
+    required_error: "Gender is required.",
+  }),
   streetAddress: z.string().min(2, { message: "Street Address is required." }),
   city: z.string().min(2, { message: "City is required." }),
   stateProvince: z.string().min(2, { message: "State/Province is required." }),
