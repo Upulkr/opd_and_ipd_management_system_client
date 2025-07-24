@@ -79,6 +79,9 @@ export const AdmissionBookForm = () => {
           },
         }
       );
+
+  
+
       setNoOfAdmissionSheetsperDay(
         Number(fetchAdmissionSheetperDay.data.NoOfAdmissionSheetsPerDay)
       );
@@ -175,7 +178,10 @@ export const AdmissionBookForm = () => {
       }
 
       setIsLoading(false);
+      setTimeout(() => {
       navigate("/inpatient-department");
+      }, 3000);
+      
     } catch (error: any) {
       if (error.status === 500) {
         toast.error("BHT already exists");
