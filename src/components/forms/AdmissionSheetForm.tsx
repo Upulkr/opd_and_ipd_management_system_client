@@ -28,10 +28,10 @@ import {
 import apiClient from "@/lib/apiClient";
 
 const formSchema = z.object({
-  bht: z.string(),
-  nic: z.string(),
-  name: z.string(),
-  age: z.string(),
+  bht: z.string().min(3).max(100),
+  nic: z.string().min(10).max(12),
+  name: z.string().min(2).max(100),
+  age: z.string().min(1).max(3),
   gender: z.enum(["Male", "Female", "Other"]),
   streetAddress: z.string(),
   city: z.string(),
@@ -39,10 +39,10 @@ const formSchema = z.object({
   postalCode: z.string(),
   country: z.string(),
   phone: z.string(),
-  wardNo: z.string(),
-  reason: z.string(),
-  pressure: z.string(),
-  weight: z.string(),
+  wardNo: z.string().min(1).max(100),
+  reason: z.string().min(5).max(500),
+  pressure: z.string().min(1).max(100),
+  weight: z.string().min(1).max(100),
   livingStatus: z.string(),
 });
 
