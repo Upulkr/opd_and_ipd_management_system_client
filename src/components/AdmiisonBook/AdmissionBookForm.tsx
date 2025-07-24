@@ -182,6 +182,7 @@ export const AdmissionBookForm = () => {
       navigate("/inpatient-department");
       }, 3000);
       
+
     } catch (error: any) {
       if (error.status === 500) {
         toast.error("BHT already exists");

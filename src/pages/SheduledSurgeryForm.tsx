@@ -23,10 +23,10 @@ import {
 } from "@/components/ui/select";
 import { useAuthStore } from "@/stores/useAuth";
 
+import apiClient from "@/lib/apiClient";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import apiClient from "@/lib/apiClient";
 type Doctor = {
   id: string;
   username: string;
@@ -88,7 +88,9 @@ export default function SheduledSurgeryForm() {
       );
       if (response.status === 200) {
         toast.success("Surgery updated successfully");
-        navigate("/surgeries");
+        setTimeout(() => {
+          navigate("/surgeries");
+        }, 3000);
       } else {
         toast.error("Failed to update surgery");
       }
