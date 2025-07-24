@@ -28,10 +28,10 @@ import {
 import apiClient from "@/lib/apiClient";
 
 const formSchema = z.object({
-  bht: z.string().min(3).max(100),
-  nic: z.string().min(10).max(12),
-  name: z.string().min(2).max(100),
-  age: z.string().min(1).max(3),
+  bht: z.string().min(1, "BHT is required"),
+  nic: z.string().min(10, "NIC must be between 10 and 12 characters").max(12),
+  name: z.string().min(2, "Name must be between 2 and 100 characters").max(100),
+  age: z.string().min(1, "Age is required").max(3),
   gender: z.enum(["Male", "Female", "Other"]),
   streetAddress: z.string(),
   city: z.string(),
@@ -39,11 +39,11 @@ const formSchema = z.object({
   postalCode: z.string(),
   country: z.string(),
   phone: z.string(),
-  wardNo: z.string().min(1).max(100),
-  reason: z.string().min(5).max(500),
-  pressure: z.string().min(1).max(100),
-  weight: z.string().min(1).max(100),
-  livingStatus: z.string(),
+  wardNo: z.string().min(1, "Ward No is required").max(100),
+  reason: z.string().min(5, "Reason must be between 5 and 500 characters").max(500),
+  pressure: z.string().min(1, "Pressure is required").max(100),
+  weight: z.string().min(1, "Weight is required").max(100),
+  livingStatus: z.string().optional(),
 });
 
 export const AdmissionSheetForm = () => {
