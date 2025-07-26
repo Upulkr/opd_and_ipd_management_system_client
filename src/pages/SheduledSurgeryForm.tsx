@@ -95,8 +95,6 @@ export default function SheduledSurgeryForm() {
       } else {
         toast.error("Failed to update surgery");
       }
-
-
     } catch (error) {
       console.error("Error editing surgery:", error);
     }
@@ -148,8 +146,8 @@ export default function SheduledSurgeryForm() {
       await editSurgery(id, data);
       toast.success("Surgery updated successfully");
       setTimeout(() => {
-      navigate("/surgeries");
-    }, 3000);
+        navigate("/surgeries");
+      }, 3000);
     } else {
       try {
         const response = await apiClient.post(
@@ -163,7 +161,9 @@ export default function SheduledSurgeryForm() {
         );
         if (response.status === 200) {
           toast.success("Surgery scheduled successfully");
-          navigate("/surgeries");
+          setTimeout(() => {
+            navigate("/surgeries");
+          }, 3000);
         }
       } catch (error: any) {
         if (error.response.status === 400) {
