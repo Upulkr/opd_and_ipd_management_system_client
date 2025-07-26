@@ -147,7 +147,9 @@ export default function SheduledSurgeryForm() {
     if (id) {
       await editSurgery(id, data);
       toast.success("Surgery updated successfully");
+      setTimeout(() => {
       navigate("/surgeries");
+    }, 3000);
     } else {
       try {
         const response = await apiClient.post(
