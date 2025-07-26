@@ -86,6 +86,7 @@ export default function SheduledSurgeryForm() {
           },
         }
       );
+
       if (response.status === 200) {
         toast.success("Surgery updated successfully");
         setTimeout(() => {
@@ -94,7 +95,8 @@ export default function SheduledSurgeryForm() {
       } else {
         toast.error("Failed to update surgery");
       }
-      console.log(response.data);
+
+
     } catch (error) {
       console.error("Error editing surgery:", error);
     }
