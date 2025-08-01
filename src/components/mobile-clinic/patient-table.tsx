@@ -11,7 +11,7 @@ import {
 
 import { Eye } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { Button } from "../ui/button";
 import { useAuthStore } from "@/stores/useAuth";
@@ -38,6 +38,7 @@ interface PatientTableProps {
 
 export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
   const token = useAuthStore((state) => state.token);
+  const navigate = useNavigate();
   const [selectedRows, setSelectedRows] = useState<
     { nic: string; id: string }[]
   >([]);
@@ -95,6 +96,7 @@ export function PatientTable({ sheduledMobileclinics }: PatientTableProps) {
         toast.success("Marked as complete");
         setloading(false);
         setSelectedRows([]);
+        navigate(0);
       }
     } catch (error: any) {
       if (error.response.status === 500) {
