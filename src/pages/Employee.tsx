@@ -382,13 +382,16 @@ export default function AdminDashboard() {
         toast.success("Staff assigned successfully");
 
         // Clear form and reset states
-        form.reset({
+    
+        setTimeout(() => {
+             navigate(0);
+        },3000)
+         form.reset({
           id: Date.now(), // Generate a new ID for the next submission
           registrationId: "",
           role: undefined,
           ward: "",
         });
-        navigate(0);
         // Important: Reset the submitted state to avoid validation messages showing up incorrectly
       }
     } catch (error: any) {
