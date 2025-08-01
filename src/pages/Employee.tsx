@@ -493,6 +493,7 @@ export default function AdminDashboard() {
                       <FormLabel>Registration Number</FormLabel>
                       <FormControl>
                         <Input
+                          placeholder="Ex: 4567"
                           {...field}
                           disabled={loading}
                           onChange={(e) => {
