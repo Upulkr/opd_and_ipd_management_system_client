@@ -173,7 +173,9 @@ export default function AdminDashboard() {
       if (response.status === 200) {
         setLoading(false);
         toast.success("Staff deleted successfully");
+
         setDeletingId(undefined);
+        navigate(0);
       }
     } catch (error: any) {
       setLoading(false);
@@ -382,16 +384,17 @@ export default function AdminDashboard() {
         toast.success("Staff assigned successfully");
 
         // Clear form and reset states
-    
-        setTimeout(() => {
-             navigate(0);
-        },3000)
-         form.reset({
+       form.reset({
           id: Date.now(), // Generate a new ID for the next submission
           registrationId: "",
           role: undefined,
           ward: "",
         });
+        setTimeout(() => {
+             navigate(0);
+        },1000)
+
+      
         // Important: Reset the submitted state to avoid validation messages showing up incorrectly
       }
     } catch (error: any) {
