@@ -295,6 +295,7 @@ export const MobileClinic = () => {
 
           setSelectedClinic("");
           setSearchNic("");
+          navigate(0);
         }, 3000);
         return () => clearTimeout(timeOut);
       }
