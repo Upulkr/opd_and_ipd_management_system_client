@@ -119,8 +119,11 @@ export default function ClinicPage() {
         }
       );
       if (response.status === 200) {
+        
         toast.success("Patient assigned successfully");
-        navigate(0);
+        setTimeout(() => {
+          navigate(0);
+        }, 3000);
       }
       setLoading(false);
     } catch (error: any) {
@@ -136,7 +139,7 @@ export default function ClinicPage() {
   const getAllClinicAssigmentsForTable = useCallback(async () => {
     try {
       const response = await apiClient.get(
-        `/clinicassigmnent/getAllClinicAssigmentsfortable`,
+        `/clinicassigmnent/getallclinicassigmentsfortable`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -144,6 +147,7 @@ export default function ClinicPage() {
         }
       );
       if (response.status === 200) {
+        
         setClinicsAssign(response.data.clinicAssigments);
       }
     } catch (error) {

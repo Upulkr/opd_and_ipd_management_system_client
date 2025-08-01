@@ -124,7 +124,7 @@ function App() {
         <SidebarComponent Departments={filteredDepartments} />
         <Routes>
           {/* Common route for all roles */}
-          <Route path="/" element={<DashBoard />} />
+          <Route path="/" element={<RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN", "PHARMACIST", "PATIENT"]}><DashBoard /></RoleProtectedRoute>} />
           {/* Public Routes */}
           <Route path="/log-in" element={<LogIn />} />
           <Route path="/sign-up" element={<Signup />} />

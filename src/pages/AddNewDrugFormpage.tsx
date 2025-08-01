@@ -146,7 +146,10 @@ export function AddNewDrugFormpage() {
       });
       if (reponse.status === 200) {
         toast.success("Drug updated successfully");
-        navigate("/drugs");
+        setTimeout(() => {
+           navigate("/pharmacy");
+        }, 3000);
+       
       }
     } catch (error: any) {
       setIsLoading(false);

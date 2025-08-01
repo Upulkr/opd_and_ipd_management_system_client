@@ -1,5 +1,6 @@
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
 import { useAuthStore } from "@/stores/useAuth";
+import { isTokenExpired } from "@/utils/token";
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
@@ -16,7 +17,7 @@ const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({
 
   console.log(token, role);
 
-  if ((!token && !role) || role === undefined) {
+  if ((!token && !role) || role === undefined||isTokenExpired(token)) {
     // Redirect to login page if no token (not logged in)
     return <Navigate to="/log-in" />;
   }
