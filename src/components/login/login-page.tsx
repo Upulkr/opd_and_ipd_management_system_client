@@ -70,7 +70,10 @@ export default function LoginPage() {
         console.log("token", response.data.token);
         toast.success("Login successful");
         form.reset();
-        navigate("/");
+        setTimeout(() => {
+               navigate("/");
+        }, 3000);
+   
       }
     } catch (error: any) {
       if (error.status === 401) {
