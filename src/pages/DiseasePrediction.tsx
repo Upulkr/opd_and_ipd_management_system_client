@@ -491,7 +491,7 @@ const testFields = {
     },
   ],
 };
-const api_url_prediction = import.meta.env.VITE_DISEASE_PREDICT_API;
+const api_url_prediction ='https://7rmkilb7r0.execute-api.ap-south-1.amazonaws.com'
 export default function DiseasePrediction() {
   const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
     useFrontendComponentsStore((state) => state);
