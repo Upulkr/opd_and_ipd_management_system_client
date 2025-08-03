@@ -61,7 +61,7 @@ export const AdmissionBookForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   // const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const [noOfAdmissionSheetsperDay, setNoOfAdmissionSheetsperDay] = useState(0);
-  const [isBhtExist, setIsBhtExist] = useState(null);
+const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
   const [noOfAdmissionSheetsperYear, setNoOfAdmissionSheetsperYear] =
     useState(0);
   if (isBhtExist === false) {
