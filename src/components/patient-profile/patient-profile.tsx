@@ -146,7 +146,7 @@ export default function CurrentPatientProfile() {
     <div className="container mx-auto p-6 space-y-8 bg-gray-50">
       <ToastContainer />
       <h1 className="text-4xl font-bold text-gray-800">
-        currentPatient Profile
+        Current Patient Profile
       </h1>
       {currentPatient ? (
         <>

@@ -8,6 +8,11 @@ export function InputBHTForm() {
   const [isLoading, setIsLoading] = useState(false);
   // const navigate = useNavigate();
   const [bht, setBht] = useState<string>("");
+
+
+ 
+
+
   // const { setPatientBHT } = usePatientStore((state) => state);
 
   // const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
@@ -97,7 +102,10 @@ export function InputBHTForm() {
       <div className="flex justify-center p-3">
         <Link to={`/admission-book-page/${bht}/${false}?`}>
           <Button
-            onClick={() => setIsLoading(true)}
+            onClick={() => {
+              setIsLoading(true);
+             
+            }}
             type="button"
             disabled={isLoading}
             className="w-full md:w-auto bg-blue-600 hover:bg-blue-700"

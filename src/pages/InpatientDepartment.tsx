@@ -94,10 +94,10 @@ export default function InpatientDepartment() {
   console.log("wardData", wardData);
   console.log("noOfFreeBeds", noOfFreeBeds);
   return (
-    <div className="relative">
+    <div className="relative overflow-hidden">
       {isShowNicForm ? (
         <div
-          className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm"
+          className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-30 backdrop-blur-sm  "
           onClick={() => setIsShowNicForm(false)} // Close when clicking outside
         >
           <InputNicForm />
@@ -136,12 +136,12 @@ export default function InpatientDepartment() {
       <div
         className={`container mx-auto p-4  ${isShowNicForm ? "hidden" : ""}`}
       >
-        <h1 className="text-3xl font-bold mb-6">
+        <h1 className="xl:text-3xl  font-bold mb-6 text-center lg:text-left text-lg ">
           Inpatient Department Dashboard
         </h1>
 
-        <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-3`}>
-          <Card>
+        <div className={`grid gap-6 md:grid-cols-2 lg:grid-cols-3 `}>
+          <Card className="w-[310px] lg:w-md xl:w-full mx-auto">
             <CardHeader>
               <CardTitle>Patient Profile Search</CardTitle>
               <CardDescription>
@@ -167,7 +167,7 @@ export default function InpatientDepartment() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="w-[310px] lg:w-md xl:w-full mx-auto">
             <CardHeader>
               <CardTitle>Total Bed Availability in IPD Wards</CardTitle>
               <CardDescription>Current bed status</CardDescription>
@@ -186,7 +186,7 @@ export default function InpatientDepartment() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="w-[310px] lg:w-md xl:w-full mx-auto">
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
               <CardDescription>Common tasks</CardDescription>
@@ -194,16 +194,18 @@ export default function InpatientDepartment() {
             <CardContent>
               <div className="flex flex-col space-y-2">
                 <Button
+                  className="text-wrap"
                   onClick={() => {
                     setEnableUpdating(true);
                     setIsShowBHTForAdmissionSheet(true);
                     setAdmissionSheetByBHT([]);
                   }}
                 >
-                  <SearchIcon className="mr-2 h-4 w-4" /> View Existing
+                  <SearchIcon className="mr-2 h-4 w-4 " /> View Existing
                   Admission Sheets by BHT Number
                 </Button>
                 <Button
+                  className="text-wrap "
                   onClick={() => {
                     setEnableUpdating(true);
                     setIsShowBHTForAdmissionBook(true);
@@ -221,7 +223,7 @@ export default function InpatientDepartment() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="w-[310px] lg:w-md xl:w-full mx-auto">
             <CardHeader>
               <CardTitle>Admission Sheet</CardTitle>
               <CardDescription>Patient admission details</CardDescription>
@@ -245,7 +247,7 @@ export default function InpatientDepartment() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="w-[310px] lg:w-md xl:w-full mx-auto">
             <CardHeader>
               <CardTitle>Admission Book</CardTitle>
               <CardDescription>Comprehensive admission records</CardDescription>

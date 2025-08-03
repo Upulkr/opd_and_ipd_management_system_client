@@ -64,7 +64,7 @@ export function InputNicForm() {
   // };
   return (
     <div
-      className="bg-white p-6 rounded-lg shadow-lg"
+      className="bg-white p-6 rounded-lg shadow-lg scale-50 lg:scale-100"
       onClick={(e) => e.stopPropagation()}
     >
       <h2 className="text-2xl font-semibold mb-4 text-center">

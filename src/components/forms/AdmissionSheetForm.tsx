@@ -40,7 +40,10 @@ const formSchema = z.object({
   country: z.string(),
   phone: z.string(),
   wardNo: z.string().min(1, "Ward No is required").max(100),
-  reason: z.string().min(5, "Reason must be between 5 and 500 characters").max(500),
+  reason: z
+    .string()
+    .min(5, "Reason must be between 5 and 500 characters")
+    .max(500),
   pressure: z.string().min(1, "Pressure is required").max(100),
   weight: z.string().min(1, "Weight is required").max(100),
   livingStatus: z.string().optional(),
@@ -50,6 +53,9 @@ export const AdmissionSheetForm = () => {
   const { bht = "", view = "", nic = "" } = useParams();
   console.log("nic", nic);
   const [isLoading, setIsLoading] = useState(false);
+  const [wardData, setWardData] = useState<
+    { wardNo: string; wardName: string }[]
+  >([]);
   // const { patient } = usePatientStore((state) => state);
 
   const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
@@ -100,7 +106,7 @@ export const AdmissionSheetForm = () => {
       if (erro.status === 404) {
         toast.error("Patient not found");
       }
-      // navigate("/patient-register-form");
+      navigate("/patient-register-form");
       console.error("Error fetching patient data by NIC", erro);
     }
   };
@@ -171,7 +177,28 @@ export const AdmissionSheetForm = () => {
     if (nic !== "") {
       getPatientDataByNIC();
     }
+    wardDetails();
   }, []);
+
+  const wardDetails = async () => {
+    try {
+      const response = await apiClient.get(`/getwardbedstatus/wardnames`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.status === 200) {
+        setWardData(response.data);
+
+        return response.data;
+      }
+    } catch (error: any) {
+      if (error.status === 500) {
+        console.log(error);
+      }
+    }
+  };
+
   return (
     <>
       <ToastContainer />
@@ -425,15 +452,25 @@ export const AdmissionSheetForm = () => {
               name="wardNo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className=" font-bold">Ward Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      className="border border-gray-500 disabled:text-black disabled:font-bold "
-                      placeholder="Ward Number ex: 12"
-                      // disabled={!!form.getValues("wardNo")}
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel>Ward Number</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select ward" />
+                      </SelectTrigger>
+                    </FormControl>
+                    {wardData.map((ward) => (
+                      <SelectContent key={ward.wardNo}>
+                        <SelectItem value={ward.wardNo}>
+                          {ward.wardNo}
+                          <span className="ml-2">{ward.wardName}</span>
+                        </SelectItem>
+                      </SelectContent>
+                    ))}
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

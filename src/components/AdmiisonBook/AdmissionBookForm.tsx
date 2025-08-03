@@ -61,11 +61,28 @@ export const AdmissionBookForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   // const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const [noOfAdmissionSheetsperDay, setNoOfAdmissionSheetsperDay] = useState(0);
+  const [isBhtExist, setIsBhtExist] = useState(null);
   const [noOfAdmissionSheetsperYear, setNoOfAdmissionSheetsperYear] =
     useState(0);
-
+  if (isBhtExist === false) {
+    toast.error("Please fill Add admission sheet first");
+    setTimeout(() => {
+      navigate('/inpatient-department');
+    }, 2000);
+  }
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
-
+  const checkBHTExistence = async () => {
+    try {
+      const reponse = await apiClient.get(`/admissionsheet/bhtexist/${bht}`);
+      console.log(reponse.data, "reponse.data");
+      setIsBhtExist(reponse.data);
+    } catch (error: any) {
+      if (error.response.status === 404) {
+        setIsBhtExist(false);
+      }
+      console.error("Error fetching admission sheet by BHT", error);
+    }
+  };
   const fetchingNoOfAdmissionSheetsperDay = async () => {
     try {
       if (enableUpdate === true) {
@@ -79,8 +96,6 @@ export const AdmissionBookForm = () => {
           },
         }
       );
-
-  
 
       setNoOfAdmissionSheetsperDay(
         Number(fetchAdmissionSheetperDay.data.NoOfAdmissionSheetsPerDay)
@@ -112,6 +127,9 @@ export const AdmissionBookForm = () => {
   };
 
   useEffect(() => {
+    if (bht) {
+      checkBHTExistence();
+    }
     if (enableUpdate === false) {
       fetchingNoOfAdmissionSheetsperDay();
       fetchingNoOfAdmissionSheetsperYear();
@@ -179,10 +197,8 @@ export const AdmissionBookForm = () => {
 
       setIsLoading(false);
       setTimeout(() => {
-      navigate("/inpatient-department");
+        navigate("/inpatient-department");
       }, 3000);
-      
-
     } catch (error: any) {
       if (error.status === 500) {
         toast.error("BHT already exists");
