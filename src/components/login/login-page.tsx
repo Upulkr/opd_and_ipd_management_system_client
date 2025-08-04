@@ -72,7 +72,7 @@ export default function LoginPage() {
         form.reset();
         setTimeout(() => {
                navigate("/");
-        }, 3000);
+        }, 1000);
    
       }
     } catch (error: any) {

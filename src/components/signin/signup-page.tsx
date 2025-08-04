@@ -108,7 +108,7 @@ export default function SignupPage() {
 
         const timeOut = setTimeout(() => {
           navigate("/log-in");
-        }, 6000);
+        }, 1000);
         return () => clearTimeout(timeOut); // Give 2 seconds for toast to show
       }
     } catch (error: any) {

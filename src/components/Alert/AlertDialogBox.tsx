@@ -16,9 +16,10 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 interface AlertDialogDemoProps {
   info: string;
   savePopUp: boolean;
+  setSavePopUp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export function AlertDialogBox({ info, savePopUp }: AlertDialogDemoProps) {
+export function AlertDialogBox({ info, savePopUp,setSavePopUp }: AlertDialogDemoProps) {
   const [nic, setNic] = useState<string>("");
   const { setPatientNic } = usePatientStore((state) => state);
   const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
@@ -58,7 +59,9 @@ export function AlertDialogBox({ info, savePopUp }: AlertDialogDemoProps) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-            onClick={() => setIsSavePredictionButonClick(false)}
+            onClick={() => {setIsSavePredictionButonClick(false)
+              setSavePopUp(false);
+            }}
           >
             Cancel
           </AlertDialogCancel>

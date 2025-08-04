@@ -491,7 +491,7 @@ const testFields = {
     },
   ],
 };
-const api_url_prediction ='http://65.2.9.155:5000'
+const api_url_prediction ='https://4opu38skdl.execute-api.ap-south-1.amazonaws.com'
 export default function DiseasePrediction() {
   const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
     useFrontendComponentsStore((state) => state);
@@ -615,7 +615,7 @@ export default function DiseasePrediction() {
 
         <ToastContainer />
         {savePopup && showResult === false && (
-          <AlertDialogBox savePopUp={savePopup} info={"Save Prediction"} />
+          <AlertDialogBox savePopUp={savePopup} info={"Save Prediction"} setSavePopUp={setSavePopup}/>
         )}
         {/* Test Selection or Form */}
         {!selectedTest ? (
