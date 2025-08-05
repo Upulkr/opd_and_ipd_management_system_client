@@ -492,7 +492,8 @@ const testFields = {
     },
   ],
 };
-const api_url_prediction ='https://4opu38skdl.execute-api.ap-south-1.amazonaws.com'
+const api_url_prediction =
+  "https://4opu38skdl.execute-api.ap-south-1.amazonaws.com";
 export default function DiseasePrediction() {
   const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
     useFrontendComponentsStore((state) => state);
@@ -517,10 +518,11 @@ export default function DiseasePrediction() {
     if (patientNic === "") return;
     try {
       const isPatientExist = await apiClient.get(
-        `/patient/isPatientexist/${patientNic}`,{
+        `/patient/isPatientexist/${patientNic}`,
+        {
           headers: {
             Authorization: `Bearer ${token}`,
-          }
+          },
         }
       );
 
@@ -529,18 +531,20 @@ export default function DiseasePrediction() {
         toast.error("Patient not found, please register the patient");
         navigate("/patient-register-form");
       }
-      const response = await apiClient.post("/diseaseprediction", {
-    
-        headers: {
-          
-          Authorization: `Bearer ${token}`,
-        },
-        data: {
+      const response = await apiClient.post(
+        "/diseaseprediction",
+        {
           nic: patientNic,
           disease: selectedTest,
           prediction: prediction.message,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.status === 200) {
         setIsSavePredictionButonClick(false);
@@ -621,7 +625,11 @@ export default function DiseasePrediction() {
 
         <ToastContainer />
         {savePopup && showResult === false && (
-          <AlertDialogBox savePopUp={savePopup} info={"Save Prediction"} setSavePopUp={setSavePopup}/>
+          <AlertDialogBox
+            savePopUp={savePopup}
+            info={"Save Prediction"}
+            setSavePopUp={setSavePopup}
+          />
         )}
         {/* Test Selection or Form */}
         {!selectedTest ? (
