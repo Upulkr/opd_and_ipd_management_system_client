@@ -37,6 +37,7 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import * as z from "zod";
 import axios from "axios";
+import { useAuthStore } from "@/stores/useAuth";
 
 const testTypes = [
   {
@@ -503,7 +504,7 @@ export default function DiseasePrediction() {
   const [prediction, setPrediction] = useState({ result: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [savePopup, setSavePopup] = useState(false);
-
+  const token = useAuthStore((state) => state.token);
   const navigate = useNavigate();
   const form = useForm({
     resolver: zodResolver(
@@ -528,6 +529,7 @@ export default function DiseasePrediction() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         data: {
           nic: patientNic,
