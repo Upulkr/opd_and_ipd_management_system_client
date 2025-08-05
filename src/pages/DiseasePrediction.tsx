@@ -517,7 +517,11 @@ export default function DiseasePrediction() {
     if (patientNic === "") return;
     try {
       const isPatientExist = await apiClient.get(
-        `/patient/isPatientexist/${patientNic}`
+        `/patient/isPatientexist/${patientNic}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        }
       );
 
       if (isPatientExist.data.patientExist === false) {
