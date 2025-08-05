@@ -532,7 +532,7 @@ export default function DiseasePrediction() {
       const response = await apiClient.post("/diseaseprediction", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          
           Authorization: `Bearer ${token}`,
         },
         data: {
