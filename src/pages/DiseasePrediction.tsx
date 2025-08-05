@@ -530,7 +530,7 @@ export default function DiseasePrediction() {
         navigate("/patient-register-form");
       }
       const response = await apiClient.post("/diseaseprediction", {
-        method: "POST",
+    
         headers: {
           
           Authorization: `Bearer ${token}`,
