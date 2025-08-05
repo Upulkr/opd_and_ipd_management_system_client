@@ -10,10 +10,13 @@ This repository contains the **React** web application written in **TypeScript**
 - Role-based access control for hospital staff
 
 ## Technologies Used
-- React with TypeScript
+- React 18 with TypeScript
+- Vite (build tool)
 - React Router DOM
 - TailwindCSS
 - Axios (for API calls)
+- **Zustand** for state management
+
 
 ## Setup Instructions
 
