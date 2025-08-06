@@ -316,7 +316,7 @@ export default function CurrentPatientProfile() {
                             }/${true}`}
                           >
                             {" "}
-                            <p className="text-blue-500 underline-offset-0">click to view</p>
+                            <p className="text-blue-500 underline-offset-1 hover:underline">click to view</p>
                           </Link>
                         </div>
                       </TableCell>
@@ -326,7 +326,7 @@ export default function CurrentPatientProfile() {
                           <Link
                             to={`/admission-book-page/${admission.bht}/${true}`}
                           >
-                            <p>click to view</p>
+                             <p className="text-blue-500 underline-offset-1 hover:underline">click to view</p>
                           </Link>
                         </div>
                       </TableCell>
