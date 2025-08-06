@@ -316,7 +316,7 @@ export default function CurrentPatientProfile() {
                             }/${true}`}
                           >
                             {" "}
-                            <p>click to view</p>
+                            <p className="text-blue-500 underline-offset-0">click to view</p>
                           </Link>
                         </div>
                       </TableCell>
