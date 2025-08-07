@@ -626,7 +626,7 @@ export default function DiseasePrediction() {
         {savePopup && showResult === false && (
           <AlertDialogBox
             savePopUp={savePopup}
-            info={"Save Prediction"}
+            info={"To Save Prediction ,add patient NIC number"}
             setSavePopUp={setSavePopup}
           />
         )}
