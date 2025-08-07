@@ -492,8 +492,7 @@ const testFields = {
     },
   ],
 };
-const api_url_prediction =
-  "https://4opu38skdl.execute-api.ap-south-1.amazonaws.com";
+const api_url_prediction ="https://f862xl21il.execute-api.ap-south-1.amazonaws.com";
 export default function DiseasePrediction() {
   const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
     useFrontendComponentsStore((state) => state);
