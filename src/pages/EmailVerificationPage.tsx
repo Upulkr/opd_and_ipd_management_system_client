@@ -13,7 +13,7 @@ import apiClient from "@/lib/apiClient";
 import { motion } from "framer-motion";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function EmailVerificationPage() {
@@ -106,13 +106,12 @@ export default function EmailVerificationPage() {
           )}
         </CardContent>
         <CardFooter className="flex justify-center border-t bg-muted/20 p-6">
-          <Button
-            onClick={() => (window.location.href = "/log-in")}
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isVerified ? "Go to Login" : "Back to Login"}
-          </Button>
+          <Link to="/log-in">
+          
+            <Button className="w-full" disabled={isLoading}>
+              {isVerified ? "Go to Login" : "Back to Login"}
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </div>
