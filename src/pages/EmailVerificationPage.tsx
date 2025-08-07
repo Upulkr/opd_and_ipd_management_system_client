@@ -106,8 +106,8 @@ export default function EmailVerificationPage() {
           )}
         </CardContent>
         <CardFooter className="flex justify-center border-t bg-muted/20 p-6">
-          <Link to="/log-in">
-          
+          <Link to="/login">
+            {" "}
             <Button className="w-full" disabled={isLoading}>
               {isVerified ? "Go to Login" : "Back to Login"}
             </Button>
