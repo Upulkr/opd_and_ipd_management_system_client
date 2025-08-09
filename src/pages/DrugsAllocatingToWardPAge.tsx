@@ -73,6 +73,7 @@ export default function DrugAllocation() {
   const filteredDrugs = drugs.filter((drug) =>
     drug.drugName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const handleAllocate = async () => {
     if (selectedDrug && selectedWard && quantity && selectedUnit) {
       const drug = drugs.find((d) => d.drugId.toString() === selectedDrug);
@@ -134,6 +135,8 @@ export default function DrugAllocation() {
   };
   useEffect(() => {
     getWardNames();
+    setSelectedWardForDetails("opd");
+    getAllocationByWard("opd");
   }, []);
   return (
     <div className="container mx-auto p-4">
