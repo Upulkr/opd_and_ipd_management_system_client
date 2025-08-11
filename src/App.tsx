@@ -109,7 +109,7 @@ function App() {
   ];
 
   const filteredDepartments = Departments.filter((dept) => {
-    if (role === "PHARMACIST") return ["/pharmacy"].includes(dept.url);
+    // if (role === "PHARMACIST") return ["/pharmacy"].includes(dept.url);
     if (role === "PATIENT") return dept.url === "/";
     return true;
   });
