@@ -137,7 +137,7 @@ function App() {
           <Route
             path="/user-profile"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <UserProfile />
               </RoleProtectedRoute>
             }
@@ -157,7 +157,7 @@ function App() {
           <Route
             path="/mobile-clinic"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <MobileClinic />
               </RoleProtectedRoute>
             }
@@ -165,7 +165,7 @@ function App() {
           <Route
             path="/outpatient-department"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <OutpatientDepartment />
               </RoleProtectedRoute>
             }
@@ -173,7 +173,7 @@ function App() {
           <Route
             path="/inpatient-department"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <InpatientDepartment />
               </RoleProtectedRoute>
             }
@@ -181,7 +181,7 @@ function App() {
           {/* <Route
             path="/icu"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <IntensiveCareUnit />
               </RoleProtectedRoute>
             }
@@ -189,7 +189,7 @@ function App() {
           <Route
             path="/clinic"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <ClinicNotifier />
               </RoleProtectedRoute>
             }
@@ -199,7 +199,7 @@ function App() {
           <Route
             path="/employee"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <Employee />
               </RoleProtectedRoute>
             }
@@ -207,7 +207,7 @@ function App() {
           <Route
             path="/ward-details"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <Wards />
               </RoleProtectedRoute>
             }
@@ -215,7 +215,7 @@ function App() {
           <Route
             path="/disease-prediction"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <DiseasePrediction />
               </RoleProtectedRoute>
             }
@@ -223,7 +223,7 @@ function App() {
           <Route
             path="/surgeries"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <SurgeriesList />
               </RoleProtectedRoute>
             }
@@ -231,7 +231,7 @@ function App() {
           <Route
             path="/sheduled-surgery"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <SheduledSurgeryForm />
               </RoleProtectedRoute>
             }
@@ -239,7 +239,7 @@ function App() {
           <Route
             path="/view-surgery/:id"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <SheduledSurgeryForm />
               </RoleProtectedRoute>
             }
@@ -247,7 +247,7 @@ function App() {
           <Route
             path="/inpatient-department/admission-sheet"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <AdmissionSheet />
               </RoleProtectedRoute>
             }
@@ -255,7 +255,7 @@ function App() {
           <Route
             path="/patient-register-form"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <PatientRegister />
               </RoleProtectedRoute>
             }
@@ -263,7 +263,7 @@ function App() {
           <Route
             path="/admission-sheet-register-page/:bht?/:view?/:nic?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <AdmissionSheetRegisterPage />
               </RoleProtectedRoute>
             }
@@ -271,7 +271,7 @@ function App() {
           <Route
             path="/admission-book-page/:bht?/:view?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <AdmissionBookPage />
               </RoleProtectedRoute>
             }
@@ -279,7 +279,7 @@ function App() {
           <Route
             path="/patient-profile-page/:nic?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <PatientProfilePage />
               </RoleProtectedRoute>
             }
@@ -287,7 +287,7 @@ function App() {
           <Route
             path="/admission-outpatient-register-page/:id?/:view?/:outPatientdescription?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <AddOutPatientForm />
               </RoleProtectedRoute>
             }
@@ -295,7 +295,7 @@ function App() {
           <Route
             path="/individual-outpatientViewForms-page/:id?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <IndividuslOutPatientForms />
               </RoleProtectedRoute>
             }
@@ -304,7 +304,7 @@ function App() {
             path="/add-new-drug-page/:drugId?"
             element={
               <RoleProtectedRoute
-                allowedRoles={["DOCTOR", "NURSE", "ADMIN", "PHARMACIST"]}
+                allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN", "PHARMACIST"]}
               >
                 <AddNewDrugFormpage />
               </RoleProtectedRoute>
@@ -313,7 +313,7 @@ function App() {
           <Route
             path="/patient-profile/:doctype?/:nic?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <PatientReports />
               </RoleProtectedRoute>
             }
@@ -322,7 +322,7 @@ function App() {
             path="/drug-allocating-to-wards"
             element={
               <RoleProtectedRoute
-                allowedRoles={["DOCTOR", "NURSE", "ADMIN", "PHARMACIST"]}
+                allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN", "PHARMACIST"]}
               >
                 <DrugsAllocatingToWardPAge />
               </RoleProtectedRoute>
@@ -331,7 +331,7 @@ function App() {
           <Route
             path="/create-new-clinic"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <AddClininicFormpage />
               </RoleProtectedRoute>
             }
@@ -339,7 +339,7 @@ function App() {
           <Route
             path="/clinic-assign"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <ClinincAssignPAge />
               </RoleProtectedRoute>
             }
@@ -347,7 +347,7 @@ function App() {
           <Route
             path="/view-in-map/:location?"
             element={
-              <RoleProtectedRoute allowedRoles={["DOCTOR", "NURSE", "ADMIN"]}>
+              <RoleProtectedRoute allowedRoles={["DOCTOR","PHARMACIST", "NURSE", "ADMIN"]}>
                 <ViewInMapPage />
               </RoleProtectedRoute>
             }
