@@ -69,7 +69,7 @@ const formSchema = z.object({
     ],
     {
       required_error: "Please select a unit.",
-    }
+    },
   ),
   totalQuantity: z.number().int().positive().optional(),
   usedQuantity: z.number().int().nonnegative().optional(),
@@ -82,13 +82,14 @@ const formSchema = z.object({
 });
 
 export function AddNewDrugFormpage() {
-  const token = useAuthStore((state) => state.token);
-  const [isLoading, setIsLoading] = useState(false);
+  const token = useAuthStore((state) => state.token); // Retrieve auth token from global store
+  const [isLoading, setIsLoading] = useState(false); // Local state for loading indicator
 
-  const { drugId } = useParams();
+  const { drugId } = useParams(); // Get drugId from URL params if looking to edit an existing drug
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Navigation hook
 
+  // Initialize the form with React Hook Form and Zod validation
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -100,9 +101,11 @@ export function AddNewDrugFormpage() {
     },
   });
 
+  // Handler for valid form submission (Creating a new drug)
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
+      // Send a POST request to add the new drug to the inventory
       const reponse = await apiClient.post("/drugs", values, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -111,10 +114,10 @@ export function AddNewDrugFormpage() {
       if (reponse.status === 200) {
         setIsLoading(false);
         toast.success("Drug added successfully");
+        // Redirect to the pharmacy page after 3 seconds
         setTimeout(() => {
           navigate("/pharmacy");
-        }, 3000);  
-      
+        }, 3000);
       }
     } catch (error: any) {
       setIsLoading(false);
@@ -122,6 +125,7 @@ export function AddNewDrugFormpage() {
       console.log(error.message);
     }
   }
+  // Function to fetch details of a drug if we are in "Edit" mode (drugId is present)
   const getdrugsDetail = async () => {
     try {
       const reponse = await apiClient.get(`/drugs/getdrugbyid/${drugId}`, {
@@ -130,6 +134,7 @@ export function AddNewDrugFormpage() {
         },
       });
       if (reponse.status === 200) {
+        // Populate the form with the fetched drug details
         form.setValue("drugName", reponse.data.drugName);
         form.setValue("unit", reponse.data.unit);
         form.setValue("totalQuantity", reponse.data.totalQuantity);
@@ -140,8 +145,10 @@ export function AddNewDrugFormpage() {
     }
   };
 
+  // Handler for updating an existing drug
   const updateDrug = async (values: z.infer<typeof formSchema>) => {
     try {
+      // Send a PUT request to update the drug details
       const reponse = await apiClient.put(`/drugs/${drugId}`, values, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -151,7 +158,7 @@ export function AddNewDrugFormpage() {
         toast.success("Drug updated successfully");
         setTimeout(() => {
           navigate("/pharmacy");
-        }, 3000);  
+        }, 3000);
       }
     } catch (error: any) {
       setIsLoading(false);
@@ -256,7 +263,7 @@ export function AddNewDrugFormpage() {
                           field.onChange(
                             e.target.value
                               ? parseInt(e.target.value)
-                              : undefined
+                              : undefined,
                           )
                         }
                       />
@@ -281,7 +288,7 @@ export function AddNewDrugFormpage() {
                             variant={"outline"}
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             {field.value ? (
@@ -321,8 +328,8 @@ export function AddNewDrugFormpage() {
                     ? "Updating..."
                     : "Adding..."
                   : drugId
-                  ? "Update Drug"
-                  : "Add Drug"}
+                    ? "Update Drug"
+                    : "Add Drug"}
               </Button>
             </form>
           </Form>

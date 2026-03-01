@@ -58,12 +58,16 @@ const surgeryFormSchema = z.object({
 type SurgeryFormValues = z.infer<typeof surgeryFormSchema>;
 
 export default function SheduledSurgeryForm() {
-  const { id } = useParams();
+  const { id } = useParams(); // Get surgery ID from URL if in edit mode
   const navigate = useNavigate();
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]); // List of doctors for dropdown
 
   const token = useAuthStore((state) => state.token);
-  // Initialize the form
+
+  // --------------------------------------------------------------------------
+  // Form Initialization
+  // Uses react-hook-form with Zod resolver for validation.
+  // --------------------------------------------------------------------------
   const form = useForm<SurgeryFormValues>({
     resolver: zodResolver(surgeryFormSchema),
     defaultValues: {
@@ -75,6 +79,11 @@ export default function SheduledSurgeryForm() {
       PatientNic: undefined,
     },
   });
+
+  // --------------------------------------------------------------------------
+  // Action: editSurgery
+  // Purpose: Updates an existing surgery record.
+  // --------------------------------------------------------------------------
   const editSurgery = async (surgeryId: string, data: SurgeryFormValues) => {
     try {
       const response = await apiClient.put(
@@ -84,7 +93,7 @@ export default function SheduledSurgeryForm() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -99,6 +108,7 @@ export default function SheduledSurgeryForm() {
       console.error("Error editing surgery:", error);
     }
   };
+  // Fetch existing surgery details if ID is present (Edit Mode)
   const getSurgeryById = async () => {
     try {
       const response = await apiClient.get(`/surgery/getsurgerybyid/${id}`, {
@@ -108,6 +118,7 @@ export default function SheduledSurgeryForm() {
       });
       if (response.status === 200) {
         const data = response.data;
+        // Populate form with existing data
         form.setValue("patientName", data.patientName);
         form.setValue("PatientNic", data.PatientNic);
         form.setValue("AssignedDoctor", data.AssignedDoctor);
@@ -119,6 +130,8 @@ export default function SheduledSurgeryForm() {
       console.error("Error fetching doctors:", error);
     }
   };
+
+  // Fetch list of doctors to populate the select field
   const getAlldoctors = async () => {
     try {
       const response = await apiClient.get("/getusers/getalldoctors", {
@@ -134,21 +147,27 @@ export default function SheduledSurgeryForm() {
       console.error("Error fetching doctors:", error);
     }
   };
+
+  // Initial Data Fetching
   useEffect(() => {
     getAlldoctors();
     if (id) {
       getSurgeryById();
     }
   }, []);
-  // Define submit handler
+  // --------------------------------------------------------------------------
+  // Form Submission Handler
+  // --------------------------------------------------------------------------
   async function onSubmit(data: SurgeryFormValues) {
     if (id) {
+      // Logic for Updating
       await editSurgery(id, data);
       toast.success("Surgery updated successfully");
       setTimeout(() => {
         navigate("/surgeries");
       }, 3000);
     } else {
+      // Logic for Creating New Schedule
       try {
         const response = await apiClient.post(
           "/surgery/createsurgeryschedule",
@@ -157,7 +176,7 @@ export default function SheduledSurgeryForm() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
         if (response.status === 200) {
           toast.success("Surgery scheduled successfully");
@@ -166,6 +185,7 @@ export default function SheduledSurgeryForm() {
           }, 3000);
         }
       } catch (error: any) {
+        // Error Handling
         if (error.response.status === 400) {
           console.error("Bad request:", error.response.data.message);
           toast.error("PAtient alreday assigned to a surgery");
@@ -173,13 +193,13 @@ export default function SheduledSurgeryForm() {
         if (error.ststus === 404) {
           console.error("Patient not registered", error.response.data.message);
           toast.error(
-            "Patient not registered ,Please register the patient first"
+            "Patient not registered ,Please register the patient first",
           );
           navigate("/registerPatient");
         } else {
           console.error(
             "Error scheduling surgery:",
-            error.response.data.message
+            error.response.data.message,
           );
           toast.error("Error scheduling surgery");
         }

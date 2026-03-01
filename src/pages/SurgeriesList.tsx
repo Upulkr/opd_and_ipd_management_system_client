@@ -4,9 +4,20 @@ import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { Suspense, useEffect, useState } from "react";
 
+// --------------------------------------------------------------------------
+// MODULE: SurgeriesList
+// PURPOSE: Displays the master list of scheduled surgeries.
+//          Includes dashboard statistics and a detailed table of surgeries.
+// --------------------------------------------------------------------------
+
 export const SurgeriesList = () => {
   const token = useAuthStore((state) => state.token);
   const [surgeries, setSurgeries] = useState([]);
+
+  // --------------------------------------------------------------------------
+  // Data Fetching: getSurgeries
+  // Purpose: Retrieves all scheduled surgeries from the backend.
+  // --------------------------------------------------------------------------
   const getSurgeries = async () => {
     try {
       const response = await apiClient.get("/surgery/getallsurgeryschedule", {

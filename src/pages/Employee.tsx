@@ -79,12 +79,16 @@ export default function AdminDashboard() {
   const [loading, setLoading] = React.useState<boolean>(false);
   const { staffCount, setStaffCount } = useStaffStore((state) => state);
   const [deletingId, setDeletingId] = React.useState<number | undefined>(
-    undefined
+    undefined,
   );
   const token = useAuthStore((state) => state.token);
+  // --------------------------------------------------------------------------
+  // Data Fetching: fetchStaff
+  // Purpose: Retrieves the list of all staff assignments from the backend.
+  // --------------------------------------------------------------------------
   const fetchStaff = async () => {
     try {
-      // setLoading(true);
+      // setLoading(true); // Optional loading state
       const response = await apiClient.get("/staffwardassignment", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -99,6 +103,10 @@ export default function AdminDashboard() {
       console.error("Error fetching staff:", error);
     }
   };
+  // --------------------------------------------------------------------------
+  // Data Fetching: getstaffCount & getWardNames
+  // Purpose: Fetches aggregate statistics for staff distribution and the list of wards.
+  // --------------------------------------------------------------------------
   const getstaffCount = async () => {
     try {
       const response = await apiClient.get(
@@ -107,7 +115,7 @@ export default function AdminDashboard() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -132,12 +140,18 @@ export default function AdminDashboard() {
       console.error("Error fetching staff counts:", error);
     }
   };
+
+  // Effect: Validates and loads initial data when the component mounts
   React.useEffect(() => {
     fetchStaff();
     getstaffCount();
     getWardNames();
   }, []);
 
+  // --------------------------------------------------------------------------
+  // Action: assignToWard
+  // Purpose: Updates the ward assignment for a specific staff member.
+  // --------------------------------------------------------------------------
   const assignToWard = async (staffId: string, ward: string) => {
     try {
       setLoading(true);
@@ -149,7 +163,7 @@ export default function AdminDashboard() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.status === 200) {
         toast.success("Staff assigned successfully");
@@ -159,23 +173,27 @@ export default function AdminDashboard() {
     }
   };
 
+  // --------------------------------------------------------------------------
+  // Action: deleteStaffMember
+  // Purpose: Removes a staff member from the system.
+  // --------------------------------------------------------------------------
   const deleteStaffMember = async (staffId: number) => {
     try {
-      setDeletingId(staffId);
+      setDeletingId(staffId); // Indicates which item is being deleted (for UI feedback)
       const response = await apiClient.delete(
         `/staffwardassignment/${staffId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.status === 200) {
         setLoading(false);
         toast.success("Staff deleted successfully");
 
         setDeletingId(undefined);
-        navigate(0);
+        navigate(0); // Reload page to update the list
       }
     } catch (error: any) {
       setLoading(false);
@@ -203,6 +221,7 @@ export default function AdminDashboard() {
         : [];
     const displayStaff = showAll ? filteredStaff : filteredStaff.slice(0, 4);
 
+    // Search Handler for the internal table
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
       const query = e.target.value;
       setSearchQuery(query);
@@ -210,8 +229,9 @@ export default function AdminDashboard() {
       if (query.trim() === "") {
         setSearchResults([]); // Reset when input is cleared
       } else {
+        // Filter the fetched staff data locally
         const searchedStaff = fetchedStaff.filter((s) =>
-          String(s.registrationId).includes(searchQuery)
+          String(s.registrationId).includes(searchQuery),
         );
         setSearchResults(searchedStaff);
       }
@@ -321,7 +341,7 @@ export default function AdminDashboard() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                )
+                ),
               )}
             </TableBody>
           </Table>
@@ -384,17 +404,16 @@ export default function AdminDashboard() {
         toast.success("Staff assigned successfully");
 
         // Clear form and reset states
-       form.reset({
+        form.reset({
           id: Date.now(), // Generate a new ID for the next submission
           registrationId: "",
           role: undefined,
           ward: "",
         });
         setTimeout(() => {
-             navigate(0);
-        },1000)
+          navigate(0);
+        }, 1000);
 
-      
         // Important: Reset the submitted state to avoid validation messages showing up incorrectly
       }
     } catch (error: any) {
@@ -428,7 +447,7 @@ export default function AdminDashboard() {
           count={staffCount?.reduce(
             (acc, curr) =>
               acc + curr.noofdoctors + curr.noofnurses + curr.noofpharmacist,
-            0
+            0,
           )}
         />
         <StaffCounter
@@ -443,7 +462,7 @@ export default function AdminDashboard() {
           role="Pharmacists"
           count={staffCount?.reduce(
             (acc, curr) => acc + curr.noofpharmacist,
-            0
+            0,
           )}
         />
       </div>

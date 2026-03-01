@@ -87,47 +87,96 @@ type CurrentPatient = {
   country: string;
   streetAddress: string;
 };
+// --------------------------------------------------------------------------
+// MODULE: CurrentPatientProfile
+// PURPOSE: This component acts as the main profile view for a specific patient.
+//          It fetches and displays personal information, medical reports, and
+//          admission history.
+// AUTHOR: [Student Name]
+// DATE: [Current Date]
+// --------------------------------------------------------------------------
 export default function CurrentPatientProfile() {
+  // HOOKS INITIALIZATION
+  // 'useNavigate': Used to programmatic navigation (e.g., redirecting to login).
+  // 'useState': Manages local component state.
+  // 'useAuthStore': Accesses the global authentication state (Zustand).
+  // 'useParams': Retrieves dynamic parameters from the URL (specifically 'nic').
   const navigate = useNavigate();
+
+  // STATE: currentPatient
+  // Stores the detailed information of the patient fetched from the backend.
+  // Initialized to null to indicate data is being loaded or not found.
   const [currentPatient, setCurrentPatient] = useState<CurrentPatient | null>(
-    null
+    null,
   );
+
+  // STATE: admissionData
+  // Stores a list of admission history records for the patient.
+  // Initialized as an empty array.
   const [admissionData, setAdmissionData] = useState<genralData[]>([]);
+
+  // GLOBAL STATE: Token
+  // We need the JWT token to authenticate our API requests.
   const token = useAuthStore((state) => state.token);
+
+  // URL PARAMETER: nic
+  // The National Identity Card number is extracted from the route path to identify the patient.
   const { nic } = useParams<{ nic: string }>();
+  // --------------------------------------------------------------------------
+  // FUNCTION: fetchCurrentPatient
+  // PURPOSE: Asynchronously fetches patient details from the backend API using the NIC.
+  // COMPLEXITY: O(1) - Network bound.
+  // --------------------------------------------------------------------------
   const fetchCurrentPatient = async () => {
     try {
+      // API Call: HTTP GET request to retrieve patient data.
+      // We pass the Authorization header with the Bearer token.
       const response = await apiClient.get(`/patient/${nic}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
+      // Response Handling:
+      // If status is 200 (OK) and data exists, update the state.
       if (response.status === 200 && response.data.Patient) {
         setCurrentPatient(response.data.Patient);
       } else {
         console.warn("No patient data found");
       }
     } catch (error) {
+      // Error Handling: Log any errors that occur during the fetch.
       console.error("Error fetching currentPatient data:", error);
     }
   };
 
+  // --------------------------------------------------------------------------
+  // FUNCTION: getAdmiitedDetails
+  // PURPOSE: Fetches the admission history for the patient.
+  //          This includes details like BHT (Bed Head Ticket), dates, and IDs.
+  // --------------------------------------------------------------------------
   const getAdmiitedDetails = async () => {
     try {
+      // API Call: Fetch general admission details.
       const reponse = await apiClient.get(
         `/generaladmission/generaldetails/${nic}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
+      // Data Processing:
+      // If successful, update the admissionData state.
+      // We default to an empty array [] if 'combinedAdmissionData' is undefined to prevent crashes.
       if (reponse.status === 200) {
         setAdmissionData(reponse.data.combinedAdmissionData || []);
       }
     } catch (error: any) {
+      // Error Handling:
+      // Specifically check for 401 Unauthorized errors.
+      // If the user's session is invalid, redirect them to the login page.
       if (error.status === 401) {
         toast.error("Pleas Log first");
         navigate("/log-in");
@@ -135,6 +184,11 @@ export default function CurrentPatientProfile() {
       console.log(error);
     }
   };
+  // --------------------------------------------------------------------------
+  // EFFECT: Initial Data Load
+  // PURPOSE: Trigger data fetching when the component mounts or when dependencies change.
+  // DEPENDENCIES: [nic, token] - Re-run if the patient NIC or auth token changes.
+  // --------------------------------------------------------------------------
   useEffect(() => {
     if (nic) {
       fetchCurrentPatient();
@@ -142,15 +196,32 @@ export default function CurrentPatientProfile() {
     }
   }, [nic, token]);
 
+  // --------------------------------------------------------------------------
+  // RENDER: Component JSX
+  // PURPOSE: Displays the patient's profile information.
+  // STRUCTURE:
+  //  - Container div with padding and background.
+  //  - ToastContainer for notifications.
+  //  - Conditional Rendering:
+  //      - IF 'currentPatient' data exists:
+  //          - Card 1: Personal Information (Avatar, Name, Address, Contact).
+  //          - Card 2: Reports and Documents (Grid of available reports).
+  //          - Card 3: Admission History (Table showing past admissions).
+  //      - ELSE:
+  //          - Display a "No data available" message.
+  // --------------------------------------------------------------------------
   return (
     <div className="container mx-auto p-6 space-y-8 bg-gray-50">
       <ToastContainer />
       <h1 className="text-4xl font-bold text-gray-800">
         Current Patient Profile
       </h1>
+
+      {/* Conditional Block: Show profile only if data is loaded */}
       {currentPatient ? (
         <>
           <>
+            {/* SECTION: Personal Information */}
             <Card className="bg-white shadow-md rounded-lg">
               <CardHeader className="border-b border-gray-200">
                 <CardTitle className="text-xl font-semibold text-gray-800">
@@ -163,7 +234,7 @@ export default function CurrentPatientProfile() {
                     className="flex flex-col sm:flex-row items-center sm:items-start gap-8"
                     key={currentPatient.nic}
                   >
-                    {/* Avatar Section */}
+                    {/* SUB-SECTION: Avatar & Badge */}
                     <div className="flex flex-col items-center space-y-3">
                       <Avatar className="w-32 h-32 shadow-lg mt-2">
                         <AvatarImage
@@ -182,9 +253,9 @@ export default function CurrentPatientProfile() {
                       </Badge>
                     </div>
 
-                    {/* currentPatient and Address Details */}
+                    {/* SUB-SECTION: Text Details (Name, Contact, Address) */}
                     <div className="flex-1 grid md:grid-cols-2 gap-6 bg-white p-6 rounded-lg shadow-sm">
-                      {/* currentPatient Details */}
+                      {/* Personal Details Column */}
                       <div className="space-y-3">
                         <h2 className="text-xl font-semibold text-gray-800">
                           {currentPatient.name}
@@ -211,7 +282,7 @@ export default function CurrentPatientProfile() {
                         </p>
                       </div>
 
-                      {/* Address Details */}
+                      {/* Address Details Column */}
                       <div className="space-y-3">
                         <p className="text-gray-700">
                           <span className="font-medium">Street Address:</span>{" "}
@@ -241,6 +312,8 @@ export default function CurrentPatientProfile() {
                 )}
               </CardContent>
             </Card>
+
+            {/* SECTION: Reports and Documents */}
             <Card className="bg-white shadow-md rounded-lg">
               <div className="flex items-center justify-items-center p-4 border-b border-gray-200">
                 <CardHeader className="border-b border-gray-200 ">
@@ -248,10 +321,12 @@ export default function CurrentPatientProfile() {
                     Reports and Documents
                   </CardTitle>
                 </CardHeader>
+                {/* File Upload Component Injection */}
                 <FileUploadPopup patientNic={nic} />
               </div>
 
               <CardContent>
+                {/* Grid Layout for Document Links */}
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {reportsAndDocuments.map((doc, index) => (
                     <Link to={`/patient-profile/${doc.redirect}/${nic}`}>
@@ -260,6 +335,7 @@ export default function CurrentPatientProfile() {
                         key={index}
                         className="flex items-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
                       >
+                        {/* Dynamic Icon Rendering based on doc type */}
                         {doc.type === "x-ray" && (
                           <Skull className="mr-3 text-red-500" />
                         )}
@@ -282,6 +358,8 @@ export default function CurrentPatientProfile() {
               </CardContent>
             </Card>
           </>
+
+          {/* SECTION: Admission History Table */}
           <Card className="bg-white shadow-md rounded-lg">
             <CardHeader className="border-b border-gray-200">
               <CardTitle className="text-xl font-semibold text-gray-800">
@@ -299,6 +377,7 @@ export default function CurrentPatientProfile() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {/* Map through admissionData to create table rows */}
                   {admissionData.map((admission, index) => (
                     <TableRow key={index}>
                       <TableCell>
@@ -316,7 +395,9 @@ export default function CurrentPatientProfile() {
                             }/${true}`}
                           >
                             {" "}
-                            <p className="text-blue-500 underline-offset-1 hover:underline">click to view</p>
+                            <p className="text-blue-500 underline-offset-1 hover:underline">
+                              click to view
+                            </p>
                           </Link>
                         </div>
                       </TableCell>
@@ -326,7 +407,9 @@ export default function CurrentPatientProfile() {
                           <Link
                             to={`/admission-book-page/${admission.bht}/${true}`}
                           >
-                             <p className="text-blue-500 underline-offset-1 hover:underline">click to view</p>
+                            <p className="text-blue-500 underline-offset-1 hover:underline">
+                              click to view
+                            </p>
                           </Link>
                         </div>
                       </TableCell>
@@ -338,6 +421,7 @@ export default function CurrentPatientProfile() {
           </Card>
         </>
       ) : (
+        /* Fallback View: Displayed when no patient data is found */
         <div className="flex flex-col items-center justify-center h-64">
           <p className="text-gray-500 text-lg">No data available</p>
           <p className="text-gray-400 text-sm">

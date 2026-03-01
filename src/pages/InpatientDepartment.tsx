@@ -26,19 +26,28 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function InpatientDepartment() {
+  // Global Store Access
+  // 'setEnableUpdating': Controls whether certain forms are in edit mode
   const { setEnableUpdating } = useFrontendComponentsStore((state) => state);
-  const [nic, setNic] = useState<string>("");
-  // const [isSearcing, setIsSearching] = useState(false);
-  const [isShowNicForm, setIsShowNicForm] = useState(false);
-  const [isShoBhtForm, setIsShoBhtForm] = useState(false);
+
+  // Local State
+  const [nic, setNic] = useState<string>(""); // NIC for patient search
+  const [isShowNicForm, setIsShowNicForm] = useState(false); // Toggle for NIC Input Modal
+  const [isShoBhtForm, setIsShoBhtForm] = useState(false); // Toggle for BHT Input Modal (Admission Book)
+
+  // Dashboard Metrics State
   const [wardData, setWardData] = useState([]);
   const [totalBeds, setTotalBeds] = useState(0);
   const [totalFreeBeds, setTotalFreeBeds] = useState(0);
+
+  // Store Actions for managing Admission data
   const { setAdmissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+  // Toggles for searching by BHT for specific forms
   const [isShowBHTForAdmissionSheet, setIsShowBHTForAdmissionSheet] =
     useState(false);
   const [isShowBHTForAdmissionBook, setIsShowBHTForAdmissionBook] =
     useState(false);
+
   const { setPatientNic } = usePatientStore((state) => state);
   const { setAdmissionBook } = useAdmissionBookByBHT((state) => state);
   const { noOfFreeBeds } = useWardTableInpatient((state) => state);
@@ -71,6 +80,10 @@ export default function InpatientDepartment() {
   //   }
   // };
 
+  // --------------------------------------------------------------------------
+  // Function: fetchTableData
+  // Purpose: Fetches the dashboard overview data including ward statistics and bed availability.
+  // --------------------------------------------------------------------------
   const fetchTableData = async () => {
     try {
       const response = await apiClient.get(`/warddetails`, {

@@ -55,13 +55,28 @@ interface DisplayFile {
 }
 
 const PatientReports = () => {
+  // --------------------------------------------------------------------------
+  // Hooks & State
+  // --------------------------------------------------------------------------
+  // 'nic' & 'doctype': URL parameters to identify the patient and filter report types
   const { nic, doctype } = useParams();
+
+  // 'files': Local state to store the processed list of files for display
   const [files, setFiles] = useState<DisplayFile[]>([]);
+
+  // 'loading' & 'error': UI state for async operations
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // 'token': Auth token from global store
   const token = useAuthStore((state) => state.token);
   console.log("doctypes", doctype);
   // Function to fetch medical reports from database
+  // --------------------------------------------------------------------------
+  // Data Fetching: fetchFiles
+  // Purpose: Retrieves medical reports from the backend based on patient NIC and document type.
+  //          Transforms the raw API response into a display-friendly format.
+  // --------------------------------------------------------------------------
   const fetchFiles = async (nic: string, doctype: string) => {
     try {
       setLoading(true);
@@ -72,20 +87,20 @@ const PatientReports = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
-        // Handle both single report and array of reports
+        // Handle both single report and array of reports to prevent crashes
         const reports = Array.isArray(response.data)
           ? response.data
           : response.data
-          ? [response.data]
-          : [];
+            ? [response.data]
+            : [];
 
-        // Transform the data to match our display requirements
+        // Transform the data to match our display requirements (DisplayFile interface)
         const displayFiles = reports.map((report: MedicalReport) => {
-          // Generate a reasonable file name based on report type
+          // Generate a user-friendly file name
           const fileName = getFileNameFromType(report.reportType);
 
           return {
@@ -94,7 +109,7 @@ const PatientReports = () => {
             type: report.reportType,
             url: report.documentUrl,
             uploadDate: new Date(report.createdAt).toISOString().split("T")[0],
-            size: "Unknown", // Assign a default value or calculate the size if available
+            size: "Unknown", // Placeholder as size isn't currently returned by API
           };
         });
 
@@ -106,8 +121,8 @@ const PatientReports = () => {
       if (err.status === 404) {
         toast.error(
           `No reports found for this patient in this ${getFileTypeLabel(
-            doctype
-          )}.`
+            doctype,
+          )}.`,
         );
       }
 

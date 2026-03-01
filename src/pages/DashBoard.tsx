@@ -37,63 +37,62 @@ import {
   YAxis,
 } from "recharts";
 
+/**
+ * Dashboard Component
+ *
+ * This is the main landing page after login. It provides a visual overview of the hospital's
+ * current status, including patient counts, bed occupancy, and statistical charts.
+ */
 export default function Dashboard() {
+  // --------------------------------------------------------------------------
+  // State Management (useState)
+  // --------------------------------------------------------------------------
+  // These variables store the dynamic data for our dashboard widgets.
+  // When these values change, React automatically re-renders the component to show the new numbers.
   const [noOfOutPatients, setNoOfOutPatients] = useState(0);
   const [noOfInPatients, setNoOfInPatients] = useState(0);
   const [monthlyVisitData, setMonthlyVisitData] = useState([]);
   const [dischargecount, setNoOfDischarge] = useState(0);
+
+  // Typescript Interface for Ward Bed Data
   interface WardBedStatus {
     wardName: string;
     noOfBeds: number;
     percentage: number;
   }
-
   const [wardBedStatus, setWardBedStatus] = useState<WardBedStatus[]>([]);
 
+  // State for search functionality
   const [nic, setNic] = useState<string>("");
+
+  // --------------------------------------------------------------------------
+  // Global Store Access (Zustand)
+  // --------------------------------------------------------------------------
+  // We grab the staff count from our global store, which might have been fetched elsewhere.
   const { staffCount } = useStaffStore((state) => state);
 
+  // --------------------------------------------------------------------------
+  // Data Fetching Functions
+  // --------------------------------------------------------------------------
+
+  // 1. Fetch Discharge Count
   const getdischargecounts = async () => {
     try {
       const response = await apiClient.get("/admissionbook/getdischargecounts");
+      // Safety check: ensure data exists before trying to access nested properties
       if (response.status === 200 && response.data.length > 0) {
         const count = response.data[0]?._count?.dischargeDate || 0;
         setNoOfDischarge(count);
       } else {
-        setNoOfDischarge(0); // no discharges today
+        setNoOfDischarge(0); // Default to 0 if no records found
       }
     } catch (error) {
       console.error(error);
-      setNoOfDischarge(0); // handle error by setting to 0
+      setNoOfDischarge(0); // Fail gracefully by showing 0 instead of crashing
     }
   };
 
-  // const patientProfileHandler = async () => {
-  //   try {
-  //     // setIsSearching(true);
-  //     const response = await apiClient.get(`/patient/${nic}`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-  //     if (response.status === 200) {
-  //       console.log("response", response.data.Patient);
-  //       setPatient(response.data.Patient);
-  //       // setIsSearching(false);
-  //       toast.success("Patient found successfully");
-  //       navigate(`/patient-profile-page`);
-  //     }
-  //   } catch (error: any) {
-  //     if (error.status === 500) {
-  //       // setIsSearching(false);
-  //       toast.error("Patient not found");
-  //       return;
-  //     } else {
-  //       // setIsSearching(false);
-  //       console.log("Error fetching patient", error);
-  //     }
-  //   }
-  // };
+  // 2. Fetch Outpatients Count
   const getNoOfOutPatients = async () => {
     try {
       const response = await apiClient.get("/outPatient/outpatientscount");
@@ -103,10 +102,11 @@ export default function Dashboard() {
     }
   };
 
+  // 3. Fetch Inpatients Count
   const getNoOfInPatients = async () => {
     try {
       const response = await apiClient.get(
-        "/admissionbook/noofadmissionbookstoday"
+        "/admissionbook/noofadmissionbookstoday",
       );
       if (response.data) setNoOfInPatients(response.data);
     } catch (error) {
@@ -114,6 +114,8 @@ export default function Dashboard() {
     }
   };
 
+  // 4. Fetch Monthly Stats (for the Bar Chart)
+  // Retrieves aggregated patient visit data grouped by month
   const getMOnthlyPatientVisits = async () => {
     try {
       const response = await apiClient.get("/getmonthlypatientvisit");
@@ -123,6 +125,7 @@ export default function Dashboard() {
     }
   };
 
+  // 5. Fetch Ward Bed Occupancy
   const getWardbedstatus = async () => {
     try {
       const response = await apiClient.get("/getwardbedstatus");
@@ -132,6 +135,12 @@ export default function Dashboard() {
       console.error(error);
     }
   };
+
+  // --------------------------------------------------------------------------
+  // Effects
+  // --------------------------------------------------------------------------
+  // useEffect with an empty dependency array [] runs ONLY ONCE when the component mounts.
+  // This is where we kick off all our API calls to populate the dashboard.
   useEffect(() => {
     getNoOfOutPatients();
     getNoOfInPatients();
@@ -139,23 +148,35 @@ export default function Dashboard() {
     getWardbedstatus();
     getdischargecounts();
   }, []);
+
+  // --------------------------------------------------------------------------
+  // Derived State (Calculations)
+  // --------------------------------------------------------------------------
+  // We calculate totals on the fly using .reduce() rather than storing them in state.
+  // This ensures they are always perfectly in sync with the staffCount array.
   const noOfDoctors = staffCount?.reduce(
     (acc, curr) => acc + curr.noofdoctors,
-    0
+    0,
   );
 
   const noOfNurses = staffCount?.reduce(
     (acc, curr) => acc + curr.noofnurses,
-    0
+    0,
   );
   const noOfPharmacists = staffCount?.reduce(
     (acc, curr) => acc + curr.noofpharmacist,
-    0
+    0,
   );
+
+  // --------------------------------------------------------------------------
+  // Rendering
+  // --------------------------------------------------------------------------
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 mt-16">
+        {/* --- Top Row: Key Metrics Cards --- */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Card 1: Total Patients (In + Out) */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -169,17 +190,20 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Card 2: Outpatients */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Outpatients Today
               </CardTitle>
-              {/* <UserPlus className="h-4 w-4 text-muted-foreground" /> */}
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{noOfOutPatients}</div>
             </CardContent>
           </Card>
+
+          {/* Card 3: Inpatients */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Inpatients</CardTitle>
@@ -189,6 +213,8 @@ export default function Dashboard() {
               <div className="text-2xl font-bold">{noOfInPatients}</div>
             </CardContent>
           </Card>
+
+          {/* Card 4: Patient Search Widget */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -205,12 +231,9 @@ export default function Dashboard() {
                   value={nic}
                   onChange={(e) => setNic(e.target.value)}
                 />{" "}
+                {/* Dynamic Link generation based on input value */}
                 <Link to={`/patient-profile-page/${nic}`}>
-                  <Button
-                    size="sm"
-                    className="h-8"
-                    // onClick={patientProfileHandler}
-                  >
+                  <Button size="sm" className="h-8">
                     Find
                   </Button>
                 </Link>
@@ -218,12 +241,16 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* --- Middle Row: Charts & Detailed Stats --- */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          {/* Bar Chart: Monthly Visits */}
           <Card className="col-span-4">
             <CardHeader>
               <CardTitle>Monthly Patient Visits</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* ResponsiveContainer makes the Recharts chart adapt to parent width */}
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={Array.isArray(monthlyVisitData) ? monthlyVisitData : []}
@@ -237,6 +264,8 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </CardContent>
           </Card>
+
+          {/* Ward Bed Status Progress Bars */}
           <Card className="col-span-3">
             <CardHeader>
               <CardTitle>Ward Bed Occupancy</CardTitle>
@@ -247,6 +276,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-4">
                 <div className="space-y-2">
+                  {/* Map through ward data to create a progress bar for each */}
                   {Array.isArray(wardBedStatus) &&
                     wardBedStatus?.length > 0 &&
                     wardBedStatus.map((ward: WardBedStatus) => (
@@ -259,6 +289,7 @@ export default function Dashboard() {
                             {ward.percentage}% Occupied
                           </div>
                         </div>
+                        {/* Custom Progress Bar Implementation */}
                         <div className="h-2 w-full rounded-full bg-gray-300 relative overflow-hidden">
                           <div
                             className="h-full bg-red-500 rounded-full"
@@ -272,7 +303,10 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* --- Bottom Row: Movement, Actions & Staff --- */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Movement Stats: Displays daily admission/discharge flow */}
           <Card>
             <CardHeader>
               <CardTitle>Today's Patient Movement</CardTitle>
@@ -296,16 +330,11 @@ export default function Dashboard() {
                     {dischargecount}
                   </span>
                 </div>
-                {/* <div className="flex items-center pt-2 border-t">
-                  <BedDouble className="mr-2 h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Net Change:</span>
-                  <span className="ml-auto text-2xl font-bold text-primary">
-                    +3
-                  </span>
-                </div> */}
               </div>
             </CardContent>
           </Card>
+
+          {/* Quick Action Buttons */}
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
@@ -331,6 +360,8 @@ export default function Dashboard() {
               </Link>
             </CardContent>
           </Card>
+
+          {/* Staff Overview */}
           <Card>
             <CardHeader>
               <CardTitle>Staff Overview</CardTitle>

@@ -27,35 +27,62 @@ import { useFrontendComponentsStore } from "@/stores/useFrontendComponentsStore"
 import { useAuthStore } from "@/stores/useAuth";
 import apiClient from "@/lib/apiClient";
 
+// ----------------------------------------------------------------------
+// Form Schema Validation (Zod)
+// ----------------------------------------------------------------------
+// This defines the structure and validation rules for the Patient Registration form.
+// We use Zod to enforce strict types and custom error messages.
 const formSchema = z.object({
+  // NIC must be at least 9 characters long (standard length)
   nic: z.string().min(9, { message: "NIC is required." }),
   name: z.string().min(2, { message: "Name is required." }),
   age: z.string().min(1, { message: "Age is required." }),
+  // Enum ensures the gender is strictly "Male", "Female", or "Other"
   gender: z.enum(["Male", "Female", "Other"], {
     required_error: "Gender is required.",
   }),
   streetAddress: z.string().min(2, { message: "Street Address is required." }),
   city: z.string().min(2, { message: "City is required." }),
   stateProvince: z.string().min(2, { message: "State/Province is required." }),
-  postalCode: z.string().min(2, { message: "Postal Code is required." }).max(20),
+  // Postal code validation with min and max length constraints
+  postalCode: z
+    .string()
+    .min(2, { message: "Postal Code is required." })
+    .max(20),
   country: z.string().min(2, { message: "Country is required." }),
   phone: z.string().min(9, { message: "Phone number is required." }),
   livingStatus: z.string().min(2, { message: "Living Status is required." }),
 });
 
 export const PatientRegisterForm = () => {
+  // ----------------------------------------------------------------------
+  // Hooks & Global State
+  // ----------------------------------------------------------------------
   const navigate = useNavigate();
+  // Local loading state to disable buttons during API submission
   const [isLoading, setIsLoading] = useState(false);
+
+  // Zustand store properties:
+  // - patientNic: Might be pre-set from a search or previous step
+  // - setPatient: Action to update the global patient state after successful creation
   const { patientNic, setPatient } = usePatientStore((state) => state);
+
+  // Auth token needed for protected API calls
   const token = useAuthStore((state) => state.token);
 
+  // Frontend component state to control navigation behavior
   const { navigateOutPatientPage, IsNAvigateToOutPatientPage } =
     useFrontendComponentsStore((state) => state);
 
+  // ----------------------------------------------------------------------
+  // Form Initialization
+  // ----------------------------------------------------------------------
+  // We initialize useForm with the Zod resolver to connect our schema.
+  // defaultValues are set to empty strings or potentially pre-filled data like 'patientNic'.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nic: patientNic?.trim() || "",
+      nic: patientNic?.trim() || "", // Autofill NIC if available in store
       name: "",
       age: "",
       gender: "Male",
@@ -71,46 +98,64 @@ export const PatientRegisterForm = () => {
     },
   });
 
+  // ----------------------------------------------------------------------
+  // Form Submission Handler
+  // ----------------------------------------------------------------------
+  // This function is called only if the Zod validation passes.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Start loading state
+
+      // Send POST request to create a new patient record
       const createPatient = await apiClient.post("/patient", values, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Attach JWT for authentication
         },
       });
 
+      // Handle Success
       if (createPatient.status === 200) {
+        // Update global store with the newly created patient data
         setPatient(createPatient.data.newPatient);
 
         toast.success("Patient created successfully");
 
+        // Delay navigation slightly to let the user see the success toast
         setTimeout(() => {
-          navigateOutPatientPage(true);
+          navigateOutPatientPage(true); // Flag that we are moving to outpatient page
+
+          // Conditional Navigation:
+          // If the flow directs to the Outpatient Register Page, go there with the NIC
           if (IsNAvigateToOutPatientPage) {
             navigate(
-              `/admission-outpatient-register-page/${createPatient.data.newPatient.nic}`
+              `/admission-outpatient-register-page/${createPatient.data.newPatient.nic}`,
             );
           } else {
+            // Otherwise, go to the generic Admission Sheet Register Page
             navigate("/admission-sheet-register-page");
           }
-        }, 2500); // Wait 2.5 seconds before navigating
+        }, 2500); // 2.5 second delay
       } else if (createPatient.status === 400) {
+        // Handle specific API error for duplicate user
         toast.error("User already exists");
       }
 
-      setIsLoading(false);
+      setIsLoading(false); // Stop loading state
     } catch (error: any) {
+      // Extensive Error Handling
       if (error.response?.status === 400) {
         toast.error("Patient already exists");
       } else {
         toast.error("Error creating patient");
-        console.log(error);
+        console.log(error); // Log unexpected errors for debugging
       }
       setIsLoading(false);
     }
   }
 
+  // ----------------------------------------------------------------------
+  // Render
+  // ----------------------------------------------------------------------
   return (
     <>
       <ToastContainer />
@@ -119,6 +164,11 @@ export const PatientRegisterForm = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-full mx-auto  py-1"
         >
+          {/* 
+            Grid Layout: 
+            Splits the form into a 2-column layout on medium screens (md:grid-cols-2) 
+            and a single column on smaller screens.
+          */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
@@ -240,6 +290,8 @@ export const PatientRegisterForm = () => {
               )}
             />
           </div>
+
+          {/* Address Section */}
           <div className="space-y-6">
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Address</h3>
@@ -338,6 +390,7 @@ export const PatientRegisterForm = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
+          {/* Submit Button */}
           <div className="flex justify-end">
             <Button
               type="submit"

@@ -10,12 +10,19 @@ import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/stores/useAuth";
 import { useEffect, useState } from "react";
 function OutpatientDepartment() {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [showNicInput, setShowNicInput] = useState(false);
-  const [showNicInputForView, setShowNicInputForView] = useState(false);
-  const [todayOutPatients, setTodayOutPatients] = useState([]);
+  // Local State
+  const [activeTab, setActiveTab] = useState("overview"); // Controls the active tab view
+  const [showNicInput, setShowNicInput] = useState(false); // Controls modal for creating new outpatient
+  const [showNicInputForView, setShowNicInputForView] = useState(false); // Controls modal for viewing outpatient details
+  const [todayOutPatients, setTodayOutPatients] = useState([]); // Stores list of today's patients
 
+  // Global State
   const token = useAuthStore((state) => state.token);
+
+  // --------------------------------------------------------------------------
+  // Data Fetching: fetchTodayOutPatients
+  // Purpose: Fetches the list of outpatients registered for the current day.
+  // --------------------------------------------------------------------------
   const fetchTodayOutPatients = async () => {
     try {
       const response = await apiClient.get("/outPatient", {
@@ -36,6 +43,7 @@ function OutpatientDepartment() {
     }
   };
 
+  // Initial fetch on mount
   useEffect(() => {
     fetchTodayOutPatients();
   }, []);

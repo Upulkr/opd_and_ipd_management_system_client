@@ -67,27 +67,28 @@ export default function ClinicPage() {
   const [smsPhoneNumbers, setSmsPhoneNumbers] = useState<string[]>([]);
   const { setPatient, patient: patients } = usePatientStore((state) => state);
   const { clinics } = useClinicStore((state) => state);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   console.log("smsPhoneNumbers", smsPhoneNumbers);
   console.log("clinics", clinics);
   console.log("selectedClinic", selectedClinic);
 
+  // Fetch patient details assigned to a specific clinic
   const handlegetPatientDetailsByClinicName = async (clinicName: string) => {
     try {
-      setLoading(true);
+      setLoading(true); // Start loading
       const response = await apiClient.get(
         `/clinicassigmnent/getPatientDetailsByClinicName/${clinicName}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (response.status === 200) {
-        setLoading(false);
-        setClinincPAtients(response.data.patientDetails);
+        setLoading(false); // Stop loading
+        setClinincPAtients(response.data.patientDetails); // Update state with fetched patients
         console.log("fetched patient details");
       }
     } catch (error: any) {
@@ -96,18 +97,22 @@ export default function ClinicPage() {
     }
   };
 
+  // Assign a patient to a selected clinic
   const handlePatientAssign = async () => {
+    // Validation: Ensure both clinic and patient are selected
     if (!selectedClinic || !searchNic) {
       toast.error("Please select a clinic and patient");
       return;
     }
     try {
       setLoading(true);
+      // Post request to assign patient
       const response = await apiClient.post(
         `/clinicassigmnent`,
         {
           nic: searchNic,
           clinicName: selectedClinic,
+          // Find the clinic ID from the store based on the selected name
           clinicId: clinics.find((clinic) => clinic.name === selectedClinic)
             ?.id,
         },
@@ -116,11 +121,11 @@ export default function ClinicPage() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       if (response.status === 200) {
-        
         toast.success("Patient assigned successfully");
+        // Reload page to reflect changes
         setTimeout(() => {
           navigate(0);
         }, 3000);
@@ -128,6 +133,7 @@ export default function ClinicPage() {
       setLoading(false);
     } catch (error: any) {
       setLoading(false);
+      // Specific error handling for non-existent patients
       if (error.response?.status === 404) {
         toast.error("Patient not found, please register the patient");
       } else {
@@ -136,6 +142,8 @@ export default function ClinicPage() {
     }
   };
 
+  // Fetch all clinic assignments to populate the dashboard table
+  // useCallback ensures this function is memoized and doesn't recreate on every render
   const getAllClinicAssigmentsForTable = useCallback(async () => {
     try {
       const response = await apiClient.get(
@@ -144,10 +152,9 @@ export default function ClinicPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.status === 200) {
-        
         setClinicsAssign(response.data.clinicAssigments);
       }
     } catch (error) {
@@ -177,12 +184,15 @@ export default function ClinicPage() {
   }, [fetchPatients, getAllClinicAssigmentsForTable]);
 
   // Debounce logic for searchNic changes
+  // Debounce logic for patient NIC search
+  // Delays the search execution until 300ms after the user stops typing
   const debouncedSearchNic = useCallback(
     debounce((nic: string) => {
       if (nic) {
+        // Filter local patient list based on NIC input
         const filtered = patients
           .filter((patient) =>
-            patient.nic.toLowerCase().includes(nic.toLowerCase())
+            patient.nic.toLowerCase().includes(nic.toLowerCase()),
           )
           .map((patient) => ({
             nic: patient.nic,
@@ -194,8 +204,8 @@ export default function ClinicPage() {
         setSuggestions([]);
         setShowSuggestions(false);
       }
-    }, 300), // 300ms debounce time
-    [patients]
+    }, 300), // 300ms debounce delay
+    [patients],
   );
 
   useEffect(() => {
@@ -223,7 +233,7 @@ export default function ClinicPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       return response.data;
@@ -234,7 +244,7 @@ export default function ClinicPage() {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
           throw new Error(
-            error.response.data.error || "Failed to schedule SMS"
+            error.response.data.error || "Failed to schedule SMS",
           );
         } else if (error.request) {
           // The request was made but no response was received
@@ -255,7 +265,7 @@ export default function ClinicPage() {
     message: string,
     sheduledAt: string | Date,
     patientName: string,
-    location: string
+    location: string,
   ) => {
     try {
       console.log("clicking");
@@ -264,7 +274,7 @@ export default function ClinicPage() {
       // Validate input type for `sheduledAt`
       if (typeof sheduledAt !== "string" && !(sheduledAt instanceof Date)) {
         throw new Error(
-          `Invalid type for sheduledAt. Expected a string or Date, received: ${typeof sheduledAt}`
+          `Invalid type for sheduledAt. Expected a string or Date, received: ${typeof sheduledAt}`,
         );
       }
 
@@ -282,7 +292,7 @@ export default function ClinicPage() {
       setSmsPhoneNumbers([]);
       console.error(
         "Failed to schedule SMS:",
-        error instanceof Error ? error.message : "Unknown error"
+        error instanceof Error ? error.message : "Unknown error",
       );
     } finally {
       setLoading(false);
@@ -408,7 +418,7 @@ export default function ClinicPage() {
                               size="sm"
                               onClick={() =>
                                 handlegetPatientDetailsByClinicName(
-                                  clinic.clinicName
+                                  clinic.clinicName,
                                 )
                               }
                             >
@@ -470,14 +480,14 @@ export default function ClinicPage() {
                           size="sm"
                           onClick={() => {
                             const phoneNumbers = clinincPAtients.map(
-                              (patient) => patient.phone
+                              (patient) => patient.phone,
                             );
                             setSmsPhoneNumbers(phoneNumbers);
                             scheduleSMS(
                               clinic.clinicName,
                               clinic.doctorName,
                               clinic.sheduledAt,
-                              clinic.location
+                              clinic.location,
                             );
                           }}
                           className="inline-flex items-center gap-2"

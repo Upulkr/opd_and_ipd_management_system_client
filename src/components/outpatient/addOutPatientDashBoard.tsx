@@ -44,6 +44,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 
+// --------------------------------------------------------------------------
+// Zod Schema Definitions
+// --------------------------------------------------------------------------
+// Schema for validating individual prescription items
 const prescriptionSchema = z.object({
   medicationName: z.string().min(2, {
     message: "Medication name must be at least 2 characters.",
@@ -60,6 +64,8 @@ const prescriptionSchema = z.object({
   notes: z.string().optional(),
 });
 
+// Main form schema for outpatient registration
+// Includes validation for personal details and the prescriptions array
 const formSchema = z.object({
   nic: z.string().min(1, { message: "NIC is required." }),
   name: z.string().min(2, {
@@ -84,16 +90,23 @@ const formSchema = z.object({
     .optional(),
   description: z.string().optional(),
 
+  // Nested array of prescription objects
   prescriptions: z.array(prescriptionSchema).optional(),
 });
 
 export function AddOutpatientForm() {
+  // Local State
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  // const { patient, setPatient } = usePatientStore((state) => state);
+  // Global State
   const token = useAuthStore((state) => state.token);
+  // URL Parameters for pre-filling data (e.g., from a quick action)
   const { id: nic, view, outPatientdescription } = useParams();
-console.log("nic++++++++",nic)
+  console.log("nic++++++++", nic);
+
+  // --------------------------------------------------------------------------
+  // Form Initialization
+  // --------------------------------------------------------------------------
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -110,11 +123,17 @@ console.log("nic++++++++",nic)
     },
   });
 
+  // dynamic field array for prescriptions
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "prescriptions",
   });
 
+  // --------------------------------------------------------------------------
+  // Data Fetching: getGeneralPatientDetailsByNic
+  // Purpose: Fetches existing patient details if NIC is provided in the URL.
+  //          Pre-fills the form with fetched data.
+  // --------------------------------------------------------------------------
   const getGeneralPatientDetailsByNic = async () => {
     try {
       const response = await apiClient.get(`/patient/${nic}`, {
@@ -125,6 +144,7 @@ console.log("nic++++++++",nic)
 
       if (response.status === 200) {
         const data = response.data.Patient;
+        // Populate form fields
         form.setValue("nic", data.nic);
         form.setValue("name", data.name);
         form.setValue("age", data.age);
@@ -137,29 +157,32 @@ console.log("nic++++++++",nic)
           "description",
           data.description || outPatientdescription === undefined
             ? "Not Provided"
-            : outPatientdescription
+            : outPatientdescription,
         );
 
         form.setValue("prescriptions", data.prescriptions);
       } else {
         console.warn("No patient data found");
-       
       }
-    } catch (error:any) {
-
+    } catch (error: any) {
       console.error(error);
-      if(error.status === 404){
-        toast.error("Patient not found");  navigate(`/patient-register-form`)
+      if (error.status === 404) {
+        toast.error("Patient not found");
+        navigate(`/patient-register-form`);
       }
-     
     }
   };
+
+  // Effect to trigger data fetching on component mount if NIC exists
   useEffect(() => {
     if (nic) {
       getGeneralPatientDetailsByNic();
     }
   }, []);
 
+  // --------------------------------------------------------------------------
+  // Form Submission Handler
+  // --------------------------------------------------------------------------
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
@@ -171,7 +194,7 @@ console.log("nic++++++++",nic)
 
       if (response.status === 201) {
         toast.success(
-          "The outpatient has been successfully added to the system"
+          "The outpatient has been successfully added to the system",
         );
         setIsLoading(false);
         form.reset();
@@ -179,7 +202,7 @@ console.log("nic++++++++",nic)
         // Delay navigation to allow the toast to display
         setTimeout(() => {
           navigate("/outpatient-department");
-        }, 4000); // 2 seconds delay
+        }, 4000); // 4 seconds delay
       }
     } catch (error: any) {
       setIsLoading(false);
@@ -412,7 +435,7 @@ console.log("nic++++++++",nic)
                                       variant={"outline"}
                                       className={cn(
                                         "w-full pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
+                                        !field.value && "text-muted-foreground",
                                       )}
                                     >
                                       {field.value ? (

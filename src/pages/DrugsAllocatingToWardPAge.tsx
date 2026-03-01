@@ -57,35 +57,54 @@ type Ward = {
   wardName: string;
 };
 export default function DrugAllocation() {
+  // --------------------------------------------------------------------------
+  // State Management
+  // --------------------------------------------------------------------------
+  // 'token': Retrieved from global auth store for authenticated API requests
   const token = useAuthStore((state) => state.token);
+  // 'wardsNames': Stores the list of available wards fetched from the backend
   const [wardsNames, setWardNames] = useState<Ward[]>([]);
+  // 'drugs': Global state containing the list of all available drugs
   const { drugs } = useDrugsStore((state) => state);
+  // 'allocations': Local state to store allocation history for a specific ward
   const [allocations, setAllocations] = useState<Allocation[]>([]);
+
+  // Form State Variables
   const [selectedDrug, setSelectedDrug] = useState<string>("");
   const [selectedWard, setSelectedWard] = useState<string>("");
   const [quantity, setQuantity] = useState<string>("");
   const [selectedUnit, setSelectedUnit] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  // 'selectedWardForDetails': Tracks which ward card is clicked to show detailed history
   const [selectedWardForDetails, setSelectedWardForDetails] = useState<
     string | null
   >(null);
 
+  // Filter drugs based on the search term input by the user
   const filteredDrugs = drugs.filter((drug) =>
-    drug.drugName.toLowerCase().includes(searchTerm.toLowerCase())
+    drug.drugName.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  // --------------------------------------------------------------------------
+  // Function: handleAllocate
+  // Purpose: Submits a new drug allocation record to the backend.
+  //          It validates that all required fields are filled before sending.
+  // --------------------------------------------------------------------------
   const handleAllocate = async () => {
     if (selectedDrug && selectedWard && quantity && selectedUnit) {
+      // Find the full drug object based on the selected ID
       const drug = drugs.find((d) => d.drugId.toString() === selectedDrug);
       if (drug) {
         try {
+          // POST request to create the allocation
           await apiClient.post(
             "/drugs/createdrugallocation",
             {
               drugId: drug.drugId,
               drugName: drug.drugName,
               totalQuantity: quantity,
-              usedQuantity: 0,
+              usedQuantity: 0, // Initial used quantity is 0
               wardName: selectedWard,
               unit: selectedUnit,
             },
@@ -93,12 +112,13 @@ export default function DrugAllocation() {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
-            }
+            },
           );
         } catch (error) {
           console.error("Error allocating drug:", error);
         }
 
+        // Reset form fields after successful allocation
         setSelectedDrug("");
         setSelectedWard("");
         setQuantity("");
@@ -107,6 +127,7 @@ export default function DrugAllocation() {
     }
   };
 
+  // Fetch allocations for a specific ward
   const getAllocationByWard = async (wardName: string) => {
     try {
       const response = await apiClient.get(
@@ -115,7 +136,7 @@ export default function DrugAllocation() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setAllocations(response.data.allocations);
@@ -123,6 +144,8 @@ export default function DrugAllocation() {
       console.error("Error fetching allocations:", error);
     }
   };
+
+  // Fetch the list of all ward names to populate the dropdown
   const getWardNames = async () => {
     try {
       const response = await apiClient.get("/warddetails/wardnames");
@@ -133,8 +156,11 @@ export default function DrugAllocation() {
       console.error("Error fetching staff counts:", error);
     }
   };
+
+  // Initial data fetch on component mount
   useEffect(() => {
     getWardNames();
+    // Set default view to 'opd'
     setSelectedWardForDetails("opd");
     getAllocationByWard("opd");
   }, []);
@@ -254,7 +280,7 @@ export default function DrugAllocation() {
                   allocations
                     .filter(
                       (allocation) =>
-                        allocation.wardName === selectedWardForDetails
+                        allocation.wardName === selectedWardForDetails,
                     )
                     .map((allocation, index) => (
                       <TableRow key={`${allocation.drugId}-${index}`}>
@@ -273,7 +299,7 @@ export default function DrugAllocation() {
                               hour: "2-digit",
                               minute: "2-digit",
                               hour12: true,
-                            }
+                            },
                           )}
                         </TableCell>
                       </TableRow>

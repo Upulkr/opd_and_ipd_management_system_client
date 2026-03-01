@@ -1,5 +1,11 @@
 import AdmissionBookForm from "@/components/AdmiisonBook/AdmissionBookForm";
 
+/**
+ * AdmissionBookPage
+ *
+ * This page contains the form for managing the Admission Book.
+ * It provides a user-friendly interface for admitting patients into the hospital.
+ */
 export default function AdmissionBookPage() {
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">

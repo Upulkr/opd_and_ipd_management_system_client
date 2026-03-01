@@ -9,16 +9,25 @@ import { useAuthStore } from "@/stores/useAuth";
 import { useClinicStore } from "@/stores/useClinicStore";
 import { useEffect } from "react";
 
+/**
+ * ClinicNotifier Component
+ *
+ * This component acts as a dashboard for clinic-related notifications and management.
+ * It aggregates various sub-components to display patient statistics, appointment overviews,
+ * and tools for adding new clinic details.
+ */
 function ClinicNotifier() {
-  const { setClinics } = useClinicStore((state) => state);
-  const token = useAuthStore((state) => state.token);
+  const { setClinics } = useClinicStore((state) => state); // Access clinic store actions
+  const token = useAuthStore((state) => state.token); // Access auth token
+  // Fetch scheduled clinics from the backend
   const fetchSheduledClinincs = async () => {
     try {
       const response = await apiClient.get("/clinic", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Include auth token in headers
         },
       });
+      // If request is successful, update the global clinic store
       if (response.status === 200) {
         setClinics(response.data.clinics);
       }
@@ -27,6 +36,7 @@ function ClinicNotifier() {
     }
   };
 
+  // useEffect to fetch clinics on component mount
   useEffect(() => {
     fetchSheduledClinincs();
   }, []);

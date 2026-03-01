@@ -6,10 +6,17 @@ import { usePatientStore } from "@/stores/usePatientStore";
 import { Eye } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
+/**
+ * OutPatientCard Component
+ *
+ * This component displays a list of recent outpatient records as cards.
+ * It allows users to view basic details (name, date) and navigate to the full details page.
+ */
 export default function OutPatientCard() {
   const { id } = useParams();
 
   const { outPatients } = usePatientStore((state) => state);
+  // Function to format date strings into a readable locale format
   const formatDate = (dateString: string) => {
     return new Intl.DateTimeFormat("en-US", {
       dateStyle: "medium",
@@ -54,7 +61,7 @@ export default function OutPatientCard() {
                     {formatDate(
                       typeof outPatient.createdAt === "string"
                         ? outPatient.createdAt
-                        : outPatient.createdAt?.toISOString() ?? ""
+                        : (outPatient.createdAt?.toISOString() ?? ""),
                     )}
                   </dd>
                 </div>

@@ -58,31 +58,43 @@ interface Suggestion {
   nic: string;
   name: string;
 }
+// --------------------------------------------------------------------------
+// MODULE: MobileClinic Dashboard
+// PURPOSE: Manages the scheduling and assignment of mobile clinics.
+//          Allows admins to assign patients to clinics, view statistics,
+//          and monitor clinic performance.
+// --------------------------------------------------------------------------
+
 export const MobileClinic = () => {
+  // Global Stores
   const { setPatientNic } = usePatientStore((state) => state);
+  const { clinics } = useClinicStore((state) => state); // List of available clinics
+  const token = useAuthStore((state) => state.token); // Auth token for API requests
+
+  // Local State for Patient Search
   const [patients, setPatients] = useState<
     { nic: string; name: string; city?: string }[]
   >([]);
+  const [searchNic, setSearchNic] = useState(""); // Input value for NIC search
+  const [showSuggestions, setShowSuggestions] = useState(false); // Toggle for search suggestions dropdown
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]); // Filtered list of patient suggestions
 
-  const [loading, setLoading] = useState(false);
-  const [searchNic, setSearchNic] = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [selectedClinic, setSelectedClinic] = useState("");
-  const [predifinedCity, setPredifinedCity] = useState("");
-  const { clinics } = useClinicStore((state) => state);
-  const [customCity, setCustomCity] = useState("");
-  const [sheduledMobileclinics, setSheduledMobileclinics] = useState([]);
-  const [date, setDate] = React.useState<Date>();
+  // Local State for Clinic Assignment
+  const [loading, setLoading] = useState(false); // Helper for async operations
+  const [selectedClinic, setSelectedClinic] = useState(""); // Selected clinic from dropdown
+  const [predifinedCity, setPredifinedCity] = useState(""); // City selected from patient's profile
+  const [customCity, setCustomCity] = useState(""); // Custom location entered manually
+  const [date, setDate] = React.useState<Date>(); // Scheduled date for the visit
+
+  // Dashboard Data State
+  const [sheduledMobileclinics, setSheduledMobileclinics] = useState([]); // List of scheduled visits
   const [clinincAgeGroups, setClinincAgeGroups] = useState<
     { age_group: string; value: number }[]
-  >([]);
-
-  const [monthlyHomeVisit, setMonthlyHomeVisits] = useState([]);
+  >([]); // Data for Age Group Chart
+  const [monthlyHomeVisit, setMonthlyHomeVisits] = useState([]); // Data for Monthly Visits Chart
   const [completedClinincCountFor30days, setCompletedClinincCountFor30days] =
-    useState(0);
-  const [totalCompletedVisits, setTotalCompletedVisits] = useState(0);
-  const token = useAuthStore((state) => state.token);
+    useState(0); // KPI: Completed visits in last 30 days
+  const [totalCompletedVisits, setTotalCompletedVisits] = useState(0); // KPI: Total completed visits
   const navigate = useNavigate();
   const clearSearch = () => {
     setSearchNic("");
@@ -169,7 +181,7 @@ export const MobileClinic = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (res.status === 200) {
         setCompletedClinincCountFor30days(res.data.completedMobileClinics);
@@ -196,7 +208,7 @@ export const MobileClinic = () => {
   }, []);
 
   const getPAtientByNic = patients.filter(
-    (patient) => patient.nic === searchNic
+    (patient) => patient.nic === searchNic,
   );
   console.log("patient", patients);
   const mobileclinincsForTable = useCallback(async () => {
@@ -234,13 +246,19 @@ export const MobileClinic = () => {
   }, []);
 
   // Debounce logic for searchNic changes
+  // --------------------------------------------------------------------------
+  // Effect: Debounced Search
+  // Purpose: Filters the patient list based on the NIC input.
+  //          Uses lodash.debounce to prevent excessive re-renders/filtering
+  //          while typing.
+  // --------------------------------------------------------------------------
   const debouncedSearchNic = useCallback(
     debounce((nic: string) => {
       if (nic) {
         const filtered = Array.isArray(patients)
           ? patients
               .filter((patient) =>
-                patient.nic?.toLowerCase().includes(nic.toLowerCase())
+                patient.nic?.toLowerCase().includes(nic.toLowerCase()),
               )
               .map((patient) => ({
                 nic: patient.nic,
@@ -254,16 +272,19 @@ export const MobileClinic = () => {
         setShowSuggestions(false);
       }
     }, 300), // 300ms debounce time
-    [patients]
+    [patients],
   );
 
-  // Update the filteredPatientDetails whenever searchNic changes
   useEffect(() => {
     debouncedSearchNic(searchNic);
-
     return () => debouncedSearchNic.cancel(); // Cleanup debounce on unmount
   }, [searchNic, debouncedSearchNic, sheduledMobileclinics]);
 
+  // --------------------------------------------------------------------------
+  // Action: createMobileClinic
+  // Purpose: Submits a new mobile clinic assignment to the backend.
+  //          Validates inputs (Nic, Date, Clinic, Location) before sending.
+  // --------------------------------------------------------------------------
   const createMobileClinic = async () => {
     if (!selectedClinic || !searchNic) {
       toast.error("Please select a clinic and patient");
@@ -284,7 +305,7 @@ export const MobileClinic = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (response.status === 200) {
         toast.success("Patient assigned successfully");
@@ -295,7 +316,7 @@ export const MobileClinic = () => {
 
           setSelectedClinic("");
           setSearchNic("");
-          navigate(0);
+          navigate(0); // Reload to reflect changes
         }, 3000);
         return () => clearTimeout(timeOut);
       }
@@ -494,7 +515,7 @@ export const MobileClinic = () => {
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal",
-                          !date && "text-muted-foreground"
+                          !date && "text-muted-foreground",
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />

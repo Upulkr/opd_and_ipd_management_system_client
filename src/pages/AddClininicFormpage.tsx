@@ -42,19 +42,23 @@ const formSchema = z.object({
     ["Room101", "Room102", "Room103", "Room104", "Room105", "Room106"],
     {
       required_error: "Please select a room.",
-    }
+    },
   ),
   sheduledAt: z.string().min(1, "Scheduled date and time is required"),
 });
 
 export default function NewClinicForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [customClinicName, setCustomClinicName] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // State to track loading status during form submission
+  const [customClinicName, setCustomClinicName] = useState<string | null>(null); // State for custom clinic name input
   const [predefinedClinics, setPrediufinedClinicsName] = useState<
     { name: string }[]
-  >([]);
+  >([]); // State to store the list of existing clinics fetched from the backend
+
+  // Accessing the authentication token from the global store
   const token = useAuthStore((state) => state.token);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook for programmatic navigation
+
+  // Initializing the form with Zod schema validation and default values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -65,11 +69,13 @@ export default function NewClinicForm() {
     },
   });
 
+  // Function to fetch all existing clinic names from the backend
+  // This allows the user to select from a predefined list or enter a new custom name
   const getAllclincsName = async () => {
     try {
       const response = await apiClient.get("/clinic", {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // Attaching the auth token for security
         },
       });
       if (response.status === 200) {
@@ -82,9 +88,11 @@ export default function NewClinicForm() {
   useEffect(() => {
     getAllclincsName();
   }, []);
+  // Form submission handler
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Set loading state to true to disable submit button
+      // Sending a POST request to create a new clinic
       const response = await apiClient.post("/clinic", values, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -92,8 +100,9 @@ export default function NewClinicForm() {
       });
       if (response.status === 200) {
         setIsLoading(false);
-        toast.success("New clinic created successfully");
-        form.reset();
+        toast.success("New clinic created successfully"); // Show success notification
+        form.reset(); // Reset form fields
+        // Navigate back to the clinic list after a short delay
         const timeOut = setTimeout(() => {
           navigate("/clinic");
           toast.dismiss();
@@ -102,6 +111,7 @@ export default function NewClinicForm() {
       }
     } catch (error: any) {
       setIsLoading(false);
+      // Handle potential errors, specifically checking for a Bad Request (400)
       if (error.response?.status === 400) {
         toast.error("Error creating clinic");
       }

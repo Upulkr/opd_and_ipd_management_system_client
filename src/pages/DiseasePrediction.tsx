@@ -39,15 +39,36 @@ import * as z from "zod";
 import axios from "axios";
 import { useAuthStore } from "@/stores/useAuth";
 
+// --------------------------------------------------------------------------
+// MODULE: DiseasePrediction
+// PURPOSE: This module handles the prediction of various diseases (Diabetes,
+//          Heart Disease, Breast Cancer) using machine learning models via an API.
+// AUTHOR: [Student Name]
+// DATE: [Current Date]
+// --------------------------------------------------------------------------
+
+// Importing necessary UI components, hooks, and libraries.
+// We use 'zod' for schema validation to ensure the user inputs valid numerical data.
+// 'react-hook-form' is used for efficient form handling.
+// 'axios' and 'apiClient' are used for making HTTP requests to the backend.
+
+// --------------------------------------------------------------------------
+// DATA STRUCTURE: testTypes
+// DESCRIPTION: An array of objects defining the available disease prediction tests.
+//              Each object contains metadata (id, title, icon) and a 'schema'
+//              property which uses Zod to define the validation rules for that specific test.
+// --------------------------------------------------------------------------
 const testTypes = [
   {
     id: "diabetes",
     title: "Diabetes Prediction",
     description: "Check diabetes risk factors",
-    icon: Activity,
-    color: "bg-blue-500",
+    icon: Activity, // Icon representing activity/vital signs
+    color: "bg-blue-500", // Visual cue for the card
+    // Zod Schema: Ensures all inputs are numbers using Regex.
+    // We treat inputs as strings initially and validate the format.
     schema: z.object({
-      pregnencies: z.string().regex(/^\d+$/, "Must be a number").optional(),
+      pregnencies: z.string().regex(/^\d+$/, "Must be a number").optional(), // Optional field
       glucose: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
       bloodPressure: z
         .string()
@@ -56,7 +77,7 @@ const testTypes = [
       skinThickness: z
         .string()
         .min(1, "Required")
-        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+        .regex(/^\d+(\.\d+)?$/, "Must be a valid number"), // Allows decimals
       insulin: z
         .string()
         .min(1, "Required")
@@ -78,12 +99,12 @@ const testTypes = [
     id: "heart_disease",
     title: "Heart Disease Prediction",
     description: "Analyze cardiac health indicators",
-    icon: Heart,
+    icon: Heart, // Heart icon for cardiology
     color: "bg-red-500",
     schema: z.object({
       age: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
-      sex: z.string().min(1, "Required").regex(/^\d+$/, "Must be a 0 or 1"),
-      cp: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"),
+      sex: z.string().min(1, "Required").regex(/^\d+$/, "Must be a 0 or 1"), // Binary classification for sex
+      cp: z.string().min(1, "Required").regex(/^\d+$/, "Must be a number"), // Chest pain type
       trestbps: z
         .string()
         .min(1, "Required")
@@ -112,6 +133,7 @@ const testTypes = [
     icon: Stethoscope,
     color: "bg-purple-500",
     schema: z.object({
+      // The breast cancer dataset has many continuous features requiring decimal validation.
       meanradius: z
         .string()
         .min(1, "Required")
@@ -232,6 +254,7 @@ const testTypes = [
         .string()
         .min(1, "Required")
         .regex(/^\d+(\.\d+)?$/, "Must be a valid number"),
+      // ...all 30 features are required for the model
     }),
   },
 ];
@@ -492,11 +515,30 @@ const testFields = {
     },
   ],
 };
-const api_url_prediction ="https://e7rrx80e09.execute-api.ap-south-1.amazonaws.com";
+// This variable holds the base URL for the prediction API service.
+const api_url_prediction =
+  "https://e7rrx80e09.execute-api.ap-south-1.amazonaws.com";
+
+// --------------------------------------------------------------------------
+// COMPONENT: DiseasePrediction
+// DESCRIPTION: The main React Functional Component that renders the interface.
+//              It manages state for the selected test, form data, and API responses.
+// --------------------------------------------------------------------------
 export default function DiseasePrediction() {
+  // ACCESSING GLOBAL STATE STORES
+  // We use zustand stores to manage state that needs to be accessed across multiple components.
+  // 'useFrontendComponentsStore' manages UI state like button clicks.
+  // 'usePatientStore' manages patient-specific data, like the NIC.
   const { setIsSavePredictionButonClick, IssavePredictionButonClick } =
     useFrontendComponentsStore((state) => state);
   const { patientNic, setPatientNic } = usePatientStore((state) => state);
+
+  // LOCAL STATE MANAGEMENT (React hooks)
+  // 'selectedTest' tracks which disease test the user has chosen.
+  // 'showResult' controls the visibility of the prediction result modal.
+  // 'prediction' stores the result returned from the API.
+  // 'loading' indicates if an API request is in progress.
+  // 'savePopup' controls the visibility of the "Save Prediction" dialog.
   const [selectedTest, setSelectedTest] = useState<
     keyof typeof testFields | ""
   >("");
@@ -504,32 +546,54 @@ export default function DiseasePrediction() {
   const [prediction, setPrediction] = useState({ result: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [savePopup, setSavePopup] = useState(false);
+
+  // Retrieve the authentication token for secure API calls.
   const token = useAuthStore((state) => state.token);
+
+  // 'useNavigate' hook for programmatic navigation (e.g., redirecting to register).
   const navigate = useNavigate();
+
+  // FORM HANDLING INITIALIZATION
+  // We initialize the form using 'react-hook-form' with 'zodResolver'.
+  // This connects the Zod validation schema defined above to our form logic.
+  // The schema is dynamically selected based on the 'selectedTest' state.
   const form = useForm({
     resolver: zodResolver(
-      testTypes.find((t) => t.id === selectedTest)?.schema || z.object({})
+      testTypes.find((t) => t.id === selectedTest)?.schema || z.object({}),
     ),
   });
 
-  //savePrediction relavant user
+  // --------------------------------------------------------------------------
+  // FUNCTION: savePrediction
+  // DESCRIPTION: An asynchronous function aimed at saving the prediction result
+  //              to the backend database. It performs the following steps:
+  //              1. Validates if the patient exists in the system.
+  //              2. If not, redirects to the registration form.
+  //              3. If yes, posts the prediction data to the database.
+  // COMPLEXITY: O(1) - dominated by network latency rather than computation.
+  // --------------------------------------------------------------------------
   const savePrediction = async () => {
+    // Validation: Ensure patient NIC is present before attempting to save
     if (patientNic === "") return;
     try {
+      // Step 1: Check if the patient exists in our database
       const isPatientExist = await apiClient.get(
         `/patient/isPatientexist/${patientNic}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Attach JWT token for security
           },
-        }
+        },
       );
 
+      // Control Flow: If patient does not exist, alert user and redirect
       if (isPatientExist.data.patientExist === false) {
         setIsSavePredictionButonClick(false);
         toast.error("Patient not found, please register the patient");
         navigate("/patient-register-form");
       }
+
+      // Step 2: Patient exists, proceed to save the prediction data
       const response = await apiClient.post(
         "/diseaseprediction",
         {
@@ -542,33 +606,45 @@ export default function DiseasePrediction() {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
+      // Handle successful save
       if (response.status === 200) {
-        setIsSavePredictionButonClick(false);
-        setSavePopup(false);
+        setIsSavePredictionButonClick(false); // Reset global state
+        setSavePopup(false); // Close the popup
         toast.success("Prediction saved successfully");
-        setPatientNic("");
+        setPatientNic(""); // Clear the NIC from store
       }
     } catch (error: any) {
+      // Error Handling: Catch network or server errors and display meaningful messages
       setSavePopup(false);
       setIsSavePredictionButonClick(false);
       toast.error(
         error.response?.status === 500
           ? "Error saving prediction"
-          : "Unexpected error occurred"
+          : "Unexpected error occurred",
       );
     }
   };
 
-  // Run only when `isSavePredictionButtonClick` is true
+  // EFFECT HOOK: Trigger Saving
+  // This 'useEffect' listens for changes in 'IssavePredictionButonClick'.
+  // When the global store indicates the save button was clicked, it triggers 'savePrediction'.
+  // This pattern decouples the button UI from the logic here.
   useEffect(() => {
-    if (!IssavePredictionButonClick) return; // Exit if false
+    if (!IssavePredictionButonClick) return; // Exit if the flag is false
     savePrediction();
   }, [IssavePredictionButonClick]);
 
+  // --------------------------------------------------------------------------
+  // FUNCTION: onSubmit
+  // DESCRIPTION: Handles the form submission event. It aggregates the user input,
+  //              sends it to the ML prediction API, and processes the result.
+  // PARAMETERS: data - The object containing form field values (validated by Zod).
+  // --------------------------------------------------------------------------
   const onSubmit = async (data: any) => {
+    // Pre-flight checks (though Zod handles most validation)
     if (data.length === 0) {
       toast.error("Please fill in all the fields.");
     }
@@ -578,12 +654,18 @@ export default function DiseasePrediction() {
     }
 
     try {
-      setLoading(true);
+      setLoading(true); // Start loading state (spins the button)
+
+      // API Call: Send data to the Flask/Python based ML service
       const response = await axios.post(
         `${api_url_prediction}/predict/${selectedTest}`,
-        data
+        data,
       );
+
+      // Process successful response
       if (response.status === 200) {
+        // MAPPING LOGIC: The breast cancer model returns 0/1 differently than others.
+        // We normalize the result here for consistent specific handling.
         setPrediction({
           result:
             response.data.disease === "breast_cancer"
@@ -596,12 +678,13 @@ export default function DiseasePrediction() {
 
           message: response.data.message,
         });
-        setShowResult(true);
+        setShowResult(true); // Open the result modal
       }
-      setLoading(false);
-      setSavePopup(true);
+      setLoading(false); // Stop loading state
+      setSavePopup(true); // Prompt user to save the result
     } catch (error: any) {
       setLoading(false);
+      // HTTP 400 means bad request (invalid data sent to model)
       if (error.status === 400) {
         console.log(error.data.message);
         toast.error("Unable to fetch prediction. Please try again.");
@@ -609,10 +692,14 @@ export default function DiseasePrediction() {
     }
   };
 
+  // --------------------------------------------------------------------------
+  // UI RENDERING
+  // The component returns a JSX structure that dynamically changes based on state.
+  // --------------------------------------------------------------------------
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="max-w-5xl mx-auto space-y-10">
-        {/* Title Section */}
+        {/* Title Section: Displays the main heading of the application */}
         <div className="text-center space-y-3">
           <h1 className="text-4xl font-bold tracking-tight">
             Medical Prediction System
@@ -622,7 +709,10 @@ export default function DiseasePrediction() {
           </p>
         </div>
 
+        {/* ToastContainer: Used for displaying non-blocking notifications (success/error messages) */}
         <ToastContainer />
+
+        {/* Conditional Rendering: Show the save popup if the state allows */}
         {savePopup && showResult === false && (
           <AlertDialogBox
             savePopUp={savePopup}
@@ -630,8 +720,13 @@ export default function DiseasePrediction() {
             setSavePopUp={setSavePopup}
           />
         )}
-        {/* Test Selection or Form */}
+
+        {/* Conditional Rendering: Main Content Switching
+            - IF 'selectedTest' is empty: Show the grid of test cards (Selection Menu).
+            - ELSE: Show the form for the selected test.
+        */}
         {!selectedTest ? (
+          /* SECTION: Test Selection Menu */
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8">
             {testTypes.map((test) => (
               <Card
@@ -659,14 +754,16 @@ export default function DiseasePrediction() {
             ))}
           </div>
         ) : (
+          /* SECTION: Input Form */
           <Card className="max-w-3xl mx-auto scale-95">
             <CardHeader className="relative p-6">
+              {/* Back Button to return to test selection */}
               <Button
                 variant="ghost"
                 className="absolute right-6 top-6 text-gray-500 hover:text-gray-700"
                 onClick={() => {
                   setSelectedTest("");
-                  form.reset();
+                  form.reset(); // Reset form state when switching views
                 }}
               >
                 Change Test
@@ -677,7 +774,7 @@ export default function DiseasePrediction() {
               <CardTitle className="lg:text-2xl text-center">
                 {
                   testTypes.find(
-                    (t) => t.id === selectedTest && t.title2 && t.title2
+                    (t) => t.id === selectedTest && t.title2 && t.title2,
                   )?.title2
                 }
               </CardTitle>
@@ -695,6 +792,8 @@ export default function DiseasePrediction() {
                     className={`
                         grid grid-cols-1 sm:grid-cols-2 gap-6  `}
                   >
+                    {/* Dynamic Field Generation: Map through the fields defined for the selected test */}
+                    {/* Accesses the field definitions from the 'testFields' object using the selected test ID */}
                     {selectedTest &&
                       testFields[selectedTest]?.map((field) => (
                         <FormField
@@ -722,6 +821,8 @@ export default function DiseasePrediction() {
                         />
                       ))}
                   </div>
+
+                  {/* Submit Button with Loading State */}
                   <Button
                     disabled={loading}
                     type="submit"
@@ -739,7 +840,7 @@ export default function DiseasePrediction() {
         )}
       </div>
 
-      {/* Prediction Result Dialog */}
+      {/* Prediction Result Dialog: Displays the outcome of the ML model */}
       <Dialog open={showResult} onOpenChange={setShowResult}>
         <DialogContent className="max-w-lg">
           <DialogHeader>

@@ -30,12 +30,18 @@ import { toast, ToastContainer } from "react-toastify";
 import * as z from "zod";
 import { Textarea } from "../ui/textarea";
 import apiClient from "@/lib/apiClient";
+
+// --------------------------------------------------------------------------
+// Schema Definition (Zod)
+// --------------------------------------------------------------------------
+// This large schema defines all the fields required for an Admission Book entry.
+// .min(1, "...") is a common pattern to make a field required (non-empty string).
 const formSchema = z.object({
-  bht: z.string().min(1, "BHT is required"),
-  nic: z.string().min(1, "NIC is required"),
+  bht: z.string().min(1, "BHT is required"), // Bed Head Ticket Number
+  nic: z.string().min(1, "NIC is required"), // National Identity Card
   name: z.string().min(1, "Name is required"),
-  dailyno: z.number().int().positive(),
-  yearlyno: z.number().int().positive(),
+  dailyno: z.number().int().positive(), // Auto-generated daily number
+  yearlyno: z.number().int().positive(), // Auto-generated yearly number
   city: z.string().min(1, "City is required"),
   stateProvince: z.string().min(1, "State/Province is required"),
   postalCode: z.string().min(1, "Postal code is required"),
@@ -46,6 +52,7 @@ const formSchema = z.object({
 
   reason: z.string().min(1, "Reason is required"),
   allergies: z.array(z.string()),
+  // Enumerated string to restrict values to specific options
   transferCategory: z.enum(["ward", "hospital-to-hospital", "direct-admit"]),
   dischargeDate: z.string().optional(),
   phone: z.string().min(1, "Phone number is required"),
@@ -54,23 +61,41 @@ const formSchema = z.object({
 });
 
 export const AdmissionBookForm = () => {
+  // --------------------------------------------------------------------------
+  // Hooks & Path Parameters
+  // --------------------------------------------------------------------------
+  // We extract 'bht' and 'view' from the URL.
+  // 'bht' is used to fetch existing data if we are editing/viewing.
+  // 'view' is a flag (string "true" or "false") to toggle read-only mode.
   const { bht, view } = useParams();
 
   const navigate = useNavigate();
   const token = useAuthStore((state) => state.token);
   const [isLoading, setIsLoading] = useState(false);
-  // const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
+
+  // --------------------------------------------------------------------------
+  // Local State
+  // --------------------------------------------------------------------------
   const [noOfAdmissionSheetsperDay, setNoOfAdmissionSheetsperDay] = useState(0);
-const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
   const [noOfAdmissionSheetsperYear, setNoOfAdmissionSheetsperYear] =
     useState(0);
+  const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
+
+  // Redirect if BHT doesn't exist (safety check)
   if (isBhtExist === false) {
     toast.error("Please fill Add admission sheet first");
     setTimeout(() => {
-      navigate('/inpatient-department');
+      navigate("/inpatient-department");
     }, 2000);
   }
+
   const { enableUpdate } = useFrontendComponentsStore((state) => state);
+
+  // --------------------------------------------------------------------------
+  // API Fetching Functions
+  // --------------------------------------------------------------------------
+
+  // 1. Check if the BHT ID provided in the URL effectively exists in the database.
   const checkBHTExistence = async () => {
     try {
       const reponse = await apiClient.get(`/admissionsheet/bhtexist/${bht}`);
@@ -83,8 +108,11 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
       console.error("Error fetching admission sheet by BHT", error);
     }
   };
+
+  // 2. Fetch the next sequential Daily Number
   const fetchingNoOfAdmissionSheetsperDay = async () => {
     try {
+      // Don't modify numbers if we are in 'Update' mode
       if (enableUpdate === true) {
         return;
       }
@@ -94,17 +122,18 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       setNoOfAdmissionSheetsperDay(
-        Number(fetchAdmissionSheetperDay.data.NoOfAdmissionSheetsPerDay)
+        Number(fetchAdmissionSheetperDay.data.NoOfAdmissionSheetsPerDay),
       );
     } catch (err: any) {
       console.error("Error fetching admission sheet", err);
     }
   };
-  // Fetching the number of admission sheets per year
+
+  // 3. Fetch the next sequential Yearly Number
   const fetchingNoOfAdmissionSheetsperYear = async () => {
     try {
       if (enableUpdate === true) {
@@ -116,24 +145,32 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       setNoOfAdmissionSheetsperYear(
-        Number(fetchAdmissionSheetperYear.data.NoOfAdmissionSheetsPerYear)
+        Number(fetchAdmissionSheetperYear.data.NoOfAdmissionSheetsPerYear),
       );
     } catch (error: any) {
       console.log("Error fetching admission sheet", error);
     }
   };
 
+  // --------------------------------------------------------------------------
+  // Initial Data Loading (useEffect)
+  // --------------------------------------------------------------------------
   useEffect(() => {
     if (bht) {
       checkBHTExistence();
     }
+    // Only fetch new daily/yearly numbers if we are creating a NEW entry (enableUpdate === false)
     if (enableUpdate === false) {
       fetchingNoOfAdmissionSheetsperDay();
       fetchingNoOfAdmissionSheetsperYear();
     }
+
+    // Logic to determine which data fetching method to use:
+    // If 'view' is active, we are likely looking at a finalized AdmissionBook entry.
+    // Otherwise, we might just be pulling data from an initial AdmissionSheet to autofill this form.
     if (bht && view !== "false") {
       getAdmissionBookByBHT();
     } else if (bht) {
@@ -143,6 +180,9 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
     }
   }, []);
 
+  // --------------------------------------------------------------------------
+  // Form Initialization
+  // --------------------------------------------------------------------------
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -167,13 +207,16 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
       livingStatus: "",
     },
   });
-  const { setValue } = form; // Access setValue function
+  const { setValue } = form;
 
+  // --------------------------------------------------------------------------
+  // Reactive Form Updates
+  // --------------------------------------------------------------------------
+  // When the API request for daily/yearly numbers completes, we update the form fields automatically.
   useEffect(() => {
     if (view === "false") {
       checkIfAdmissionBookExists();
     }
-    // After state change, update the form values
     if (noOfAdmissionSheetsperDay > 0) {
       setValue("dailyno", noOfAdmissionSheetsperDay);
     }
@@ -182,6 +225,9 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
     }
   }, [noOfAdmissionSheetsperDay, noOfAdmissionSheetsperYear, setValue]);
 
+  // --------------------------------------------------------------------------
+  // Form Submission
+  // --------------------------------------------------------------------------
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
@@ -196,6 +242,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
       }
 
       setIsLoading(false);
+      // Navigate back to the main list after a short delay
       setTimeout(() => {
         navigate("/inpatient-department");
       }, 3000);
@@ -213,6 +260,9 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
     }
   }
 
+  // --------------------------------------------------------------------------
+  // Validation Helpers
+  // --------------------------------------------------------------------------
   const checkIfAdmissionBookExists = async () => {
     if (!bht) {
       toast.error("BHT is required");
@@ -227,9 +277,10 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
+      // Block duplicate entries
       if (isAdmissionBookExisting.data.admissionBook) {
         toast.error("BHT already exists");
         setIsLoading(false);
@@ -243,6 +294,12 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
       console.log(error);
     }
   };
+
+  // --------------------------------------------------------------------------
+  // Autofill Data Fetchers
+  // --------------------------------------------------------------------------
+
+  // Strategy A: Pre-fill form from an Admission Sheet (Draft state)
   const getAdmissionSheetDataBYBHT = async () => {
     try {
       const response = await apiClient.get(`/admissionSheet/bht?bht=${bht}`, {
@@ -252,6 +309,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
       });
 
       if (response.status === 200) {
+        // Manually setting each field value from the API response
         form.setValue("bht", String(response.data.admissionSheet.bht));
         form.setValue("nic", response.data.admissionSheet.nic);
         form.setValue("name", response.data.admissionSheet.name);
@@ -259,18 +317,18 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
 
         form.setValue(
           "streetAddress",
-          response.data.admissionSheet.streetAddress
+          response.data.admissionSheet.streetAddress,
         );
         form.setValue("city", response.data.admissionSheet.city);
         form.setValue(
           "stateProvince",
-          response.data.admissionSheet.stateProvince
+          response.data.admissionSheet.stateProvince,
         );
         form.setValue(
           "admittedDate",
           new Date(response.data.admissionSheet.createdAt)
             .toISOString()
-            .slice(0, 16)
+            .slice(0, 16),
         );
         form.setValue("postalCode", response.data.admissionSheet.postalCode);
         form.setValue("country", response.data.admissionSheet.country);
@@ -284,6 +342,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
     }
   };
 
+  // Strategy B: Pre-fill form from an existing Admission Book Entry (View only / Edit final)
   const getAdmissionBookByBHT = async () => {
     try {
       const reponse = await apiClient.get(`/admissionbook/bht?bht=${bht}`, {
@@ -299,18 +358,18 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
         form.setValue("age", reponse.data.admissionBook.age);
         form.setValue(
           "streetAddress",
-          reponse.data.admissionBook.streetAddress
+          reponse.data.admissionBook.streetAddress,
         );
         form.setValue("city", reponse.data.admissionBook.city);
         form.setValue(
           "stateProvince",
-          reponse.data.admissionBook.stateProvince
+          reponse.data.admissionBook.stateProvince,
         );
         form.setValue(
           "admittedDate",
           new Date(reponse.data.admissionBook.admittedDate)
             .toISOString()
-            .slice(0, 16)
+            .slice(0, 16),
         );
         form.setValue("postalCode", reponse.data.admissionBook.postalCode);
         form.setValue("country", reponse.data.admissionBook.country);
@@ -322,7 +381,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
         form.setValue("yearlyno", reponse.data.admissionBook.yearlyno);
         form.setValue(
           "transferCategory",
-          reponse.data.admissionBook.transferCategory
+          reponse.data.admissionBook.transferCategory,
         );
       }
     } catch (error) {
@@ -330,6 +389,9 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
     }
   };
 
+  // --------------------------------------------------------------------------
+  // Rendering
+  // --------------------------------------------------------------------------
   return (
     <Form {...form}>
       <ToastContainer />
@@ -338,6 +400,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
         <div className="space-y-4">
+          {/* BHT Field - Disabled if value exists (readonly mode) */}
           <FormField
             control={form.control}
             name="bht"
@@ -372,6 +435,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
               </FormItem>
             )}
           />
+          {/* Living Status Select Dropdown */}
           <FormField
             control={form.control}
             name="livingStatus"
@@ -642,6 +706,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
           />
         </div>
         <div className="col-span-full space-y-4">
+          {/* Dynamic Array Field: Allergies (Add/Remove Buttons) */}
           <FormField
             control={form.control}
             name="allergies"
@@ -664,6 +729,7 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
                         Add Allergy
                       </Button>
                     </div>
+                    {/* Render each allergy input dynamically */}
                     {field.value.map((allergy, index) => (
                       <div key={index} className="flex items-center space-x-2">
                         <Input
@@ -686,8 +752,9 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
                           variant="destructive"
                           size="icon"
                           onClick={() => {
+                            // Filter out the item to delete it
                             const newAllergies = field.value.filter(
-                              (_, i) => i !== index
+                              (_, i) => i !== index,
                             );
                             field.onChange(newAllergies);
                           }}
@@ -735,26 +802,8 @@ const [isBhtExist, setIsBhtExist] = useState<boolean | null>(null);
             )}
           />
         </div>
-        {/* <div className={`col-span-full md:col-span-1 space-y-4`}>
-          <FormField
-            control={form.control}
-            name="dischargeDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Discharge Date</FormLabel>
-                <FormControl>
-                  <Input
-                    type="datetime-local"
-                    {...field}
-                    disabled={view === "true" ? false : true}
-                    className="border border-gray-500 disabled:text-black disabled:font-bold "
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div> */}
+
+        {/* Submit Button */}
         <div className="col-span-full flex justify-center">
           <Button
             type="submit"

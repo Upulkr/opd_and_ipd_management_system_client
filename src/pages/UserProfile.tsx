@@ -21,6 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/stores/useAuth";
 
+// --------------------------------------------------------------------------
+// MODULE: UserProfile
+// PURPOSE: Displays the logged-in user's profile information.
+//          Allows the user to change their password via a modal dialog.
+// --------------------------------------------------------------------------
+
+// Zod schema for password change validation
 const passwordSchema = z
   .object({
     oldPassword: z.string().min(1, "Old password is required"),
@@ -37,10 +44,14 @@ const passwordSchema = z
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
 const UserProfile: React.FC = () => {
+  // Global State
   const user = useUserProfileData((state) => state.user);
   const token = useAuthStore((state) => state.token);
-  const [open, setOpen] = React.useState(false);
 
+  // Local State
+  const [open, setOpen] = React.useState(false); // Controls the password change dialog
+
+  // Form Handling
   const {
     register,
     handleSubmit,
@@ -50,6 +61,10 @@ const UserProfile: React.FC = () => {
     resolver: zodResolver(passwordSchema),
   });
 
+  // --------------------------------------------------------------------------
+  // Action: onSubmit
+  // Purpose: Handles the password change form submission.
+  // --------------------------------------------------------------------------
   const onSubmit = async (data: PasswordFormData) => {
     if (!user) return;
 
@@ -64,7 +79,7 @@ const UserProfile: React.FC = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       toast.success("Password updated successfully");
@@ -72,7 +87,7 @@ const UserProfile: React.FC = () => {
       reset();
     } catch (error: any) {
       toast.error(
-        error?.response?.data?.message || "Failed to change password"
+        error?.response?.data?.message || "Failed to change password",
       );
     }
   };

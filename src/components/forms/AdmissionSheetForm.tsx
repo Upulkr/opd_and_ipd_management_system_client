@@ -49,18 +49,33 @@ const formSchema = z.object({
   livingStatus: z.string().optional(),
 });
 
+// --------------------------------------------------------------------------
+// MODULE: AdmissionSheetForm
+// PURPOSE: Manages the creation of a new admission sheet for a patient.
+//          Handles patient data retrieval, form validation, and submission.
+// --------------------------------------------------------------------------
+
 export const AdmissionSheetForm = () => {
+  // URL Parameters
+  // 'bht': Bed Head Ticket - optional, used to view existing admission details
+  // 'view': Read-only mode flag
+  // 'nic': National Identity Card - used to pre-fill patient data
   const { bht = "", view = "", nic = "" } = useParams();
-  console.log("nic", nic);
+
+  // Local State
   const [isLoading, setIsLoading] = useState(false);
   const [wardData, setWardData] = useState<
     { wardNo: string; wardName: string }[]
-  >([]);
-  // const { patient } = usePatientStore((state) => state);
+  >([]); // List of available wards for selection
 
+  // Global State
   const { admissionSheetByBHT } = useAdmissionSheetByBHT((state) => state);
   const token = useAuthStore((state) => state.token);
   const navigate = useNavigate();
+
+  // --------------------------------------------------------------------------
+  // Form Initialization
+  // --------------------------------------------------------------------------
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,6 +98,11 @@ export const AdmissionSheetForm = () => {
     },
   });
 
+  // --------------------------------------------------------------------------
+  // Data Fetching: getPatientDataByNIC
+  // Purpose: Fetches patient details using NIC to pre-fill the form.
+  //          If not found, redirects to patient registration.
+  // --------------------------------------------------------------------------
   const getPatientDataByNIC = async () => {
     try {
       const response = await apiClient.get(`/patient/${nic}`, {
@@ -91,6 +111,7 @@ export const AdmissionSheetForm = () => {
         },
       });
       if (response.status === 200) {
+        // Populate form with fetched patient data
         form.setValue("nic", response.data.Patient.nic);
         form.setValue("name", response.data.Patient.name);
         form.setValue("age", response.data.Patient.age);
@@ -111,6 +132,10 @@ export const AdmissionSheetForm = () => {
     }
   };
 
+  // --------------------------------------------------------------------------
+  // Data Fetching: getAdmissionSheetByBHT
+  // Purpose: Fetches existing admission sheet details if a BHT is provided.
+  // --------------------------------------------------------------------------
   const getAdmissionSheetByBHT = async () => {
     try {
       const reponse = await apiClient.get(`/admissionsheet/bht?bht=${bht}`, {
@@ -119,13 +144,14 @@ export const AdmissionSheetForm = () => {
         },
       });
       if (reponse.status === 200) {
+        // Dynamically populate form fields that match the schema
         for (const [key, value] of Object.entries(
-          reponse.data.admissionSheet
+          reponse.data.admissionSheet,
         )) {
           if (key in formSchema.shape) {
             form.setValue(
               key as keyof typeof formSchema.shape,
-              value as string
+              value as string,
             );
           }
         }
@@ -135,9 +161,15 @@ export const AdmissionSheetForm = () => {
     }
   };
 
+  // --------------------------------------------------------------------------
+  // Form Submission Handler
+  // Purpose: Submits the admission sheet data to the backend.
+  //          Also triggers a ward bed update upon success.
+  // --------------------------------------------------------------------------
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
+      // Create Admission Sheet
       const response = await apiClient.post(`/admissionSheet`, values, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -147,8 +179,8 @@ export const AdmissionSheetForm = () => {
       if (response.status === 201) {
         setIsLoading(false);
         toast.success("Admission Sheet Created");
-        // form.reset();
-        setIsLoading(false);
+
+        // Update Ward Bed Status (Occupancy)
         await apiClient.put(`/wardbedscontroller/${values.wardNo}`, undefined, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -170,16 +202,26 @@ export const AdmissionSheetForm = () => {
       }
     }
   }
+  // --------------------------------------------------------------------------
+  // Effects
+  // --------------------------------------------------------------------------
   useEffect(() => {
+    // If BHT is provided, fetch existing admission sheet details
     if (bht !== "" && bht !== "undefined" && bht !== "null") {
       getAdmissionSheetByBHT();
     }
+    // If NIC is provided, fetch patient details
     if (nic !== "") {
       getPatientDataByNIC();
     }
+    // Always fetch ward details to populate the dropdown
     wardDetails();
   }, []);
 
+  // --------------------------------------------------------------------------
+  // Data Fetching: wardDetails
+  // Purpose: Fetches the list of all wards to populate the ward selection dropdown.
+  // --------------------------------------------------------------------------
   const wardDetails = async () => {
     try {
       const response = await apiClient.get(`/getwardbedstatus/wardnames`, {

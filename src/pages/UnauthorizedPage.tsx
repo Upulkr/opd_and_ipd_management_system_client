@@ -2,6 +2,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+/**
+ * UnauthorizedPage
+ *
+ * This page is displayed when a user attempts to access a protected route
+ * without the necessary permissions (e.g., role-based access control).
+ */
 const UnauthorizedPage: React.FC = () => {
   return (
     <div className=" w-full flex items-center justify-center h-screen bg-gray-100">

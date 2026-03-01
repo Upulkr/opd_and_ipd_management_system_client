@@ -11,25 +11,37 @@ import {
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const center = { lat: 48.8584, lng: 2.2945 };
+// --------------------------------------------------------------------------
+// MODULE: ViewInMapPage
+// PURPOSE: Displays a route between two locations using Google Maps API.
+//          Calculates distance and duration for driving travel mode.
+// --------------------------------------------------------------------------
+
+const center = { lat: 48.8584, lng: 2.2945 }; // Default center (Paris)
 
 function ViewInMapPage() {
-  const { location } = useParams();
+  const { location } = useParams(); // Pre-filled destination from URL
 
+  // Load Google Maps Script
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AlzaSyNHaGT1jk3_6_BEQWJUVgsY6m8dUCYcJmk",
+    googleMapsApiKey: "AlzaSyNHaGT1jk3_6_BEQWJUVgsY6m8dUCYcJmk", // Note: Verify this key is restricted in production
     libraries: ["places"],
   });
 
+  // Map & Route State
   const [map, setMap] = useState<google.maps.Map | null>(null);
-
   const [directionsResponse, setDirectionsResponse] = useState<any>(null);
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
+
+  // Input State
   const [origin, setOrigin] = useState("X3R2+PW Badulla, Sri Lanka");
   const [destination, setDestination] = useState(location || "");
   const [loading, setLoading] = useState(false);
+
   console.log("map", map);
+
+  // Auto-calculate route if destination is provided via URL
   useEffect(() => {
     if (isLoaded) {
       calculateRoute();
@@ -45,6 +57,11 @@ function ViewInMapPage() {
     );
   }
 
+  // --------------------------------------------------------------------------
+  // Action: calculateRoute
+  // Purpose: Uses Google Maps Directions Service to calculate the route,
+  //          distance, and duration between origin and destination.
+  // --------------------------------------------------------------------------
   async function calculateRoute() {
     if (!origin || !destination) return;
     try {
